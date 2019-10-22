@@ -1,0 +1,58 @@
+#!/bin/bash
+
+source $(dirname $BASH_SOURCE)/common
+set -euo pipefail
+
+workspace_dir=$1 && shift
+template_dir=$1 && shift
+vpn_type=$1 && shift
+cloud=$1 && shift
+
+function command_usage() {
+  echo -e "${NC}\nUSAGE: vs $vpn_type $cloud destroy-server [-r|--region <REGION>] [-d|--debug]\n"
+  echo -e "  This CLI command creates a VPN server in the given region.\n${LIGHT_GREEN}"
+  echo -e "  -r|--region <REGION>  The region to create the server in. Run the \"show-regions\" command"
+  echo -e "                        to get the list of target regions for a given public cloud"
+  echo -e "  -d|--debug            Enable trace output\n${DARK_GRAY}"
+  echo -e "${NC}"
+}
+
+if [[ $# -eq 0 ]]; then
+  command_usage
+  exit 1
+fi
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -r|--region)
+      region=$2
+      shift
+      ;;
+    -d|--debug)
+      set -x
+      ;;
+    -h|--help)
+      command_usage
+      exit 0
+      ;;
+    *)
+      echo -e "${RED}\nERROR! Unknown option \"$1\".${NC}"
+      command_usage
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+if [[ -z $region ]]; then
+  echo -e "${RED}\nERROR! A region must be specified for the deployment."
+fi
+
+if [[ -e ${workspace_dir}/${region} ]]; then
+  pushd ${workspace_dir}/${region} >/dev/null 2>&1
+  terraform::set_cloud_region "$vpn_type" "$cloud" "$region"
+  terraform::destroy "$vpn_type" "$cloud" "$region" "$template_dir"
+  popd >/dev/null 2>&1
+else
+  echo -e "${RED}\nERROR! Deployment workspace path does not exist. The region"
+  echo -e "provided may be invalid or the server may not have been deployed.${NC}"
+fi

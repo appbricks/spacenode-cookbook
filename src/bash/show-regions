@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -euo pipefail
+
+source $(dirname $BASH_SOURCE)/common
+
+case $3 in
+  aws)
+    echo -e "${GREEN}\nAvailable Amazon Web Services (AWS) Regions:${NC}\n" 
+    aws ec2 describe-regions --query "Regions[].{Name:RegionName}" --output text | sort
+    ;;
+  google)
+    echo -e "${GREEN}\nAvailable Google Cloud Regions:${NC}\n" 
+    gcloud compute regions list | awk '$1 != "NAME" { print $1 }' | sort
+    ;;
+  azure)
+    echo -e "${GREEN}\nAvailable Microsoft Azure Regions:${NC}\n" 
+    az account list-locations -o table | awk '$4 != "Name" && $0 !~ /^-.*/ { print substr($0, 48) }' | sort
+    ;;
+esac

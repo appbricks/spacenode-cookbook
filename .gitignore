@@ -1,3 +1,7 @@
+.*
+cloud-credentials
+deployment-vars
+
 #  Local .terraform directories
 **/.terraform/*
 

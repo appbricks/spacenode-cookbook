@@ -1,0 +1,44 @@
+#!/bin/bash
+
+root_dir=$(cd $(dirname $BASH_SOURCE)/.. && pwd)
+source $root_dir/src/bash/common
+
+common::initialize
+
+case "$command" in
+  -h|--help|help)
+    usage
+    ;;
+  show-regions)
+    $root_dir/src/bash/show-regions \
+      $workspace_dir $template_dir $cloud
+    ;;
+  deploy-server)
+    $root_dir/src/bash/deploy-server \
+      $workspace_dir $template_dir \
+      $vpn_type $cloud ${@:4:99}
+    ;;
+  destroy-server)
+    $root_dir/src/bash/destroy-server \
+      $workspace_dir $template_dir \
+      $vpn_type $cloud ${@:4:99}
+    ;;
+  list-servers)
+    $root_dir/src/bash/list-servers \
+      $workspace_dir $template_dir \
+      $vpn_type $cloud ${@:4:99}
+    ;;
+  start-server)
+    $root_dir/src/bash/start-server \
+      $workspace_dir $template_dir \
+      $vpn_type $cloud ${@:4:99}
+    ;;
+  start-tunnel)
+    $root_dir/src/bash/start-tunnel \
+      $workspace_dir $template_dir \
+      $vpn_type $cloud ${@:4:99}
+    ;;
+  *)
+    echo -e "${RED}\nERROR! Unknown command \"$command\"."
+    usage
+esac

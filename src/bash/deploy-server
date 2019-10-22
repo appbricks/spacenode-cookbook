@@ -1,0 +1,64 @@
+#!/bin/bash
+
+source $(dirname $BASH_SOURCE)/common
+set -euo pipefail
+
+workspace_dir=$1 && shift
+template_dir=$1 && shift
+vpn_type=$1 && shift
+cloud=$1 && shift
+
+function command_usage() {
+  echo -e "\nUSAGE: vs $vpn_type $cloud create-server [-r|--region <REGION>] [-c|--clean] [-d|--debug]\n"
+  echo -e "  This CLI command creates a VPN server in the given region.\n${LIGHT_GREEN}"
+  echo -e "  -r|--region <REGION>  The region to create the server in. Run the \"show-regions\" command"
+  echo -e "                        to get the list of target regions for a given public cloud"
+  echo -e "  -c|--clean            Re-initialize the terraform workspace context before deploying"
+  echo -e "  -d|--debug            Enable trace output\n${DARK_GRAY}"
+  echo -e "${NC}"
+}
+
+clean=no
+
+if [[ $# -eq 0 ]]; then
+  command_usage
+  exit 1
+fi
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -r|--region)
+      region=$2
+      shift
+      ;;
+    -c|--clean)
+      clean=yes
+      ;;
+    -d|--debug)
+      set -x
+      ;;
+    -h|--help)
+      command_usage
+      exit 0
+      ;;
+    *)
+      echo -e "${RED}\nERROR! Unknown option \"$1\".${NC}"
+      command_usage
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+mkdir -p ${workspace_dir}/${region}
+pushd ${workspace_dir}/${region} >/dev/null 2>&1
+
+terraform::set_cloud_region "$vpn_type" "$cloud" "$region"
+if [[ $clean == yes || ! -e .terraform ]]; then
+  # (Re)Initialize terraform context if
+  # requested or if doing fresh deployment
+  rm -fr .terraform
+  terraform::init "$vpn_type" "$cloud" "$region" "$template_dir"
+fi
+terraform::apply "$vpn_type" "$cloud" "$region" "$template_dir"
+
+popd >/dev/null 2>&1
