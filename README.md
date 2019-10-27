@@ -1,4 +1,4 @@
-# Personal VPN Nodes
+# Private VPN Node Builder
 
 This repository contains scripts and templates to allow you to launch and manage VPN nodes in your personal public cloud account. The nodes are built using a public AMI appliance which can configure itself to run OpenVPN or IPSec/IKEv2 VPN services.
 
