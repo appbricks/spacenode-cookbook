@@ -1,0 +1,95 @@
+#!/bin/bash
+
+scripts_dir=$(dirname $BASH_SOURCE)
+root_dir=$(cd $scripts_dir/../.. && pwd)
+source ${scripts_dir}/common
+set -euo pipefail
+
+workspace_dir=$1 && shift
+template_dir=$1 && shift
+
+echo -e "\n${GREEN}${BOLD}VPN Nodes deployed to the cloud${NORMAL}"
+echo -e "===============================${NC}\n"
+
+vpn_nodes=( $(cloud::nodes $workspace_dir) )
+if [[ ${#vpn_nodes[@]} -eq 0 ]]; then
+  echo -e "${GREEN}No nodes have been deployed.${NC}"
+  exit 0
+fi
+ui::print_nodes_table "${vpn_nodes[@]}"
+
+printf "\n${GREEN}Select node to perform an action on or (q)uit: ${NC}" && read option
+[[ -n $option && $option != q && $option != Q ]] || exit 0
+
+if [[ $option -lt 0 || $option -gt $((${#vpn_nodes[@]}-1)) ]]; then
+  echo -e "${RED}\nERROR! Invalid node selected.${NC}"
+  exit 1
+fi
+
+node_detail=( $(echo "${vpn_nodes[$option]}" | sed "s/|/ /g") )
+vpn_type=${node_detail[0]}
+cloud=${node_detail[1]}
+region=${node_detail[2]}
+node_name=${node_detail[3]}
+node_status=${node_detail[4]}
+node_id=${node_detail[5]}
+
+echo -e "\n${GREEN}${BOLD}What do you want to do:${NORMAL}"
+echo -e "1) Update Node"
+echo -e "2) Download VPN Config"
+if [[ $node_status == running ]]; then
+  echo -e "3) Stop Node"
+elif [[ $node_status == stopped ]]; then
+  echo -e "3) Start Node"
+else
+  echo -e "${DIM}3) Stop Node${NORMAL}"
+fi
+echo -e "4) Delete Node"
+
+printf "\nSelect action or (q)uit: ${NC}" && read option
+[[ -n $option && $option != q && $option != Q ]] || exit 0
+
+if [[ $option -lt 1 || $option -gt 4 ]]; then
+  echo -e "${RED}\nERROR! Invalid action selected.${NC}"
+  exit 1
+fi
+
+case $option in
+  1)
+    common::validate_workspace
+    echo
+    $scripts_dir/deploy-node \
+      $workspace_dir $template_dir \
+      $vpn_type $cloud -r $region -u
+    ;;
+  2)
+    common::validate_workspace
+    echo -e -n "\n${GREEN}Please enter the VPN username: ${NC}" && read username
+    echo -e -n "${GREEN}Please enter the VPN password: ${NC}" && read -s password
+
+    echo
+    $scripts_dir/download-vpn-config \
+      $workspace_dir $template_dir \
+      $vpn_type $cloud -r $region \
+      -u $username -p $password
+    ;;
+  3)
+    case $node_status in
+      running)
+        echo -e "\n${GREEN}Stopping \"${node_name}\"...${NC}"
+        response=$(cloud::stop_node "$cloud" "$region" "$node_id")
+        ;;
+      stopped)
+        echo -e "\n${GREEN}Starting \"${node_name}\"...${NC}"
+        response=$(cloud::start_node "$cloud" "$region" "$node_id")
+        ;;
+    esac
+    ;;
+  4)
+    common::validate_workspace
+    echo
+    $scripts_dir/destroy-node \
+      $workspace_dir $template_dir \
+      $vpn_type $cloud -r $region
+    ;;
+esac

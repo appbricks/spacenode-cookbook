@@ -1,9 +1,20 @@
 #
+# Google Cloud Platform specific inputs
+#
+variable "google_dns_managed_zone_name" {
+  default = ""
+}
+
+variable "google_dns_zone" {
+  type = string
+}
+
+#
 # Bootstrap VPN server
 #
 
 module "bootstrap" {
-  source = "github.com/mevansam/cloud-inceptor.git/modules/bootstrap-automation/google"
+  source = "../../../../../cloud-inceptor/modules/bootstrap/google"
 
   #
   # Company information used in certificate creation
@@ -28,19 +39,25 @@ module "bootstrap" {
   vpc_name = "${var.name}-ipsec-${var.region}"
 
   # DNS Name for VPC
-  vpc_dns_zone = "${var.name}-ipsec-${var.region}.${var.dns_zone}"
+  vpc_dns_zone = "${var.name}-ipsec-${var.region}.${var.google_dns_zone}"
 
   # Local DNS zone. This could also be the same as the public
   # which will enable setting up a split DNS of the public zone
   # for names to map to external and internal addresses.
   vpc_internal_dns_zones = ["local"]
 
+  # Name of parent zone 'gcp.appbricks.cloud' to which the 
+  # name server records of the 'vpc_dns_zone' will be added.
+  dns_managed_zone_name = "${length(var.google_dns_managed_zone_name) == 0
+    ? replace(var.google_dns_zone, ".", "-")
+    : var.google_dns_managed_zone_name }"
+
   # Local file path to write SSH private key for bastion instance
   ssh_key_file_path = "${length(var.ssh_key_file_path) > 0 ? var.ssh_key_file_path : path.cwd}"
 
   # VPN
   vpn_users = "${var.vpn_users}"
-  vpn_idle_action = "shutdown"
+  vpn_idle_action = "${var.vpn_idle_action}"
 
   vpn_type = "ipsec"
 
@@ -50,7 +67,7 @@ module "bootstrap" {
   bastion_host_name = "vpn"
   bastion_use_fqdn = true
 
-  bastion_instance_type = "t2.micro"
+  bastion_instance_type = "n1-standard-1"
 
   # Issue certificates from letsencrypt.org
   certify_bastion = true

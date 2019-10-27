@@ -1,9 +1,16 @@
 #
+# AWS specific inputs
+#
+variable "aws_dns_zone" {
+  type = string
+}
+
+#
 # Bootstrap VPN server
 #
 
 module "bootstrap" {
-  source = "github.com/mevansam/cloud-inceptor.git/modules/bootstrap-automation/aws"
+  source = "../../../../../cloud-inceptor/modules/bootstrap/aws"
 
   #
   # Company information used in certificate creation
@@ -28,7 +35,7 @@ module "bootstrap" {
   vpc_name = "${var.name}-ovpn-${var.region}"
 
   # DNS Name for VPC
-  vpc_dns_zone = "${var.name}-ovpn-${var.region}.${var.dns_zone}"
+  vpc_dns_zone = "${var.name}-ovpn-${var.region}.${var.aws_dns_zone}"
 
   # Local DNS zone. This could also be the same as the public
   # which will enable setting up a split DNS of the public zone
@@ -40,7 +47,7 @@ module "bootstrap" {
 
   # VPN
   vpn_users = "${var.vpn_users}"
-  #vpn_idle_action = "shutdown"
+  vpn_idle_action = "${var.vpn_idle_action}"
 
   vpn_type = "openvpn"
   vpn_tunnel_all_traffic = "yes"

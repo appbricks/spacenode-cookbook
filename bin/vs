@@ -3,37 +3,62 @@
 root_dir=$(cd $(dirname $BASH_SOURCE)/.. && pwd)
 source $root_dir/src/bash/common
 
-common::initialize
+if [[ $1 == help ]]; then
+  usage
+  exit 0
+fi
+
+command=${1:-UNKNOWN}
+common::set_working_dir
 
 case "$command" in
   -h|--help|help)
     usage
+    exit 0
+    ;;
+  init)
+    $root_dir/src/bash/init \
+      $workspace_dir ${@:2:99}
+    exit 0
     ;;
   show-regions)
-    $root_dir/src/bash/show-regions \
-      $workspace_dir $template_dir $cloud
+    common::validate_environment
+    $root_dir/src/bash/show-regions ${@:2:99}
+    exit 0
     ;;
-  deploy-server)
-    $root_dir/src/bash/deploy-server \
+  show-nodes)
+    common::validate_environment
+    $root_dir/src/bash/show-nodes \
+      $workspace_dir $template_dir ${@:2:99}
+    exit 0
+    ;;
+esac
+
+common::validate_environment
+vpn_type=${2:-UNKNOWN}
+cloud=${3:-UNKNOWN}
+
+case "$command" in
+  deploy-node)
+    common::validate_workspace
+    $root_dir/src/bash/deploy-node \
       $workspace_dir $template_dir \
       $vpn_type $cloud ${@:4:99}
     ;;
-  destroy-server)
-    $root_dir/src/bash/destroy-server \
+  destroy-node)
+    common::validate_workspace
+    $root_dir/src/bash/destroy-node \
       $workspace_dir $template_dir \
       $vpn_type $cloud ${@:4:99}
     ;;
-  list-servers)
-    $root_dir/src/bash/list-servers \
-      $workspace_dir $template_dir \
-      $vpn_type $cloud ${@:4:99}
-    ;;
-  start-server)
-    $root_dir/src/bash/start-server \
+  download-vpn-config)
+    common::validate_workspace
+    $root_dir/src/bash/download-vpn-config \
       $workspace_dir $template_dir \
       $vpn_type $cloud ${@:4:99}
     ;;
   start-tunnel)
+    common::validate_workspace
     $root_dir/src/bash/start-tunnel \
       $workspace_dir $template_dir \
       $vpn_type $cloud ${@:4:99}

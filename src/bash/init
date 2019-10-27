@@ -1,0 +1,50 @@
+#!/bin/bash
+
+source $(dirname $BASH_SOURCE)/common
+set -euo pipefail
+
+workspace_dir=$1 && shift
+
+control_file_dir=$(dirname $workspace_dir)
+echo -e "${GREEN}\nCreating control files in \"${control_file_dir}\"...${NC}"
+
+if [[ ! -e ${control_file_dir}/cloud-credentials ]]; then
+  cat << ---EOF > ${control_file_dir}/cloud-credentials
+# AWS IaaS credentials for Terraform
+export AWS_ACCESS_KEY=
+export AWS_SECRET_KEY=
+
+# GCP IaaS credentials for Terraform
+export GOOGLE_CREDENTIALS=
+export GOOGLE_PROJECT=
+
+# Azure IaaS credentials for Terraform
+export ARM_SUBSCRIPTION_ID=
+export ARM_TENANT_ID=
+export ARM_CLIENT_ID=
+export ARM_CLIENT_SECRET=
+---EOF
+fi
+
+if [[ ! -e ${control_file_dir}/deployment-vars ]]; then
+  cat << ---EOF > ${control_file_dir}/deployment-vars
+# Deployment idenfifier or name
+export TF_VAR_name=
+
+# DNS Zone for all deployments
+export TF_VAR_aws_dns_zone=
+export TF_VAR_azure_dns_zone=
+export TF_VAR_google_dns_zone=
+
+# Values to used for creating self-signed X509 certs
+export TF_VAR_company_name="appbricks"
+export TF_VAR_organization_name="appbricks dev"
+export TF_VAR_locality="Boston"
+export TF_VAR_province="MA"
+export TF_VAR_country="US"
+
+export TF_VAR_vpn_users='[
+  "user|password"
+]'
+---EOF
+fi

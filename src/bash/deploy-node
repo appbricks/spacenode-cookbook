@@ -1,0 +1,100 @@
+#!/bin/bash
+
+source $(dirname $BASH_SOURCE)/common
+set -euo pipefail
+
+workspace_dir=$1 && shift
+template_dir=$1 && shift
+vpn_type=$1 && shift
+cloud=$1 && shift
+
+function command_usage() {
+  echo -e "\nUSAGE: vs create-server $vpn_type $cloud [-r|--region <REGION>] [-c|--clean] [-i|--init] [-u|--upgrade] [-a|--no-idle-shutdown] [-s|--show] [-d|--debug]\n${LIGHT_BLUE}"
+  echo -e "  This CLI command creates a VPN server in the given region.\n${LIGHT_GREEN}"
+  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region to create the server in"
+  echo -e "  ${DIM}-c|--clean${NORMAL}             Clean the terraform workspace context before deploying"
+  echo -e "  ${DIM}-i|--init${NORMAL}              Re-initialize terraform workspace context before deploying"
+  echo -e "  ${DIM}-u|--upgrade${NORMAL}           Re-builds/upgrades the VPN node using the most recent version"
+  echo -e "  ${DIM}-a|--no-idle-shutdown${NORMAL}  Do not shutdown VPN node when idle"
+  echo -e "  ${DIM}-s|--show${NORMAL}              Show cloud resources to be created or changed but do not deploy"
+  echo -e "  ${DIM}-d|--debug${NORMAL}             Enable trace output${NC}"
+}
+
+region=""
+clean=no
+init=no
+upgrade=no
+idle_shutdown=yes
+plan=no
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -r|--region)
+      region=$2
+      shift
+      ;;
+    -c|--clean)
+      clean=yes
+      ;;
+    -i|--init)
+      init=yes
+      ;;
+    -u|--upgrade)
+      upgrade=yes
+      ;;
+    -a|--no-idle-shutdown)
+      idle_shutdown=no
+      ;;
+    -s|--show)
+      plan=yes
+      ;;
+    -d|--debug)
+      set -x
+      ;;
+    -h|--help)
+      command_usage
+      exit 0
+      ;;
+    *)
+      echo -e "${RED}\nERROR! Unknown option \"$1\".${NC}"
+      command_usage
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+if [[ -z $region ]]; then
+  echo -e "${RED}\nERROR! Please provide a cloud region from the following list.${NC}"
+  $(dirname $BASH_SOURCE)/show-regions $cloud
+  exit 1
+fi
+
+mkdir -p ${workspace_dir}/${region}
+pushd ${workspace_dir}/${region} >/dev/null 2>&1
+
+if [[ idle_shutdown == yes ]]; then
+  export TF_VAR_vpn_idle_action="shutdown"
+else
+  export TF_VAR_vpn_idle_action=""
+fi
+
+terraform::set_cloud_region "$vpn_type" "$cloud" "$region"
+if [[ $clean == yes || ! -e .terraform ]]; then
+  # (Re)Initialize terraform context if
+  # requested or if doing fresh deployment
+  rm -fr .terraform
+  terraform::init "$vpn_type" "$cloud" "$region" "$template_dir"
+elif [[ $init == yes ]]; then
+  terraform::init "$vpn_type" "$cloud" "$region" "$template_dir"
+fi
+if [[ $upgrade == yes ]]; then
+  terraform::taint_bastion "$vpn_type" "$cloud" "$region" "$template_dir"
+fi
+if [[ $plan == yes ]]; then
+  terraform::plan "$vpn_type" "$cloud" "$region" "$template_dir"
+else
+  terraform::apply "$vpn_type" "$cloud" "$region" "$template_dir"
+fi
+
+popd >/dev/null 2>&1

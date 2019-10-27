@@ -1,0 +1,153 @@
+#!/bin/bash
+
+source $(dirname $BASH_SOURCE)/common
+set -euo pipefail
+
+workspace_dir=$1 && shift
+template_dir=$1 && shift
+vpn_type=$1 && shift
+cloud=$1 && shift
+
+function command_usage() {
+  echo -e "\nUSAGE: vs download-vpn-config $vpn_type $cloud [-r|--region <REGION>] [-u|--user <USERNAME>] [-p|--password <PASSWORD>] [-d|--debug]\n"
+  echo -e "${LIGHT_BLUE}  This CLI command downloads the VPN client configuration from the VPN server deployed to the given region.\n"
+  echo -e "${LIGHT_GREEN}  -r|--region <REGION>      The region of the server from which the configuration should be downloaded"
+  echo -e "  -u|--user <USERNAME>      The name of the VPN user whose client configuration should be downloaded"
+  echo -e "  -p|--password <PASSWORD>  The password of the VPN user"
+  echo -e "  -c|--clean                Re-initialize the terraform workspace context before deploying"
+  echo -e "  -d|--debug                Enable trace output\n${DARK_GRAY}"
+  echo -e "${NC}"
+}
+
+function download_vpn_config() {
+
+  local user=$1
+  local password=$2
+  local config_file_url=$3
+  local config_file_out=$4
+
+  set +e
+  curl -s -f -u "${user}:${password}" $config_file_url -o $config_file_out
+  
+  while [[ $? -ne 0 ]]; do
+    echo "Waiting for VPN node to become available..."
+    sleep 5
+
+    curl -s -f -u "${user}:${password}" $config_file_url -o $config_file_out
+  done
+  set -e
+}
+
+region=""
+user=""
+password=""
+
+if [[ $# -eq 0 ]]; then
+  command_usage
+  exit 1
+fi
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -r|--region)
+      region=$2
+      shift
+      ;;
+    -u|--user)
+      user=$2
+      shift
+      ;;
+    -p|--password)
+      password=$2
+      shift
+      ;;
+    -c|--clean)
+      clean=yes
+      ;;
+    -d|--debug)
+      set -x
+      ;;
+    -h|--help)
+      command_usage
+      exit 0
+      ;;
+    *)
+      echo -e "${RED}\nERROR! Unknown option \"$1\".${NC}"
+      command_usage
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+if [[ -z $region ]]; then
+  echo -e "${RED}\nERROR! A region must be specified to identify the"
+  echo -e "       VPN server to retrieve the configuration from.${NC}"
+  exit 1
+fi
+if [[ ! -e ${workspace_dir}/${region} ]]; then
+  echo -e "${RED}\nERROR! Deployment workspace path does not exist. The region"
+  echo -e "       provided may be invalid or the server may not have been deployed.${NC}"
+  exit 1
+fi
+if [[ -z "$user" || -z "$password" ]]; then
+  echo -e "${RED}\nERROR! The user name and password of the VPN user whose"
+  echo -e "       configuration should be download cannot be empty.${NC}"
+  exit 1
+fi
+
+vpn_server_url=$(cat ${workspace_dir}/${region}/output.json | jq -r .bastion_fqdn.value)
+echo -e "${GREEN}Downloading VPN configs for node $vpn_server_url...${NC}"
+
+tmp_dir=$(cd ${workspace_dir}/../../.. && pwd)/tmp
+mkdir -p $tmp_dir
+
+os_type="$(uname -s)"
+if [[ $os_type == Darwin ]]; then
+
+  case $vpn_type in
+    ipsec)
+      file=${TF_VAR_name}-${vpn_type}-${region}-vpn.mobileconfig
+      ;;
+    ovpn|ovpn-indirect)
+      file=openvpn-config.tunnelblick.zip
+      ;;
+  esac
+  rm -fr ${tmp_dir}/${file}
+
+  download_vpn_config $user $password \
+    https://$vpn_server_url/~$user/${file} \
+    ${tmp_dir}/${file}
+
+  case $vpn_type in
+    ipsec)
+      open ${tmp_dir}/${file}
+      ;;
+    ovpn|ovpn-indirect)
+      rm -fr ${tmp_dir}/*.tblk
+      unzip -q -o ${tmp_dir}/${file} -d $tmp_dir
+
+      tunnelblick_config=$(ls -l $tmp_dir | grep ".tblk" | awk '{ print $9 }')
+      open ${tmp_dir}/${tunnelblick_config}
+      ;;
+  esac
+
+elif [[ $os_type == Linux ]]; then
+
+    file=${TF_VAR_name}-${vpn_type}-${region}-vpn.ovpn
+    wget --no-check-certificate \
+        --http-user="${user}" --http-password="${password}" \    
+        https://${vpn_server_url}/~${user}/${file} \
+        -o ${tmp_dir}/${file}
+
+    echo -e "${GREEN}\nVPN client config downloaded to ${tmp_dir}/${file}. Import it"
+    echo -e "to your OpenVPN client and login using the credentials below:\n${NC}"
+    echo -e "  user: ${user}"
+    echo -e "  password: ${password}\n"
+else
+    echo -e "${RED}\nERROR: Unable to determine OS type for which the VPN configurations should be"
+    echo -e "       downloaded. Please download manually from:\n${NC}"
+    echo -e "       url: https://${vpn_server_url}/~${user}"
+    echo -e "       user: ${user}"
+    echo -e "       password: ${password}\n"
+    exit 1
+fi

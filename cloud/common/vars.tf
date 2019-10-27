@@ -36,18 +36,20 @@ variable "country" {
 }
 
 #
-# DNS
-#
-variable "dns_zone" {
-  type = string
-}
-
-#
-# VPN Users
+# VPN Users - list of 'user|password' pairs
 #
 variable "vpn_users" {
   type = list
 }
+
+#
+# Indicates action when no VPN clients have 
+# been connected to a node for some time
+#
+variable "vpn_idle_action" {
+  type = string
+}
+
 
 #
 # SSH Key Path

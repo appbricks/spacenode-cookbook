@@ -9,18 +9,19 @@ vpn_type=$1 && shift
 cloud=$1 && shift
 
 function command_usage() {
-  echo -e "${NC}\nUSAGE: vs $vpn_type $cloud destroy-server [-r|--region <REGION>] [-d|--debug]\n"
-  echo -e "  This CLI command creates a VPN server in the given region.\n${LIGHT_GREEN}"
-  echo -e "  -r|--region <REGION>  The region to create the server in. Run the \"show-regions\" command"
-  echo -e "                        to get the list of target regions for a given public cloud"
-  echo -e "  -d|--debug            Enable trace output\n${DARK_GRAY}"
-  echo -e "${NC}"
+  echo -e "${NC}\nUSAGE: vs destroy-server $vpn_type $cloud [-r|--region <REGION>] [-d|--debug]\n${LIGHT_BLUE}"
+  echo -e "  This CLI command destroys a VPN server that has been deployed to the given region.\n${LIGHT_GREEN}"
+  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region where the server to be destroyed is deployed"
+  echo -e "  ${DIM}-d|--debug${NORMAL}            Enable trace output${NC}"
 }
 
-if [[ $# -eq 0 ]]; then
-  command_usage
-  exit 1
-fi
+# Since VPN node is being destroyed this value
+# has no effect, but needs to be set as Terraform
+# expects a value regardless
+export TF_VAR_vpn_idle_action=""
+
+region=""
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -r|--region)
@@ -44,7 +45,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z $region ]]; then
-  echo -e "${RED}\nERROR! A region must be specified for the deployment."
+  echo -e "${RED}\nERROR! Please provide a cloud region from the following list.${NC}"
+  $(dirname $BASH_SOURCE)/show-regions $cloud
+  exit 1
 fi
 
 if [[ -e ${workspace_dir}/${region} ]]; then
@@ -54,5 +57,5 @@ if [[ -e ${workspace_dir}/${region} ]]; then
   popd >/dev/null 2>&1
 else
   echo -e "${RED}\nERROR! Deployment workspace path does not exist. The region"
-  echo -e "provided may be invalid or the server may not have been deployed.${NC}"
+  echo -e "       provided may be invalid or the server may not have been deployed.${NC}"
 fi

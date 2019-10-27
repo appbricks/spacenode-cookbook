@@ -1,9 +1,16 @@
 #
+# Azure specific inputs
+#
+variable "azure_dns_zone" {
+  type = string
+}
+
+#
 # Bootstrap VPN server
 #
 
 module "bootstrap" {
-  source = "github.com/mevansam/cloud-inceptor.git/modules/bootstrap-automation/azure"
+  source = "../../../../../cloud-inceptor/modules/bootstrap/azure"
 
   #
   # Company information used in certificate creation
@@ -28,7 +35,7 @@ module "bootstrap" {
   vpc_name = "${var.name}-ovpn-i-${var.region}"
 
   # DNS Name for VPC
-  vpc_dns_zone = "${var.name}-ovpn-i-${var.region}.${var.dns_zone}"
+  vpc_dns_zone = "${var.name}-ovpn-i-${var.region}.${var.azure_dns_zone}"
 
   # Local DNS zone. This could also be the same as the public
   # which will enable setting up a split DNS of the public zone
@@ -40,7 +47,7 @@ module "bootstrap" {
 
   # VPN
   vpn_users = "${var.vpn_users}"
-  vpn_idle_action = "shutdown"
+  vpn_idle_action = "${var.vpn_idle_action}"
 
   vpn_type = "openvpn"
   vpn_tunnel_all_traffic = "yes"
@@ -59,7 +66,7 @@ module "bootstrap" {
   bastion_host_name = "vpn"
   bastion_use_fqdn = true
 
-  bastion_instance_type = "t2.micro"
+  bastion_instance_type = "Standard_DS2_v2"
 
   # ICMP needs to be allowed to enable ICMP tunneling
   allow_bastion_icmp = true
