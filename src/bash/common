@@ -386,6 +386,8 @@ function cloud::nodes() {
     vpn_type_path=$(dirname $cloud_path)
     vpn_type=$(basename $vpn_type_path)
 
+    >&2 echo -e -n "${BROWN_ORANGE}Retrieving details of instance \"${node_name}\"...          ${NC}\r"
+
     state=""
     case $cloud in
       aws)
