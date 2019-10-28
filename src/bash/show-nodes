@@ -43,6 +43,7 @@ elif [[ $node_status == stopped ]]; then
   echo -e "${DIM}${DARK_GRAY}2) Download VPN Config${GREEN}${NORMAL}"
   echo -e "3) Start Node"
 else
+  echo -e "${DIM}${DARK_GRAY}2) Download VPN Config${GREEN}${NORMAL}"
   echo -e "${DIM}${DARK_GRAY}3) Stop Node${GREEN}${NORMAL}"
 fi
 echo -e "4) Delete Node"
