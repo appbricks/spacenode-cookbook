@@ -73,7 +73,7 @@ fi
 mkdir -p ${workspace_dir}/${region}
 pushd ${workspace_dir}/${region} >/dev/null 2>&1
 
-if [[ idle_shutdown == yes ]]; then
+if [[ $idle_shutdown == yes ]]; then
   export TF_VAR_vpn_idle_action="shutdown"
 else
   export TF_VAR_vpn_idle_action=""
