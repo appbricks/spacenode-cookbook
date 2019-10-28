@@ -10,7 +10,7 @@ variable "azure_dns_zone" {
 #
 
 module "bootstrap" {
-  source = "../../../../../cloud-inceptor/modules/bootstrap/azure"
+  source = "github.com/appbricks/cloud-inceptor.git/modules/bootstrap/azure"
 
   #
   # Company information used in certificate creation

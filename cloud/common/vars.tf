@@ -50,7 +50,6 @@ variable "vpn_idle_action" {
   type = string
 }
 
-
 #
 # SSH Key Path
 #

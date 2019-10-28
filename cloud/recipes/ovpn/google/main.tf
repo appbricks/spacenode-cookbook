@@ -14,7 +14,7 @@ variable "google_dns_zone" {
 #
 
 module "bootstrap" {
-  source = "../../../../../cloud-inceptor/modules/bootstrap/google"
+  source = "github.com/appbricks/cloud-inceptor.git/modules/bootstrap/google"
 
   #
   # Company information used in certificate creation

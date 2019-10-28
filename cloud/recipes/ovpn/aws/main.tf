@@ -10,7 +10,7 @@ variable "aws_dns_zone" {
 #
 
 module "bootstrap" {
-  source = "../../../../../cloud-inceptor/modules/bootstrap/aws"
+  source = "github.com/appbricks/cloud-inceptor.git/modules/bootstrap/aws"
 
   #
   # Company information used in certificate creation

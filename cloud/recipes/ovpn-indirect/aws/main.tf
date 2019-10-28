@@ -10,7 +10,7 @@ variable "aws_dns_zone" {
 #
 
 module "bootstrap" {
-  source = "../../../../../cloud-inceptor/modules/bootstrap/aws"
+  source = "github.com/appbricks/cloud-inceptor.git/modules/bootstrap/aws"
 
   #
   # Company information used in certificate creation
@@ -47,7 +47,7 @@ module "bootstrap" {
 
   # VPN
   vpn_users = "${var.vpn_users}"
-  vpn_idle_action = "${var.vpn_idle_action}"
+  vpn_idle_action = "shutdown"
 
   vpn_type = "openvpn"
   vpn_tunnel_all_traffic = "yes"
