@@ -17,7 +17,7 @@ case "$command" in
     exit 0
     ;;
   init)
-    $root_dir/src/bash/init \
+    $root_dir/src/bash/init-workspace \
       $workspace_dir ${@:2:99}
     exit 0
     ;;
