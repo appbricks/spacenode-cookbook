@@ -36,13 +36,14 @@ node_id=${node_detail[5]}
 
 echo -e "\n${GREEN}${BOLD}What do you want to do:${NORMAL}"
 echo -e "1) Update Node"
-echo -e "2) Download VPN Config"
 if [[ $node_status == running ]]; then
+  echo -e "2) Download VPN Config"
   echo -e "3) Stop Node"
 elif [[ $node_status == stopped ]]; then
+  echo -e "${DIM}${DARK_GRAY}2) Download VPN Config${GREEN}${NORMAL}"
   echo -e "3) Start Node"
 else
-  echo -e "${DIM}3) Stop Node${NORMAL}"
+  echo -e "${DIM}${DARK_GRAY}3) Stop Node${GREEN}${NORMAL}"
 fi
 echo -e "4) Delete Node"
 
@@ -63,15 +64,17 @@ case $option in
       $vpn_type $cloud -r $region -u
     ;;
   2)
-    common::validate_workspace
-    echo -e -n "\n${GREEN}Please enter the VPN username: ${NC}" && read username
-    echo -e -n "${GREEN}Please enter the VPN password: ${NC}" && read -s password
+    if [[ $node_status == running ]]; then
+      common::validate_workspace
+      echo -e -n "\n${GREEN}Please enter the VPN username: ${NC}" && read username
+      echo -e -n "${GREEN}Please enter the VPN password: ${NC}" && read -s password
 
-    echo
-    $scripts_dir/download-vpn-config \
-      $workspace_dir $template_dir \
-      $vpn_type $cloud -r $region \
-      -u $username -p $password
+      echo
+      $scripts_dir/download-vpn-config \
+        $workspace_dir $template_dir \
+        $vpn_type $cloud -r $region \
+        -u $username -p $password
+    fi
     ;;
   3)
     case $node_status in

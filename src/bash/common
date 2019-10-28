@@ -372,6 +372,7 @@ function terraform::destroy() {
 function cloud::nodes() {
 
   local workspace_dir=$1
+  set +e
 
   for o in $(find $workspace_dir -name "output.json" -type f -print); do
 
@@ -385,56 +386,71 @@ function cloud::nodes() {
     vpn_type_path=$(dirname $cloud_path)
     vpn_type=$(basename $vpn_type_path)
 
+    state=""
     case $cloud in
       aws)
-        state=$(aws \
+        instance_detail=$(aws \
           ec2 describe-instances \
             --instance-ids "$bastion_instance_id" \
-            --region "$region" \
-          | jq -r '.Reservations[0].Instances[0].State.Name')
+            --region "$region")
+        
+        if [[ $? -eq 0 ]]; then
+          state=$(echo "$instance_detail" \
+            | jq -r '.Reservations[0].Instances[0].State.Name')          
+        fi
         ;;
       azure)
-        azure_vm_state=$(az vm show --id "$bastion_instance_id" --show-details \
-          | jq -r .powerState)
-        case $azure_vm_state in
-          'VM running')
-            state=running
-            ;;
-          'VM stopped'|'VM deallocated')
-            state=stopped
-            ;;
-          *)
-            state="${azure_vm_state#* }"
-            ;;
-        esac
+        instance_detail=$(az vm show \
+          --id "$bastion_instance_id" --show-details)
+
+        if [[ $? -eq 0 ]]; then
+          azure_vm_state=$(echo "$instance_detail" \
+            | jq -r .powerState)
+          
+          case $azure_vm_state in
+            'VM running')
+              state=running
+              ;;
+            'VM stopped'|'VM deallocated')
+              state=stopped
+              ;;
+            *)
+              state="${azure_vm_state#* }"
+              ;;
+          esac
+        fi
         ;;
+
       google)
         gcp_zone=$(gcloud compute zones list --format json \
           | jq -r --arg region "$region" \
             '[ .[] | select(.region | match($region)) | .name ] | sort | .[0]')
-        gcp_state=$(gcloud compute instances describe \
-          "$bastion_instance_id" --zone "$gcp_zone" --format json \
-          | jq -r '.status | ascii_downcase')
-        case $gcp_state in
-          running)
-            state=running
-            ;;
-          terminated)
-            state=stopped
-            ;;
-          *)
-            state=unknown
-            ;;
-        esac
-        
-        if [[ $state == terminated ]]; then
-          # Stopped VMs in GCP are labeled as terminated
-          state=stopped
+        instance_detail=$(gcloud compute instances describe \
+          "$bastion_instance_id" --zone "$gcp_zone" --format json)
+
+        if [[ $? -eq 0 ]]; then
+          gcp_state=$(echo "$instance_detail" \
+            | jq -r '.status | ascii_downcase')
+
+          case $gcp_state in
+            running)
+              state=running
+              ;;
+            terminated)
+              state=stopped
+              ;;
+            *)
+              state=$gcp_state
+              ;;
+          esac
         fi
         ;;
     esac
+    [[ -n $state ]] || state="unknown"
     echo "${vpn_type}|${cloud}|${region}|${node_name}|${state}|${bastion_instance_id}"
   done
+
+  set -e
 }
 
 function cloud::start_node() {
@@ -486,13 +502,14 @@ function ui::print_nodes_table() {
 
   local vpn_nodes=("$@")
 
-  echo -e "     +----------+---------+----------------------+----------------------------------------------------+-------------+"
-  echo -e "     | ${BOLD}VPN Type${NORMAL} | ${BOLD}Cloud${NORMAL}   | ${BOLD}Region${NORMAL}               | ${BOLD}Name${NORMAL}                                               | ${BOLD}Status${NORMAL}      |"
-  echo -e "+----+----------+---------+----------------------+----------------------------------------------------+-------------+"
+  printf "     +----------+----------+----------------------+----------------------------------------------------+--------------+\n"
+  printf "     | ${BOLD}%-8s${NORMAL} | ${BOLD}%-8s${NORMAL} | ${BOLD}%-20s${NORMAL} | ${BOLD}%-50s${NORMAL} | ${BOLD}%-12s${NORMAL} |\n" \
+    'VPN Type' 'Cloud' 'Region' 'Name' 'Status'
+  printf "+----+----------+----------+----------------------+----------------------------------------------------+--------------+\n"
 
   for ((i=0; i<${#vpn_nodes[@]}; i++)); do
     node_detail=( $(echo "${vpn_nodes[$i]}" | sed "s/|/ /g") )
-    printf "| %2d | %-8s | %-7s | %-20s | %-50s | %-11s |\n" \
+    printf "| %2d | %-8s | %-8s | %-20s | %-50s | %-12s |\n" \
       $i \
       ${node_detail[0]} \
       ${node_detail[1]} \
@@ -501,5 +518,5 @@ function ui::print_nodes_table() {
       ${node_detail[4]}
   done
 
-  echo -e "+----+----------+---------+----------------------+----------------------------------------------------+-------------+"  
+  echo -e "+----+----------+----------+----------------------+----------------------------------------------------+--------------+"  
 }
