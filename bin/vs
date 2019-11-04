@@ -51,6 +51,12 @@ case "$command" in
       $workspace_dir $template_dir \
       $vpn_type $cloud ${@:4:99}
     ;;
+  reinit-node)
+    common::validate_workspace
+    $root_dir/src/bash/reinit-node \
+      $workspace_dir $template_dir \
+      $vpn_type $cloud ${@:4:99}
+    ;;
   download-vpn-config)
     common::validate_workspace
     $root_dir/src/bash/download-vpn-config \

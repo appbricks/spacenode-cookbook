@@ -35,6 +35,7 @@ function usage() {
   echo -e "                                             for running deployment scripts."
   echo -e "    ${BOLD}show-regions${NORMAL}         <CLOUD>             Show regions nodes can be created in."
   echo -e "    ${BOLD}deploy-node${NORMAL}          <VPN_TYPE> <CLOUD>  Deploys or updates a personal VPN node."
+  echo -e "    ${BOLD}reinit-node${NORMAL}          <VPN_TYPE> <CLOUD>  Reinitializes a VPN node's remote state."
   echo -e "    ${BOLD}destroy-node${NORMAL}         <VPN_TYPE> <CLOUD>  Destroys a VPN node."
   echo -e "    ${BOLD}download-vpn-config${NORMAL}  <VPN_TYPE> <CLOUD>  Downloads the client VPN configuration."
   #echo -e "    ${BOLD}start-tunnel${NORMAL}                             Starts tunnel services which obfuscate VPN traffic to a node."
@@ -124,18 +125,20 @@ function common::validate_environment() {
 function common::validate_workspace() {
 
   if [[ ! -e $root_dir/cloud/recipes/$vpn_type ]]; then
+    usage
     echo -e "${RED}\nERROR! Unknown VPN type.\n" 
     echo -e "${GREEN}Available VPN types for deployment are:\n"
-    for d in $(find $root_dir/cloud/recipes -type d -depth 1 -print); do 
+    for d in $(find $root_dir/cloud/recipes -maxdepth 1 -type d -print); do 
       echo "- \"$(basename $d)\"" 
     done
     echo -e "${NC}"
     exit 1
   fi
   if [[ ! -e $root_dir/cloud/recipes/$vpn_type/$cloud ]]; then
+    usage
     echo -e "${RED}\nERROR! Unknown cloud target for VPN of type \"$vpn_type\".\n" 
     echo -e "${GREEN}Cloud targets available for deployment are:\n"
-    for d in $(find $root_dir/cloud/recipes/$vpn_type -type d -depth 1 -print); do 
+    for d in $(find $root_dir/cloud/recipes/$vpn_type -maxdepth 1 -type d -print); do 
       echo "- \"$(basename $d)\"" 
     done
     echo -e "${NC}"
@@ -170,6 +173,7 @@ function terraform::set_cloud_region() {
 
   case $cloud in
     aws)
+      cloud::set_aws_credentials
       regions=$(aws ec2 describe-regions --query "Regions[].{Name:RegionName}" --output text)
       common::validate_value_from_list \
         "$regions" "$region" \
@@ -178,12 +182,14 @@ function terraform::set_cloud_region() {
       export AWS_DEFAULT_REGION=$region
       ;;
     azure)
+      cloud::set_azure_credentials
       regions=$(az account list-locations -o table | awk '$4 != "Name" && $0 !~ /^-.*/ { print substr($0, 48) }')
       common::validate_value_from_list \
         "$regions" "$region" \
         "Unknown Azure Cloud region \"$region\"."
       ;;
     google)
+      cloud::set_google_credentials >/dev/null
       regions=$(gcloud compute regions list | awk '$1 != "NAME" { print $1 }')
       common::validate_value_from_list \
         "$regions" "$region" \
