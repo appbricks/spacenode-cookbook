@@ -22,6 +22,10 @@ BOLD='\033[1m'
 NORMAL='\033[22m'
 DIM='\033[2m'
 
+awz_cli_credentials_validated=no
+azure_cli_credentials_validated=no
+google_cli_credentials_validated=no
+
 function usage() {
   echo -e "${NC}\nUSAGE: vs ${BOLD}<COMMAND>${NORMAL} [options]\n"
   echo -e "  This CLI manages personal cloud VPN nodes in multiple cloud regions.\n"
@@ -369,6 +373,65 @@ function terraform::destroy() {
   rm -fr output.json
 }
 
+function cloud::set_aws_credentials() {
+
+  if [[ -z $AWS_ACCESS_KEY || -z $AWS_SECRET_KEY ]]; then
+    echo -e "${RED}\nERROR! The environment variables \"AWS_ACCESS_KEY\" and \"AWS_SECRET_KEY\" must be set in the \"cloud-credentials\" file.${NC}" 
+    exit 1
+  fi
+
+  if [[ $awz_cli_credentials_validated == no ]]; then
+
+    # AWS CLI credentials
+    export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
+    export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
+
+    # Required for generic queries but this value is overidden
+    export AWS_DEFAULT_REGION=us-east-1
+
+    awz_cli_credentials_validated=yes
+  fi
+}
+
+function cloud::set_azure_credentials() {
+
+  if [[ -z $ARM_CLIENT_ID || -z $ARM_CLIENT_SECRET || -z $ARM_TENANT_ID ]]; then
+    echo -e "${RED}\nERROR! The environment variables \"ARM_CLIENT_ID\", \"ARM_CLIENT_SECRET\" and \"ARM_TENANT_ID\" must be set in the \"cloud-credentials\" file.${NC}" 
+    exit 1
+  fi
+
+  if [[ $azure_cli_credentials_validated == no ]]; then
+
+    # Set azure credentials
+    az login --service-principal \
+      --username "$ARM_CLIENT_ID" \
+      --password "$ARM_CLIENT_SECRET" \
+      --tenant "$ARM_TENANT_ID" 2>&1 >/dev/null
+
+    azure_cli_credentials_validated=yes
+  fi
+}
+
+function cloud::set_google_credentials() {
+  
+  if [[ -z $GOOGLE_CREDENTIALS || -z $GOOGLE_PROJECT ]]; then
+    echo -e "${RED}\nERROR! The environment variables \"GOOGLE_CREDENTIALS\" and \"GOOGLE_PROJECT\" must be set in the \"cloud-credentials\" file.${NC}" 
+    exit 1
+  fi
+
+  if [[ $google_cli_credentials_validated == no ]]; then
+
+    # Set GCP CLI credentials
+    gcloud auth activate-service-account \
+      --key-file=$GOOGLE_CREDENTIALS \
+      --quiet 2>&1 >/dev/null
+    gcloud config set project $GOOGLE_PROJECT \
+      --quiet 2>&1 >/dev/null
+
+    google_cli_credentials_validated=yes
+  fi
+}
+
 function cloud::nodes() {
 
   local workspace_dir=$1
@@ -391,6 +454,7 @@ function cloud::nodes() {
     state=""
     case $cloud in
       aws)
+        cloud::set_aws_credentials
         instance_detail=$(aws \
           ec2 describe-instances \
             --instance-ids "$bastion_instance_id" \
@@ -402,6 +466,7 @@ function cloud::nodes() {
         fi
         ;;
       azure)
+        cloud::set_azure_credentials
         instance_detail=$(az vm show \
           --id "$bastion_instance_id" --show-details)
 
@@ -424,6 +489,7 @@ function cloud::nodes() {
         ;;
 
       google)
+        cloud::set_google_credentials >/dev/null
         gcp_zone=$(gcloud compute zones list --format json \
           | jq -r --arg region "$region" \
             '[ .[] | select(.region | match($region)) | .name ] | sort | .[0]')
@@ -504,14 +570,14 @@ function ui::print_nodes_table() {
 
   local vpn_nodes=("$@")
 
-  printf "     +----------+----------+----------------------+----------------------------------------------------+--------------+\n"
-  printf "     | ${BOLD}%-8s${NORMAL} | ${BOLD}%-8s${NORMAL} | ${BOLD}%-20s${NORMAL} | ${BOLD}%-50s${NORMAL} | ${BOLD}%-12s${NORMAL} |\n" \
+  printf "     +----------------+----------+----------------------+----------------------------------------------------+--------------+\n"
+  printf "     | ${BOLD}%-14s${NORMAL} | ${BOLD}%-8s${NORMAL} | ${BOLD}%-20s${NORMAL} | ${BOLD}%-50s${NORMAL} | ${BOLD}%-12s${NORMAL} |\n" \
     'VPN Type' 'Cloud' 'Region' 'Name' 'Status'
-  printf "+----+----------+----------+----------------------+----------------------------------------------------+--------------+\n"
+  printf "+----+----------------+----------+----------------------+----------------------------------------------------+--------------+\n"
 
   for ((i=0; i<${#vpn_nodes[@]}; i++)); do
     node_detail=( $(echo "${vpn_nodes[$i]}" | sed "s/|/ /g") )
-    printf "| %2d | %-8s | %-8s | %-20s | %-50s | %-12s |\n" \
+    printf "| %2d | %-14s | %-8s | %-20s | %-50s | %-12s |\n" \
       $i \
       ${node_detail[0]} \
       ${node_detail[1]} \
@@ -520,5 +586,5 @@ function ui::print_nodes_table() {
       ${node_detail[4]}
   done
 
-  echo -e "+----+----------+----------+----------------------+----------------------------------------------------+--------------+"  
+  echo -e "+----+----------------+----------+----------------------+----------------------------------------------------+--------------+"  
 }

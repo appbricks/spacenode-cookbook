@@ -11,20 +11,26 @@ function command_usage() {
 cloud=${1:--h}
 case $cloud in
   aws)
+    cloud::set_aws_credentials
+
     echo -e "${GREEN}\nAvailable Amazon Web Services (AWS) Regions:${NC}\n" 
     aws ec2 describe-regions --query "Regions[].{Name:RegionName}" --output text | sort
     echo -e "${GREEN}\nMore detail can be found at the following link:"
     echo -e "${BLUE}- https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.RegionsAndAvailabilityZones.html"
     ;;
-  google)
-    echo -e "${GREEN}\nAvailable Google Cloud Regions:${NC}\n" 
-    gcloud compute regions list | awk '$1 != "NAME" { print $1 }' | sort
+  azure)
+    cloud::set_azure_credentials
+
+    echo -e "${GREEN}\nAvailable Microsoft Azure Regions:${NC}\n" 
+    az account list-locations -o table | awk '$4 != "Name" && $0 !~ /^-.*/ { print substr($0, 48) }' | sort
     echo -e "${GREEN}\nMore detail can be found at the following link:"
     echo -e "${BLUE}- https://cloud.google.com/compute/docs/regions-zones/"
     ;;
-  azure)
-    echo -e "${GREEN}\nAvailable Microsoft Azure Regions:${NC}\n" 
-    az account list-locations -o table | awk '$4 != "Name" && $0 !~ /^-.*/ { print substr($0, 48) }' | sort
+  google)
+    cloud::set_google_credentials >/dev/null
+
+    echo -e "${GREEN}\nAvailable Google Cloud Regions:${NC}\n" 
+    gcloud compute regions list | awk '$1 != "NAME" { print $1 }' | sort
     echo -e "${GREEN}\nMore detail can be found at the following link:"
     echo -e "${BLUE}- https://cloud.google.com/compute/docs/regions-zones/"
     ;;
