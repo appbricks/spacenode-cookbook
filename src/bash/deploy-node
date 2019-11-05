@@ -10,7 +10,7 @@ cloud=$1 && shift
 
 function command_usage() {
   echo -e "\nUSAGE: vs deploy-node $vpn_type $cloud [-r|--region <REGION>] [-c|--clean] [-i|--init] [-u|--upgrade] [-a|--no-idle-shutdown] [-s|--show] [-d|--debug]\n${LIGHT_BLUE}"
-  echo -e "  This CLI command creates a VPN node in the given region.\n${LIGHT_GREEN}"
+  echo -e "${LIGHT_BLUE}  This CLI command creates a VPN node in the given region.\n${LIGHT_GREEN}"
   echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region to create the server in"
   echo -e "  ${DIM}-c|--clean${NORMAL}             Clean the terraform workspace context before deploying"
   echo -e "  ${DIM}-i|--init${NORMAL}              Re-initialize terraform workspace context before deploying"
@@ -27,6 +27,10 @@ upgrade=no
 idle_shutdown=yes
 plan=no
 
+if [[ $# -eq 0 ]]; then
+  command_usage
+  exit 1
+fi
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -r|--region)

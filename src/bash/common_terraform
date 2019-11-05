@@ -1,0 +1,215 @@
+#!/bin/bash
+
+function terraform::set_cloud_region() {
+
+  local vpn_type=$1
+  local cloud=$2
+  local region=$3
+
+  case $cloud in
+    aws)
+      cloud::set_aws_credentials
+      regions=$(aws ec2 describe-regions --query "Regions[].{Name:RegionName}" --output text)
+      common::validate_value_from_list \
+        "$regions" "$region" \
+        "Unknown AWS region \"$region\"."
+
+      export AWS_DEFAULT_REGION=$region
+      ;;
+    azure)
+      cloud::set_azure_credentials
+      regions=$(az account list-locations -o table | awk '$4 != "Name" && $0 !~ /^-.*/ { print substr($0, 48) }')
+      common::validate_value_from_list \
+        "$regions" "$region" \
+        "Unknown Azure Cloud region \"$region\"."
+      ;;
+    google)
+      cloud::set_google_credentials >/dev/null
+      regions=$(gcloud compute regions list | awk '$1 != "NAME" { print $1 }')
+      common::validate_value_from_list \
+        "$regions" "$region" \
+        "Unknown Azure region \"$region\"."
+      ;;
+  esac
+
+  export TF_VAR_region=$region
+}
+
+function terraform::init() {
+
+  local vpn_type=$1
+  local cloud=$2
+  local region=$3
+  local template_dir=$4
+
+  bucket_name=${TF_VAR_name}-vs-tfstate-${region}
+
+  case $cloud in
+    aws)
+      # Check/Create Terraform state bucket
+      set +e
+      aws s3 ls | grep "${bucket_name}" >/dev/null 2>&1
+      if [[ $? -ne 0 ]]; then
+        echo -e "${GREEN}\nCreating AWS S3 state bucket \"${bucket_name}\" to save terraform deployment state...${NC}"
+        aws s3 mb s3://${bucket_name} --region $region
+      fi
+      set -e
+
+      # Initialize Terraform
+      echo -e "${GREEN}Initializing terraform context...${NC}"
+      terraform init \
+        -backend-config="key=${vpn_type}" \
+        -backend-config="bucket=${bucket_name}" \
+        $template_dir
+      echo
+      ;;
+
+    google)
+      # Check/Create Terraform state bucket
+      set +e
+      gsutil ls | awk -F'/' '{ print $3 }' | grep "${bucket_name}" >/dev/null 2>&1
+      if [[ $? -ne 0 ]]; then
+        echo -e "${GREEN}\nCreating Google Storage state bucket \"${bucket_name}\" to save terraform deployment state...${NC}"
+        gsutil mb -l $region gs://${bucket_name}
+      fi
+      set -e
+
+      # Initialize Terraform
+      echo -e "${GREEN}Initializing terraform context...${NC}"
+      terraform init \
+        -backend-config="prefix=${vpn_type}" \
+        -backend-config="bucket=${bucket_name}" \
+        $template_dir
+      echo
+      ;;
+
+    azure)
+      set +e
+      az group list \
+        | jq -r '.[].name' | grep default >/dev/null 2>&1
+      if [[ $? -ne 0 ]]; then
+        echo -e "${GREEN}\nCreating Azure resource group \"default\" in region \"$region\"...${NC}"
+        az group create \
+          --name default \
+          --location "${region}" \
+          --output none
+      fi
+      storage_account=vsstate${region}
+      az storage account list \
+        | jq -r '.[].name' | grep "${storage_account}" >/dev/null 2>&1
+      if [[ $? -ne 0 ]]; then
+        echo -e "${GREEN}\nCreating Azure Storage account \"${storage_account}\" to save terraform deployment state in...${NC}"
+        az storage account create \
+          --name "${storage_account}" \
+          --location "${region}" \
+          --resource-group default \
+          --sku Standard_LRS \
+          --output none
+      fi
+      container_name="${TF_VAR_name}"
+      az storage container list --account-name "${storage_account}" \
+        | jq -r '.[].name' | grep "${container_name}" >/dev/null 2>&1
+      if [[ $? -ne 0 ]]; then
+        echo -e "${GREEN}\nCreating Azure container \"${container_name}\" in storage account \"${storage_account}\" to save terraform deployment state in...${NC}"
+        az storage container create \
+          --name "${container_name}" \
+          --account-name "${storage_account}" \
+          --output none
+      fi
+      set -e
+
+      # Initialize Terraform
+      echo -e "${GREEN}Initializing terraform context...${NC}"
+      terraform init \
+        -backend-config="resource_group_name=default" \
+        -backend-config="container_name=${container_name}" \
+        -backend-config="key=terraform.tfstate" \
+        -backend-config="storage_account_name=${storage_account}" \
+        $template_dir
+      echo
+      ;;
+  esac
+
+  # Seems to be a bug in terraform where 'output' and 'taint' command are 
+  # unable to load the backend state when the working directory does not 
+  # have the backend resource template file.
+  local backend_type=$(cat .terraform/terraform.tfstate | jq -r .backend.type)
+  cat << ---EOF > backend.tf
+terraform {
+  backend "$backend_type" {}
+}
+---EOF
+}
+
+function terraform::apply() {
+
+  local vpn_type=$1
+  local cloud=$2
+  local region=$3
+  local template_dir=$4
+
+  echo -e "${GREEN}Deploying VPN node type \"${vpn_type}\" to region \"${region}\" of \"$cloud\" cloud...${NC}"
+
+  # Apply Terraform template and filter out
+  # any output values for security purposes.
+  terraform apply -auto-approve $template_dir 2>&1 \
+    | tee apply.log | awk '/Outputs:/ {l=999}; (l-- > 0) {next} 1'
+
+  # Save Terraform output in a JSON file for
+  # later reference.
+  terraform output -json \
+     -state=.terraform/terraform.tfstate > output.json
+}
+
+function terraform::taint_bastion() {
+
+  local vpn_type=$1
+  local cloud=$2
+  local region=$3
+  local template_dir=$4
+
+  echo -e "${GREEN}Flagging VPN node type \"${vpn_type}\" in region \"${region}\" of \"$cloud\" cloud to be rebuilt...${NC}"
+
+  case $cloud in
+    aws)
+      terraform taint module.bootstrap.aws_instance.bastion
+      ;;
+    azure)
+      terraform taint module.bootstrap.azurerm_virtual_machine.bastion
+      ;;
+    google)
+      terraform taint module.bootstrap.google_compute_instance.bastion
+      ;;
+  esac
+}
+
+function terraform::plan() {
+
+  local vpn_type=$1
+  local cloud=$2
+  local region=$3
+  local template_dir=$4
+
+  echo -e "${GREEN}Showing deployment plan for VPN node type \"${vpn_type}\" in region \"${region}\" of \"$cloud\" cloud...${NC}"
+
+  # Output Terraform plan
+  terraform plan $template_dir
+}
+
+function terraform::destroy() {
+
+  local vpn_type=$1
+  local cloud=$2
+  local region=$3
+  local template_dir=$4
+
+  echo -e "${GREEN}Destroying VPN node type \"${vpn_type}\" deployed to region \"${region}\" of \"$cloud\" cloud...${NC}"
+
+  # Apply Terraform template and filter out
+  # any output values for security purposes.
+  terraform destroy -auto-approve \
+    -state=.terraform/terraform.tfstate \
+    $template_dir 2>&1 | tee apply.log
+
+  rm -fr output.json
+}

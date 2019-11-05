@@ -13,17 +13,16 @@ function command_usage() {
   echo -e "  This CLI command reinitializes the remote state of a VPN node in the given"
   echo -e "  region. The state is refreshed and an outline of the remote resources created" 
   echo -e "  or to be created will be shown.\n${LIGHT_GREEN}"
-  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region where the server to be destroyed is deployed"
+  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region where the node is deployed"
   echo -e "  ${DIM}-d|--debug${NORMAL}            Enable trace output${NC}"
 }
 
-# Since VPN node is being destroyed this value
-# has no effect, but needs to be set as Terraform
-# expects a value regardless
-export TF_VAR_vpn_idle_action=""
-
 region=""
 
+if [[ $# -eq 0 ]]; then
+  command_usage
+  exit 1
+fi
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -r|--region)

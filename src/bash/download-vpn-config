@@ -10,13 +10,11 @@ cloud=$1 && shift
 
 function command_usage() {
   echo -e "\nUSAGE: vs download-vpn-config $vpn_type $cloud [-r|--region <REGION>] [-u|--user <USERNAME>] [-p|--password <PASSWORD>] [-d|--debug]\n"
-  echo -e "${LIGHT_BLUE}  This CLI command downloads the VPN client configuration from the VPN server deployed to the given region.\n"
-  echo -e "${LIGHT_GREEN}  -r|--region <REGION>      The region of the server from which the configuration should be downloaded"
-  echo -e "  -u|--user <USERNAME>      The name of the VPN user whose client configuration should be downloaded"
-  echo -e "  -p|--password <PASSWORD>  The password of the VPN user"
-  echo -e "  -c|--clean                Re-initialize the terraform workspace context before deploying"
-  echo -e "  -d|--debug                Enable trace output\n${DARK_GRAY}"
-  echo -e "${NC}"
+  echo -e "${LIGHT_BLUE}  This CLI command downloads the VPN client configuration from the VPN server deployed to the given region.\n${LIGHT_GREEN}"
+  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>      The region of the server from which the configuration should be downloaded"
+  echo -e "  ${BOLD}-u|--user${NORMAL} <USERNAME>      The name of the VPN user whose client configuration should be downloaded"
+  echo -e "  ${BOLD}-p|--password${NORMAL} <PASSWORD>  The password of the VPN user"
+  echo -e "  ${DIM}-d|--debug${NORMAL}                Enable trace output\n${NC}"
 }
 
 function download_vpn_config() {
@@ -26,14 +24,25 @@ function download_vpn_config() {
   local config_file_url=$3
   local config_file_out=$4
 
+  rm -fr $config_file_out
+
+  skip_ssl_validation=""
+  if [[ $TF_VAR_certify_bastion == false ]]; then
+    skip_ssl_validation="-k"
+  fi
+
   set +e
-  curl -s -f -u "${user}:${password}" $config_file_url -o $config_file_out
+  curl -s -f $skip_ssl_validation \
+    -u "${user}:${password}" $config_file_url \
+    -o $config_file_out
   
   while [[ $? -ne 0 ]]; do
     echo "Waiting for VPN node to become available..."
     sleep 5
 
-    curl -s -f -u "${user}:${password}" $config_file_url -o $config_file_out
+    curl -s -f $skip_ssl_validation \
+      -u "${user}:${password}" $config_file_url \
+      -o $config_file_out
   done
   set -e
 }
@@ -59,9 +68,6 @@ while [[ $# -gt 0 ]]; do
     -p|--password)
       password=$2
       shift
-      ;;
-    -c|--clean)
-      clean=yes
       ;;
     -d|--debug)
       set -x
@@ -98,49 +104,74 @@ fi
 vpn_server_url=$(cat ${workspace_dir}/${region}/output.json | jq -r .bastion_fqdn.value)
 echo -e "${GREEN}Downloading VPN configs for node $vpn_server_url...${NC}"
 
-tmp_dir=$(cd ${workspace_dir}/../../.. && pwd)/tmp
-mkdir -p $tmp_dir
+if [[ $vpn_type == ovpn-x ]]; then
+  # Download tunnel script
+  download_vpn_config $user $password \
+    https://$vpn_server_url/~$user/client_tunnel \
+    ${workspace_dir}/${region}/client_tunnel
 
+  chmod +x ${workspace_dir}/${region}/client_tunnel
+fi
+
+working_dir=$(cd $workspace_dir/../../../ && pwd)
 os_type="$(uname -s)"
+
 if [[ $os_type == Darwin ]]; then
 
   case $vpn_type in
     ipsec)
       file=${TF_VAR_name}-${vpn_type}-${region}-vpn.mobileconfig
       ;;
-    ovpn|ovpn-indirect)
+    ovpn|ovpn-x)
       file=openvpn-config.tunnelblick.zip
       ;;
   esac
-  rm -fr ${tmp_dir}/${file}
 
   download_vpn_config $user $password \
     https://$vpn_server_url/~$user/${file} \
-    ${tmp_dir}/${file}
+    ${working_dir}/${file}
 
   case $vpn_type in
     ipsec)
-      open ${tmp_dir}/${file}
+      open ${working_dir}/${file}
       ;;
-    ovpn|ovpn-indirect)
-      rm -fr ${tmp_dir}/*.tblk
-      unzip -q -o ${tmp_dir}/${file} -d $tmp_dir
+    ovpn|ovpn-x)
+      rm -fr ${working_dir}/*.tblk
+      unzip -q -o ${working_dir}/${file} -d $working_dir
+      rm ${working_dir}/${file}
 
-      tunnelblick_config=$(ls -l $tmp_dir | grep ".tblk" | awk '{ print $9 }')
-      open ${tmp_dir}/${tunnelblick_config}
+      tunnelblick_config=$(ls -l $working_dir | grep ".tblk" | awk '{ print $9 }')
+      open ${working_dir}/${tunnelblick_config}
       ;;
   esac
 
 elif [[ $os_type == Linux ]]; then
 
-    file=${TF_VAR_name}-${vpn_type}-${region}-vpn.ovpn
-    wget --no-check-certificate \
-        --http-user="${user}" --http-password="${password}" \    
-        https://${vpn_server_url}/~${user}/${file} \
-        -o ${tmp_dir}/${file}
+    if [[ $vpn_type == ipsec ]]; then
+        echo -e "${RED}\nERROR! No configuration file to download. You"
+        echo -e "       will need to setup the IPSEC client manually.${NC}"
+        exit 1
+    fi
 
-    echo -e "${GREEN}\nVPN client config downloaded to ${tmp_dir}/${file}. Import it"
-    echo -e "to your OpenVPN client and login using the credentials below:\n${NC}"
+    file=openvpn-config.tunnelblick.zip
+    download_vpn_config $user $password \
+      https://$vpn_server_url/~$user/${file} \
+      ${working_dir}/${file}
+
+    rm -fr ${working_dir}/*.tblk
+    unzip -q -o ${working_dir}/${file} -d $working_dir
+    rm ${working_dir}/${file}
+    
+    file=${TF_VAR_name}-${vpn_type}-${region}-vpn.ovpn
+    download_vpn_config $user $password \
+      https://$vpn_server_url/~$user/${file} \
+      ${working_dir}/${file}    
+
+    echo -e "${GREEN}\nVPN client config downloaded to file with names:\n"
+    echo -e "- ${TF_VAR_name}-${vpn_type}-${region}-vpn.ovpn"
+    echo -e "- ${TF_VAR_name}-${vpn_type}-${region}-vpn.tblk\n"
+    echo -e "Import it to your OpenVPN or Tunnelblick client and login using the credentials"
+    echo -e "below:\n${NC}"
     echo -e "  user: ${user}"
     echo -e "  password: ${password}\n"
 else

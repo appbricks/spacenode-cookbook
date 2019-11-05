@@ -10,8 +10,8 @@ cloud=$1 && shift
 
 function command_usage() {
   echo -e "${NC}\nUSAGE: vs destroy-node $vpn_type $cloud [-r|--region <REGION>] [-d|--debug]\n${LIGHT_BLUE}"
-  echo -e "  This CLI command destroys a VPN node that has been deployed to the given region.\n${LIGHT_GREEN}"
-  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region where the server to be destroyed is deployed"
+  echo -e "${LIGHT_BLUE}  This CLI command destroys a VPN node that has been deployed to the given region.\n${LIGHT_GREEN}"
+  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region where the node to be destroyed is deployed"
   echo -e "  ${DIM}-d|--debug${NORMAL}            Enable trace output${NC}"
 }
 
@@ -22,6 +22,10 @@ export TF_VAR_vpn_idle_action=""
 
 region=""
 
+if [[ $# -eq 0 ]]; then
+  command_usage
+  exit 1
+fi
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -r|--region)

@@ -38,7 +38,7 @@ function usage() {
   echo -e "    ${BOLD}reinit-node${NORMAL}          <VPN_TYPE> <CLOUD>  Reinitializes a VPN node's remote state."
   echo -e "    ${BOLD}destroy-node${NORMAL}         <VPN_TYPE> <CLOUD>  Destroys a VPN node."
   echo -e "    ${BOLD}download-vpn-config${NORMAL}  <VPN_TYPE> <CLOUD>  Downloads the client VPN configuration."
-  #echo -e "    ${BOLD}start-tunnel${NORMAL}                             Starts tunnel services which obfuscate VPN traffic to a node."
+  echo -e "    ${BOLD}start-tunnel${NORMAL}                             Starts tunnel services which obfuscate VPN traffic to a node."
   echo -e "    ${BOLD}show-nodes${NORMAL}                               Show all deployed nodes and their status.${NC}"
 }
 
@@ -109,11 +109,11 @@ function common::validate_environment() {
   set -e
 
   if [[ ! -e $working_dir/cloud-credentials ]]; then
-    echo -e "${RED}\nERROR! Unable to find the Cloud Credentials file at \"$working_dir/cloud-credentials\".${NC}" 
+    echo -e "${RED}\nERROR! Unable to find the Cloud Credentials file at \"./cloud-credentials\".${NC}" 
     exit 1
   fi
   if [[ ! -e $working_dir/deployment-vars ]]; then
-    echo -e "${RED}\nERROR! Unable to find the Deployment variables file at \"$working_dir/deployment-vars\".${NC}" 
+    echo -e "${RED}\nERROR! Unable to find the Deployment variables file at \"./deployment-vars\".${NC}" 
     exit 1
   fi
 
@@ -122,14 +122,49 @@ function common::validate_environment() {
   source $working_dir/deployment-vars
 }
 
+function common::validate_cloud_credentials() {
+
+  case $1 in
+    aws)
+      if [[ -z $AWS_ACCESS_KEY \
+        || -z $AWS_SECRET_KEY ]]; then
+        echo -e "${RED}\nERROR! The environment variables \"AWS_ACCESS_KEY\" and \"AWS_SECRET_KEY\" must be set in the \"cloud-credentials\" file.${NC}" 
+        exit 1
+      fi
+      ;;
+    azure)
+      if [[ -z $ARM_CLIENT_ID \
+        || -z $ARM_CLIENT_SECRET \
+        || -z $ARM_TENANT_ID ]]; then
+        echo -e "${RED}\nERROR! The environment variables \"ARM_CLIENT_ID\", \"ARM_CLIENT_SECRET\" and \"ARM_TENANT_ID\" must be set in the \"cloud-credentials\" file.${NC}" 
+        exit 1
+      fi
+      ;;
+    google)
+      if [[ -z $GOOGLE_CREDENTIALS \
+        || -z $GOOGLE_PROJECT ]]; then
+        echo -e "${RED}\nERROR! The environment variables \"GOOGLE_CREDENTIALS\" and \"GOOGLE_PROJECT\" must be set in the \"cloud-credentials\" file.${NC}" 
+        exit 1
+      fi
+      ;;
+  esac
+}
+
 function common::validate_workspace() {
+
+  local first
 
   if [[ ! -e $root_dir/cloud/recipes/$vpn_type ]]; then
     usage
     echo -e "${RED}\nERROR! Unknown VPN type.\n" 
     echo -e "${GREEN}Available VPN types for deployment are:\n"
-    for d in $(find $root_dir/cloud/recipes -maxdepth 1 -type d -print); do 
-      echo "- \"$(basename $d)\"" 
+    first=y
+    for d in $(find $root_dir/cloud/recipes -maxdepth 1 -type d -print); do
+      if [[ $first == n ]]; then
+        echo "- \"$(basename $d)\""
+      else
+        first=n
+      fi      
     done
     echo -e "${NC}"
     exit 1
@@ -138,12 +173,19 @@ function common::validate_workspace() {
     usage
     echo -e "${RED}\nERROR! Unknown cloud target for VPN of type \"$vpn_type\".\n" 
     echo -e "${GREEN}Cloud targets available for deployment are:\n"
+    first=y
     for d in $(find $root_dir/cloud/recipes/$vpn_type -maxdepth 1 -type d -print); do 
-      echo "- \"$(basename $d)\"" 
+      if [[ $first == n ]]; then
+        echo "- \"$(basename $d)\""
+      else
+        first=n
+      fi      
     done
     echo -e "${NC}"
     exit 1
   fi
+
+  common::validate_cloud_credentials $cloud
 
   template_dir=${template_dir}/${vpn_type}/${cloud}
   workspace_dir=${workspace_dir}/${vpn_type}/${cloud}
@@ -165,226 +207,7 @@ function common::validate_value_from_list() {
   set -e
 }
 
-function terraform::set_cloud_region() {
-
-  local vpn_type=$1
-  local cloud=$2
-  local region=$3
-
-  case $cloud in
-    aws)
-      cloud::set_aws_credentials
-      regions=$(aws ec2 describe-regions --query "Regions[].{Name:RegionName}" --output text)
-      common::validate_value_from_list \
-        "$regions" "$region" \
-        "Unknown AWS region \"$region\"."
-
-      export AWS_DEFAULT_REGION=$region
-      ;;
-    azure)
-      cloud::set_azure_credentials
-      regions=$(az account list-locations -o table | awk '$4 != "Name" && $0 !~ /^-.*/ { print substr($0, 48) }')
-      common::validate_value_from_list \
-        "$regions" "$region" \
-        "Unknown Azure Cloud region \"$region\"."
-      ;;
-    google)
-      cloud::set_google_credentials >/dev/null
-      regions=$(gcloud compute regions list | awk '$1 != "NAME" { print $1 }')
-      common::validate_value_from_list \
-        "$regions" "$region" \
-        "Unknown Azure region \"$region\"."
-      ;;
-  esac
-
-  export TF_VAR_region=$region
-}
-
-function terraform::init() {
-
-  local vpn_type=$1
-  local cloud=$2
-  local region=$3
-  local template_dir=$4
-
-  bucket_name=${TF_VAR_name}-vs-tfstate-${region}
-
-  case $cloud in
-    aws)
-      # Check/Create Terraform state bucket
-      set +e
-      aws s3 ls | grep "${bucket_name}" >/dev/null 2>&1
-      if [[ $? -ne 0 ]]; then
-        echo -e "${GREEN}\nCreating AWS S3 state bucket \"${bucket_name}\" to save terraform deployment state...${NC}"
-        aws s3 mb s3://${bucket_name} --region $region
-      fi
-      set -e
-
-      # Initialize Terraform
-      echo -e "${GREEN}Initializing terraform context...${NC}"
-      terraform init \
-        -backend-config="key=${vpn_type}" \
-        -backend-config="bucket=${bucket_name}" \
-        $template_dir
-      echo
-      ;;
-
-    google)
-      # Check/Create Terraform state bucket
-      set +e
-      gsutil ls | awk -F'/' '{ print $3 }' | grep "${bucket_name}" >/dev/null 2>&1
-      if [[ $? -ne 0 ]]; then
-        echo -e "${GREEN}\nCreating Google Storage state bucket \"${bucket_name}\" to save terraform deployment state...${NC}"
-        gsutil mb -l $region gs://${bucket_name}
-      fi
-      set -e
-
-      # Initialize Terraform
-      echo -e "${GREEN}Initializing terraform context...${NC}"
-      terraform init \
-        -backend-config="prefix=${vpn_type}" \
-        -backend-config="bucket=${bucket_name}" \
-        $template_dir
-      echo
-      ;;
-
-    azure)
-      set +e
-      az group list \
-        | jq -r '.[].name' | grep default >/dev/null 2>&1
-      if [[ $? -ne 0 ]]; then
-        echo -e "${GREEN}\nCreating Azure resource group \"default\" in region \"$region\"...${NC}"
-        az group create \
-          --name default \
-          --location "${region}" \
-          --output none
-      fi
-      storage_account=vsstate${region}
-      az storage account list \
-        | jq -r '.[].name' | grep "${storage_account}" >/dev/null 2>&1
-      if [[ $? -ne 0 ]]; then
-        echo -e "${GREEN}\nCreating Azure Storage account \"${storage_account}\" to save terraform deployment state in...${NC}"
-        az storage account create \
-          --name "${storage_account}" \
-          --location "${region}" \
-          --resource-group default \
-          --sku Standard_LRS \
-          --output none
-      fi
-      container_name="${TF_VAR_name}"
-      az storage container list --account-name "${storage_account}" \
-        | jq -r '.[].name' | grep "${container_name}" >/dev/null 2>&1
-      if [[ $? -ne 0 ]]; then
-        echo -e "${GREEN}\nCreating Azure container \"${container_name}\" in storage account \"${storage_account}\" to save terraform deployment state in...${NC}"
-        az storage container create \
-          --name "${container_name}" \
-          --account-name "${storage_account}" \
-          --output none
-      fi
-      set -e
-
-      # Initialize Terraform
-      echo -e "${GREEN}Initializing terraform context...${NC}"
-      terraform init \
-        -backend-config="resource_group_name=default" \
-        -backend-config="container_name=${container_name}" \
-        -backend-config="key=terraform.tfstate" \
-        -backend-config="storage_account_name=${storage_account}" \
-        $template_dir
-      echo
-      ;;
-  esac
-
-  # Seems to be a bug in terraform where 'output' and 'taint' command are 
-  # unable to load the backend state when the working directory does not 
-  # have the backend resource template file.
-  local backend_type=$(cat .terraform/terraform.tfstate | jq -r .backend.type)
-  cat << ---EOF > backend.tf
-terraform {
-  backend "$backend_type" {}
-}
----EOF
-}
-
-function terraform::apply() {
-
-  local vpn_type=$1
-  local cloud=$2
-  local region=$3
-  local template_dir=$4
-
-  echo -e "${GREEN}Deploying VPN node type \"${vpn_type}\" to region \"${region}\" of \"$cloud\" cloud...${NC}"
-
-  # Apply Terraform template and filter out
-  # any output values for security purposes.
-  terraform apply -auto-approve $template_dir 2>&1 \
-    | tee apply.log | awk '/Outputs:/ {l=999}; (l-- > 0) {next} 1'
-
-  # Save Terraform output in a JSON file for
-  # later reference.
-  terraform output -json \
-     -state=.terraform/terraform.tfstate > output.json
-}
-
-function terraform::taint_bastion() {
-
-  local vpn_type=$1
-  local cloud=$2
-  local region=$3
-  local template_dir=$4
-
-  echo -e "${GREEN}Flagging VPN node type \"${vpn_type}\" in region \"${region}\" of \"$cloud\" cloud to be rebuilt...${NC}"
-
-  case $cloud in
-    aws)
-      terraform taint module.bootstrap.aws_instance.bastion
-      ;;
-    azure)
-      terraform taint module.bootstrap.azurerm_virtual_machine.bastion
-      ;;
-    google)
-      terraform taint module.bootstrap.google_compute_instance.bastion
-      ;;
-  esac
-}
-
-function terraform::plan() {
-
-  local vpn_type=$1
-  local cloud=$2
-  local region=$3
-  local template_dir=$4
-
-  echo -e "${GREEN}Showing deployment plan for VPN node type \"${vpn_type}\" in region \"${region}\" of \"$cloud\" cloud...${NC}"
-
-  # Output Terraform plan
-  terraform plan $template_dir
-}
-
-function terraform::destroy() {
-
-  local vpn_type=$1
-  local cloud=$2
-  local region=$3
-  local template_dir=$4
-
-  echo -e "${GREEN}Destroying VPN node type \"${vpn_type}\" deployed to region \"${region}\" of \"$cloud\" cloud...${NC}"
-
-  # Apply Terraform template and filter out
-  # any output values for security purposes.
-  terraform destroy -auto-approve \
-    -state=.terraform/terraform.tfstate \
-    $template_dir 2>&1 | tee apply.log
-
-  rm -fr output.json
-}
-
 function cloud::set_aws_credentials() {
-
-  if [[ -z $AWS_ACCESS_KEY || -z $AWS_SECRET_KEY ]]; then
-    echo -e "${RED}\nERROR! The environment variables \"AWS_ACCESS_KEY\" and \"AWS_SECRET_KEY\" must be set in the \"cloud-credentials\" file.${NC}" 
-    exit 1
-  fi
 
   if [[ $awz_cli_credentials_validated == no ]]; then
 
@@ -401,11 +224,6 @@ function cloud::set_aws_credentials() {
 
 function cloud::set_azure_credentials() {
 
-  if [[ -z $ARM_CLIENT_ID || -z $ARM_CLIENT_SECRET || -z $ARM_TENANT_ID ]]; then
-    echo -e "${RED}\nERROR! The environment variables \"ARM_CLIENT_ID\", \"ARM_CLIENT_SECRET\" and \"ARM_TENANT_ID\" must be set in the \"cloud-credentials\" file.${NC}" 
-    exit 1
-  fi
-
   if [[ $azure_cli_credentials_validated == no ]]; then
 
     # Set azure credentials
@@ -416,160 +234,6 @@ function cloud::set_azure_credentials() {
 
     azure_cli_credentials_validated=yes
   fi
-}
-
-function cloud::set_google_credentials() {
-  
-  if [[ -z $GOOGLE_CREDENTIALS || -z $GOOGLE_PROJECT ]]; then
-    echo -e "${RED}\nERROR! The environment variables \"GOOGLE_CREDENTIALS\" and \"GOOGLE_PROJECT\" must be set in the \"cloud-credentials\" file.${NC}" 
-    exit 1
-  fi
-
-  if [[ $google_cli_credentials_validated == no ]]; then
-
-    # Set GCP CLI credentials
-    gcloud auth activate-service-account \
-      --key-file=$GOOGLE_CREDENTIALS \
-      --quiet 2>&1 >/dev/null
-    gcloud config set project $GOOGLE_PROJECT \
-      --quiet 2>&1 >/dev/null
-
-    google_cli_credentials_validated=yes
-  fi
-}
-
-function cloud::nodes() {
-
-  local workspace_dir=$1
-  set +e
-
-  for o in $(find $workspace_dir -name "output.json" -type f -print); do
-
-    node_name=$(cat $o | jq -r .bastion_fqdn.value)
-    bastion_instance_id=$(cat $o | jq -r .bastion_instance_id.value)
-
-    region_path=$(dirname $o)
-    region=$(basename $region_path)
-    cloud_path=$(dirname $region_path)
-    cloud=$(basename $cloud_path)
-    vpn_type_path=$(dirname $cloud_path)
-    vpn_type=$(basename $vpn_type_path)
-
-    >&2 echo -e -n "${BROWN_ORANGE}Retrieving details of instance \"${node_name}\"...          ${NC}\r"
-
-    state=""
-    case $cloud in
-      aws)
-        cloud::set_aws_credentials
-        instance_detail=$(aws \
-          ec2 describe-instances \
-            --instance-ids "$bastion_instance_id" \
-            --region "$region")
-        
-        if [[ $? -eq 0 ]]; then
-          state=$(echo "$instance_detail" \
-            | jq -r '.Reservations[0].Instances[0].State.Name')          
-        fi
-        ;;
-      azure)
-        cloud::set_azure_credentials
-        instance_detail=$(az vm show \
-          --id "$bastion_instance_id" --show-details)
-
-        if [[ $? -eq 0 ]]; then
-          azure_vm_state=$(echo "$instance_detail" \
-            | jq -r .powerState)
-          
-          case $azure_vm_state in
-            'VM running')
-              state=running
-              ;;
-            'VM stopped'|'VM deallocated')
-              state=stopped
-              ;;
-            *)
-              state="${azure_vm_state#* }"
-              ;;
-          esac
-        fi
-        ;;
-
-      google)
-        cloud::set_google_credentials >/dev/null
-        gcp_zone=$(gcloud compute zones list --format json \
-          | jq -r --arg region "$region" \
-            '[ .[] | select(.region | match($region)) | .name ] | sort | .[0]')
-        instance_detail=$(gcloud compute instances describe \
-          "$bastion_instance_id" --zone "$gcp_zone" --format json)
-
-        if [[ $? -eq 0 ]]; then
-          gcp_state=$(echo "$instance_detail" \
-            | jq -r '.status | ascii_downcase')
-
-          case $gcp_state in
-            running)
-              state=running
-              ;;
-            terminated)
-              state=stopped
-              ;;
-            *)
-              state=$gcp_state
-              ;;
-          esac
-        fi
-        ;;
-    esac
-    [[ -n $state ]] || state="unknown"
-    echo "${vpn_type}|${cloud}|${region}|${node_name}|${state}|${bastion_instance_id}"
-  done
-
-  set -e
-}
-
-function cloud::start_node() {
-
-  local cloud=$1
-  local region=$2
-  local node_id=$3
-
-  case $cloud in
-    aws)
-      aws ec2 start-instances --instance-ids "$node_id" --region "$region"
-      ;;
-    azure)
-      az vm start --ids "${node_id}"
-      ;;
-    google)
-      gcp_zone=$(gcloud compute zones list --format json \
-        | jq -r --arg region "$region" \
-          '[ .[] | select(.region | match($region)) | .name ] | sort | .[0]')
-      gcloud compute instances start "$node_id" --zone="$gcp_zone"
-      ;;
-  esac
-}
-
-function cloud::stop_node() {
-
-  local cloud=$1
-  local region=$2
-  local node_id=$3
-
-  case $cloud in
-    aws)
-      aws ec2 stop-instances --instance-ids "$node_id" --region "$region"
-      ;;
-    azure)
-      az vm stop --ids "${node_id}" 2>&1 >/dev/null
-      az vm deallocate --ids "${node_id}" 2>&1 >/dev/null
-      ;;
-    google)
-      gcp_zone=$(gcloud compute zones list --format json \
-        | jq -r --arg region "$region" \
-          '[ .[] | select(.region | match($region)) | .name ] | sort | .[0]')
-      gcloud compute instances stop "$node_id" --zone="$gcp_zone"
-      ;;
-  esac
 }
 
 function ui::print_nodes_table() {
@@ -594,3 +258,7 @@ function ui::print_nodes_table() {
 
   echo -e "+----+----------------+----------+----------------------+----------------------------------------------------+--------------+"  
 }
+
+scripts_dir=$(dirname $BASH_SOURCE)
+source ${scripts_dir}/common_cloud
+source ${scripts_dir}/common_terraform

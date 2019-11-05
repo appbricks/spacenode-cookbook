@@ -1,0 +1,167 @@
+#!/bin/bash
+
+function cloud::set_google_credentials() {
+  
+  if [[ $google_cli_credentials_validated == no ]]; then
+
+    # Set GCP CLI credentials
+    gcloud auth activate-service-account \
+      --key-file=$GOOGLE_CREDENTIALS \
+      --quiet 2>&1 >/dev/null
+    gcloud config set project $GOOGLE_PROJECT \
+      --quiet 2>&1 >/dev/null
+
+    google_cli_credentials_validated=yes
+  fi
+}
+
+function cloud::get_node_state() {
+
+  local cloud=$1
+  local region=$2
+  local bastion_instance_id=$3
+
+  local state=""
+
+  case $cloud in
+    aws)
+      cloud::set_aws_credentials
+      local instance_detail=$(aws \
+        ec2 describe-instances \
+          --instance-ids "$bastion_instance_id" \
+          --region "$region")
+      
+      if [[ $? -eq 0 ]]; then
+        state=$(echo "$instance_detail" \
+          | jq -r '.Reservations[0].Instances[0].State.Name')          
+      fi
+      ;;
+    azure)
+      cloud::set_azure_credentials
+      local instance_detail=$(az vm show \
+        --id "$bastion_instance_id" --show-details)
+
+      if [[ $? -eq 0 ]]; then
+        azure_vm_state=$(echo "$instance_detail" \
+          | jq -r .powerState)
+        
+        case $azure_vm_state in
+          'VM running')
+            state=running
+            ;;
+          'VM stopped'|'VM deallocated')
+            state=stopped
+            ;;
+          *)
+            state="${azure_vm_state#* }"
+            ;;
+        esac
+      fi
+      ;;
+
+    google)
+      cloud::set_google_credentials >/dev/null
+      local gcp_zone=$(gcloud compute zones list --format json \
+        | jq -r --arg region "$region" \
+          '[ .[] | select(.region | match($region)) | .name ] | sort | .[0]')
+      local instance_detail=$(gcloud compute instances describe \
+        "$bastion_instance_id" --zone "$gcp_zone" --format json)
+
+      if [[ $? -eq 0 ]]; then
+        local gcp_state=$(echo "$instance_detail" \
+          | jq -r '.status | ascii_downcase')
+
+        case $gcp_state in
+          running)
+            state=running
+            ;;
+          terminated)
+            state=stopped
+            ;;
+          *)
+            state=$gcp_state
+            ;;
+        esac
+      fi
+      ;;
+  esac
+  [[ -n $state ]] || state="unknown"
+  echo $state
+}
+
+function cloud::nodes() {
+
+  local workspace_dir=$1
+  set +e
+
+  for o in $(find $workspace_dir -name "output.json" -type f -print); do
+
+    local node_name=$(cat $o | jq -r .bastion_fqdn.value)
+    local bastion_instance_id=$(cat $o | jq -r .bastion_instance_id.value)
+
+    local region_path=$(dirname $o)
+    local region=$(basename $region_path)
+    local cloud_path=$(dirname $region_path)
+    local cloud=$(basename $cloud_path)
+    local vpn_type_path=$(dirname $cloud_path)
+    local vpn_type=$(basename $vpn_type_path)
+
+    >&2 echo -e -n "${BROWN_ORANGE}Retrieving details of instance \"${node_name}\"...          ${NC}\r"
+    local state=$(cloud::get_node_state "$cloud" "$region" "$bastion_instance_id")
+    
+    echo "${vpn_type}|${cloud}|${region}|${node_name}|${state}|${bastion_instance_id}"
+  done
+
+  set -e
+}
+
+function cloud::start_node() {
+
+  local cloud=$1
+  local region=$2
+  local node_id=$3
+
+  case $cloud in
+    aws)
+      cloud::set_aws_credentials
+      aws ec2 start-instances --instance-ids "$node_id" --region "$region"
+      ;;
+    azure)
+      cloud::set_azure_credentials
+      az vm start --ids "${node_id}"
+      ;;
+    google)
+      cloud::set_google_credentials >/dev/null
+      gcp_zone=$(gcloud compute zones list --format json \
+        | jq -r --arg region "$region" \
+          '[ .[] | select(.region | match($region)) | .name ] | sort | .[0]')
+      gcloud compute instances start "$node_id" --zone="$gcp_zone"
+      ;;
+  esac
+}
+
+function cloud::stop_node() {
+
+  local cloud=$1
+  local region=$2
+  local node_id=$3
+
+  case $cloud in
+    aws)
+      cloud::set_aws_credentials
+      aws ec2 stop-instances --instance-ids "$node_id" --region "$region"
+      ;;
+    azure)
+      cloud::set_azure_credentials
+      az vm stop --ids "${node_id}" 2>&1 >/dev/null
+      az vm deallocate --ids "${node_id}" 2>&1 >/dev/null
+      ;;
+    google)
+      cloud::set_google_credentials >/dev/null
+      gcp_zone=$(gcloud compute zones list --format json \
+        | jq -r --arg region "$region" \
+          '[ .[] | select(.region | match($region)) | .name ] | sort | .[0]')
+      gcloud compute instances stop "$node_id" --zone="$gcp_zone"
+      ;;
+  esac
+}

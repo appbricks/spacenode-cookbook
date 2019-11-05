@@ -2,7 +2,7 @@
 
 # Install APT packages
 apt-get update && apt-get install -y \
-  ca-certificates apt-transport-https lsb-release gnupg \
+  ca-certificates apt-transport-https iptables lsb-release gnupg \
   build-essential python3 python3-dev git curl zip
 
 # Setup APT repo for Azure CLI
@@ -65,7 +65,7 @@ pushd /tmp
 curl -L https://github.com/xtaci/kcptun/releases/download/v${kcp_tunnel_version}/kcptun-linux-amd64-${kcp_tunnel_version}.tar.gz \
   -o kcptun-linux-amd64.tgz
 tar xvzf kcptun-linux-amd64.tgz
-mv server_linux_amd64 /usr/local/bin/kcptun-server
+mv client_linux_amd64 /usr/local/bin/kcptun-client
 popd
 
 mkdir /vpn

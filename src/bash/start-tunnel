@@ -1,5 +1,106 @@
 #!/bin/bash
 
+source $(dirname $BASH_SOURCE)/common
 set -euo pipefail
 
-echo "$0 $@"
+workspace_dir=$1 && shift
+template_dir=$1 && shift
+vpn_type=$1 && shift
+cloud=$1 && shift
+
+function command_usage() {
+  echo -e "${NC}\nUSAGE: vs start-tunnel $vpn_type $cloud [-r|--region <REGION>] [-t|--type <TUNNEL TYPE>] [-d|--debug]\n${LIGHT_BLUE}"
+  echo -e "${LIGHT_BLUE}  This CLI command starts tunnel services which obfuscate VPN traffic to a node.\n${LIGHT_GREEN}"
+  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>       The region where the node is deployed"
+  echo -e "  ${BOLD}-t|--type${NORMAL} <TUNNEL TYPE>    The type of tunnel. This should be one of:\n"
+  echo -e "                             - udp_over_tcp"
+  echo -e "                             - udp_over_icmp"
+  echo -e "                             - udp_over_udp"
+  echo -e "                             - udp_over_udp_with_fec"
+  echo -e "                             - tcp_over_udp_with_fec\n"
+  echo -e "  ${DIM}-d|--debug${NORMAL}                 Enable trace output${NC}"
+}
+
+region=""
+tunnel_type=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -r|--region)
+      region=$2
+      shift
+      ;;
+    -t|--type)
+      tunnel_type=$2
+      shift
+      ;;
+    -d|--debug)
+      set -x
+      ;;
+    -h|--help)
+      command_usage
+      exit 0
+      ;;
+    *)
+      echo -e "${RED}\nERROR! Unknown option \"$1\".${NC}"
+      command_usage
+      exit 1
+      ;;
+  esac
+  shift
+done
+
+if [[ -z $region ]]; then
+  echo -e "${RED}\nERROR! Please provide a cloud region from the following list.${NC}"
+  $(dirname $BASH_SOURCE)/show-regions $cloud
+  exit 1
+fi
+if [[ ! -e ${workspace_dir}/${region}/output.json ]]; then
+  echo -e "${RED}\nERROR! Deployment workspace path does not exist. The region"
+  echo -e "       provided may be invalid or the server may not have been deployed.${NC}"
+  exit 1
+fi
+if [[ ! -e ${workspace_dir}/${region}/client_tunnel ]]; then
+  echo -e "${RED}\nERROR! The client tunnel script for the node has not been"
+  echo -e "       retrieved. You can retrieve it by running the \"download-vpn-config\""
+  echo -e "       command.${NC}"
+  exit 1
+fi
+if [[ -z $tunnel_type ]]; then
+  echo -e "${RED}\nERROR! Please provide a tunnel type.${NC}"
+  exit 1
+fi
+if [[ $tunnel_type != udp_over_tcp \
+  && $tunnel_type != udp_over_icmp \
+  && $tunnel_type != udp_over_udp \
+  && $tunnel_type != udp_over_udp_with_fec \
+  && $tunnel_type != tcp_over_udp_with_fec ]]; then
+
+  echo -e "${RED}\nERROR! Invalid tunnel type.${NC}"
+  exit 1
+fi
+
+deployment_output=${workspace_dir}/${region}/output.json
+node_name=$(cat $deployment_output | jq -r .bastion_fqdn.value)
+node_id=$(cat $deployment_output | jq -r .bastion_instance_id.value)
+state=$(cloud::get_node_state "$cloud" "$region" "$node_id")
+
+if [[ $state == stopped ]]; then
+  echo -n -e "\n${GREEN}${BOLD}Node is not running. Starting it.${NORMAL}"
+  response=$(cloud::start_node "$cloud" "$region" "$node_id")
+
+  i=0
+  while [[ $state != running && $i -lt 24 ]]; do
+    sleep 5
+    state=$(cloud::get_node_state "$cloud" "$region" "$node_id")
+    echo -n -e "."
+    i=$((i+1))
+  done
+  echo -e "${NORMAL}"
+fi
+if [[ $state == running ]]; then
+  ${workspace_dir}/${region}/client_tunnel $tunnel_type
+else
+  echo -e "${RED}\nERROR! Node is not running. Current state of node is \"${state}\".${NC}"
+  exit 1
+fi
