@@ -1,11 +1,7 @@
 #
-# Google Cloud Platform specific inputs
+# Azure specific inputs
 #
-variable "google_dns_managed_zone_name" {
-  default = ""
-}
-
-variable "google_dns_zone" {
+variable "azure_dns_zone" {
   type = string
 }
 
@@ -14,7 +10,7 @@ variable "google_dns_zone" {
 #
 
 module "bootstrap" {
-  source = "github.com/appbricks/cloud-inceptor.git/modules/bootstrap/google"
+  source = "github.com/appbricks/cloud-inceptor.git/modules/bootstrap/azure"
 
   #
   # Company information used in certificate creation
@@ -36,21 +32,15 @@ module "bootstrap" {
 
   # Name of VPC will be used to identify 
   # VPC specific cloud resources
-  vpc_name = "${var.name}-ovpn-indirect-${var.region}"
+  vpc_name = "${var.name}-ovpn-x-${var.region}"
 
   # DNS Name for VPC
-  vpc_dns_zone = "${var.name}-ovpn-indirect-${var.region}.${var.google_dns_zone}"
+  vpc_dns_zone = "${var.name}-ovpn-x-${var.region}.${var.azure_dns_zone}"
 
   # Local DNS zone. This could also be the same as the public
   # which will enable setting up a split DNS of the public zone
   # for names to map to external and internal addresses.
   vpc_internal_dns_zones = ["local"]
-
-  # Name of parent zone 'gcp.appbricks.cloud' to which the 
-  # name server records of the 'vpc_dns_zone' will be added.
-  dns_managed_zone_name = "${length(var.google_dns_managed_zone_name) == 0
-    ? replace(var.google_dns_zone, ".", "-")
-    : var.google_dns_managed_zone_name }"
 
   # Local file path to write SSH private key for bastion instance
   ssh_key_file_path = "${length(var.ssh_key_file_path) > 0 ? var.ssh_key_file_path : path.cwd}"
@@ -76,7 +66,7 @@ module "bootstrap" {
   bastion_host_name = "vpn"
   bastion_use_fqdn = true
 
-  bastion_instance_type = "n1-standard-1"
+  bastion_instance_type = "Standard_DS2_v2"
 
   # ICMP needs to be allowed to enable ICMP tunneling
   allow_bastion_icmp = true
@@ -94,7 +84,7 @@ module "bootstrap" {
 # Backend state
 #
 terraform {
-  backend "gcs" {
+  backend "azurerm" {
   }
 }
 
