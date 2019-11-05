@@ -47,7 +47,7 @@ module "bootstrap" {
 
   # VPN
   vpn_users = "${var.vpn_users}"
-  vpn_idle_action = "shutdown"
+  vpn_idle_action = "${var.vpn_idle_action}"
 
   vpn_type = "openvpn"
   vpn_tunnel_all_traffic = "yes"
@@ -72,7 +72,7 @@ module "bootstrap" {
   allow_bastion_icmp = true
 
   # Issue certificates from letsencrypt.org
-  certify_bastion = true
+  certify_bastion ="${var.certify_bastion}"
 
   # Whether to deploy a jumpbox in the admin network. The
   # jumpbox will be deployed only if a local DNS zone is

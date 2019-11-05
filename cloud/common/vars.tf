@@ -56,3 +56,10 @@ variable "vpn_idle_action" {
 variable "ssh_key_file_path" {
   default = ""
 }
+
+#
+# Issue valid letsencrypt certificate to bastion
+#
+variable "certify_bastion" {
+  default = true
+}
