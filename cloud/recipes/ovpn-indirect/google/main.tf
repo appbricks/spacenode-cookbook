@@ -36,10 +36,10 @@ module "bootstrap" {
 
   # Name of VPC will be used to identify 
   # VPC specific cloud resources
-  vpc_name = "${var.name}-ovpn-i-${var.region}"
+  vpc_name = "${var.name}-ovpn-indirect-${var.region}"
 
   # DNS Name for VPC
-  vpc_dns_zone = "${var.name}-ovpn-i-${var.region}.${var.google_dns_zone}"
+  vpc_dns_zone = "${var.name}-ovpn-indirect-${var.region}.${var.google_dns_zone}"
 
   # Local DNS zone. This could also be the same as the public
   # which will enable setting up a split DNS of the public zone
