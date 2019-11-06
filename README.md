@@ -37,6 +37,8 @@ Steps to run the scripts directly.
 
 The scripts in this repository are also distributed as a [Docker](https://www.docker.com/) container. This approach will allow you to run this scripts from environments that do not have the `bash` shell installed such as Micrsoft Windows. To run the the CLI via the container add the following alias to your system.
 
+For this approach Docker is the only pre-requisite and it can be installed from [Docker Hub](https://www.docker.com/products/docker-desktop).
+
 * In Mac OSX or Linux
 
   ```
