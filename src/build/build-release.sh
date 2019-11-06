@@ -44,15 +44,17 @@ if [[ "$1" == "publish" ]]; then
     docker rmi vpn-server
 
     # Create installer scripts
-    sed "s|appbricks/vpn-server:latest|appbricks/vpn-server:$TAG|" \
+    sed "s|appbricks/vpn-server:latest|appbricks/vpn-server:${TAG}|" \
       ${build_script_path}/../install/install.sh > install.sh
-    sed "s|appbricks/vpn-server:latest|appbricks/vpn-server:$TAG|" \
+    sed "s|appbricks/vpn-server:latest|appbricks/vpn-server:${TAG}|" \
       ${build_script_path}/../install/install.ps1 > install.ps1
 
-    if [[ -e ${build_script_path}/../../doc/release-notes-$TAG.md ]]; then
-      cp ${build_script_path}/../../doc/release-notes-$TAG.md release-notes.md
+    if [[ -e ${build_script_path}/../../doc/release-notes-${TAG}.md ]]; then
+      sed "s|<VERSION>|${TAG}|" \
+        ${build_script_path}/../../doc/release-notes-${TAG}.md > release-notes.md
     else
-      cp ${build_script_path}/../../doc/release-notes.md release-notes.md
+      sed "s|<VERSION>|${TAG}|" \
+        ${build_script_path}/../../doc/release-notes.md release-notes.md
     fi
   else
     echo "To publish DOCKER_REPO, DOCKER_USER and DOCKER_PASSWORD arguments are required."
