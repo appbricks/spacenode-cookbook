@@ -13,6 +13,11 @@ The VPN Node Builder utility scripts orchestrate the creation of VPN nodes and p
 * [IPSEC/IKev2](https://www.strongswan.org/)
 * [OpenVPN](https://openvpn.net/)
 
+Two flavors of the OpenVPN configuration is supported.
+
+* Regular OpenVPN over either UDP or TCP
+* Same as regular but tweaked to support connecting via a tunnel that obfuscates OpenVPN traffic to enable bypassing DPI at the service provider.
+
 The appliance can manage basic routing to internal Virtual Private Cloud (VPC) networks and can also peer nodes across regions. Additionally each appliance has built in automation to launch additional services within the VPC if instructed to do so. These are advance features of the appliance which are not enabled in the basic VPN appliance. The templates to launch the appliance in the various clouds are available as [Terraform modules](https://github.com/appbricks/cloud-inceptor) and are used by the scripts in this repository to manage the deployment of the VPN service to various cloud regions.
 
 ## Installation
