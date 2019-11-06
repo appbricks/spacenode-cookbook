@@ -71,6 +71,6 @@ grep "alias vs=" $profile_file 2>&1 >/dev/null \
   && sed -i${sed_option} "s|^alias vs=.*$|${docker_alias}|" $profile_file \
   || echo -e "\n${docker_alias}" >> $profile_file
 
-echo -e "${GREEN}\nVS CLI has been added to you shell startup profile. Run "
-echo -e "'vs --help' to download CLI container image and validate.${NC}"
-exec $SHELL
+echo -e "${GREEN}\nVS CLI has been added to you shell startup profile. Run"
+echo -e "'exec \$SHELL' to restart the shell and then 'vs --help'"
+echo -e "to download the CLI container image and validate.${NC}"
