@@ -52,7 +52,7 @@ For this approach Docker is the only pre-requisite and it can be installed from 
   alias vs='docker run --privileged --rm -p 4495:4495 -p 4495:4495/udp -v $(pwd)/:/vpn -it appbricks/vpn-server'
   ```
 
-On the [releases page](https://github.com/appbricks/vpn-server/releases), you can find scripts to make the above changes to you local systems profile.
+On the [releases page](https://github.com/appbricks/vpn-server/releases), you can find scripts to make the above changes to you local system's profile.
 
 ## Usage
 
