@@ -17,8 +17,7 @@ deploy:
   file:
   - install.sh
   #- install.ps1
-  body:
-  - |
+  body: |
     ### Release Notes
     * test release note line 1
     * test release note line 2
