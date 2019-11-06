@@ -1,3 +1,3 @@
 ### Release Note
 
-Incremental feature updates and bug fixes for beta release.
+Initial beta releases includes incremental feature updates and bug fixes. Currently install script is available only for Mac OSX and Linux environments.
