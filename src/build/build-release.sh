@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 function usage {
   echo -e "\nUSAGE: ./build-release.sh [publish DOCKER_REPO DOCKER_USER DOCKER_PASSWORD]"
@@ -40,6 +40,12 @@ if [[ "$1" == "publish" ]]; then
     docker rmi $2/vpn-server:latest
     docker rmi $2/vpn-server:$TAG
     docker rmi vpn-server
+
+    # Create installer scripts
+    sed "s|appbricks/vpn-server:latest|appbricks/vpn-server:$TAG|" \
+      $(dirname $BASH_SOURCE)/../install/install.sh > install.sh
+    sed "s|appbricks/vpn-server:latest|appbricks/vpn-server:$TAG|" \
+      $(dirname $BASH_SOURCE)/../install/install.ps1 > install.ps1
   else
     echo "To publish DOCKER_REPO, DOCKER_USER and DOCKER_PASSWORD arguments are required."
     exit 1
