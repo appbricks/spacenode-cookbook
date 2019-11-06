@@ -1,31 +1,16 @@
 #!/bin/bash
 
+workspace_dir=$1 && shift
+template_dir=$1 && shift
+vpn_type=${1:-<VPN_TYPE>} && shift
+cloud=${1:-<CLOUD>} && shift
+
 source $(dirname $BASH_SOURCE)/common
 set -euo pipefail
 
-workspace_dir=$1 && shift
-template_dir=$1 && shift
-vpn_type=$1 && shift
-cloud=$1 && shift
-
-function command_usage() {
-  echo -e "${NC}\nUSAGE: vs destroy-node $vpn_type $cloud [-r|--region <REGION>] [-d|--debug]\n${LIGHT_BLUE}"
-  echo -e "${LIGHT_BLUE}  This CLI command destroys a VPN node that has been deployed to the given region.\n${LIGHT_GREEN}"
-  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region where the node to be destroyed is deployed"
-  echo -e "  ${DIM}-d|--debug${NORMAL}            Enable trace output${NC}"
-}
-
-# Since VPN node is being destroyed this value
-# has no effect, but needs to be set as Terraform
-# expects a value regardless
-export TF_VAR_vpn_idle_action=""
-
 region=""
 
-if [[ $# -eq 0 ]]; then
-  command_usage
-  exit 1
-fi
+common::validate_workspace destroy_node
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -r|--region)
@@ -36,12 +21,12 @@ while [[ $# -gt 0 ]]; do
       set -x
       ;;
     -h|--help)
-      command_usage
+      usage::destroy_node
       exit 0
       ;;
     *)
       echo -e "${RED}\nERROR! Unknown option \"$1\".${NC}"
-      command_usage
+      usage::destroy_node
       exit 1
       ;;
   esac
@@ -49,10 +34,15 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z $region ]]; then
+  usage::destroy_node
   echo -e "${RED}\nERROR! Please provide a cloud region from the following list.${NC}"
   $(dirname $BASH_SOURCE)/show-regions $cloud
   exit 1
 fi
+
+# This is usually set at deploy but required in 
+# order to reinitialize without prompting for input.
+export TF_VAR_vpn_idle_action=""
 
 if [[ -e ${workspace_dir}/${region} ]]; then
   pushd ${workspace_dir}/${region} >/dev/null 2>&1

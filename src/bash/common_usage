@@ -1,0 +1,74 @@
+#!/bin/bash
+
+function usage::main() {
+  echo -e "${NC}\nUSAGE: vs ${BOLD}<COMMAND>${NORMAL} [options]\n"
+  echo -e "  This CLI manages personal cloud VPN nodes in multiple cloud regions.\n"
+  echo -e "${LIGHT_BLUE}  ${BOLD}<COMMAND>${NORMAL} should be one of the following:\n${GREEN}"
+  echo -e "    ${BOLD}init${NORMAL}                                    Initializes the current folder with the"
+  echo -e "                                            control files which contain the environment"
+  echo -e "                                            for running deployment scripts.\n"
+  echo -e "    ${BOLD}show-regions${NORMAL} <CLOUD>                    Show regions nodes can be created in.\n"
+  echo -e "    ${BOLD}deploy-node${NORMAL} <VPN_TYPE> <CLOUD>          Deploys or updates a personal VPN node.\n"
+  echo -e "    ${BOLD}reinit-node${NORMAL} <VPN_TYPE> <CLOUD>          Reinitializes a VPN node's remote state.\n"
+  echo -e "    ${BOLD}destroy-node${NORMAL} <VPN_TYPE> <CLOUD>         Destroys a VPN node.\n"
+  echo -e "    ${BOLD}download-vpn-config${NORMAL} <VPN_TYPE> <CLOUD>  Downloads the client VPN configuration.\n"
+  echo -e "    ${BOLD}start-tunnel${NORMAL} <CLOUD>                    Starts tunnel services which obfuscate VPN"
+  echo -e "                                            traffic to a node. This is available only for \"ovpn-x\""
+  echo -e "                                            type VPNs.\n"
+  echo -e "    ${BOLD}show-nodes${NORMAL}                              Show all deployed nodes and their status.${NC}"
+}
+
+function usage::show_regions() {
+  echo -e "${NC}\nUSAGE: vs show-regions ${BOLD}<CLOUD>${NORMAL}\n"
+  echo -e "${LIGHT_BLUE}  This CLI command shows the regions that can be targeted for each of the supported"
+  echo -e "  clouds. The available public clouds for deployment are \"aws\", \"azure\" and \"google\".${NC}"
+}
+
+function usage::deploy_node() {
+  echo -e "\nUSAGE: vs deploy-node $vpn_type $cloud [-r|--region <REGION>] [-c|--clean] [-i|--init] [-u|--upgrade] [-a|--no-idle-shutdown] [-s|--show] [-d|--debug]\n${LIGHT_BLUE}"
+  echo -e "${LIGHT_BLUE}  This CLI command creates a VPN node in the given region.\n${LIGHT_GREEN}"
+  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region to create the server in"
+  echo -e "  ${DIM}-c|--clean${NORMAL}             Clean the terraform workspace context before deploying"
+  echo -e "  ${DIM}-i|--init${NORMAL}              Re-initialize terraform workspace context before deploying"
+  echo -e "  ${DIM}-u|--upgrade${NORMAL}           Re-builds/upgrades the VPN node using the most recent version"
+  echo -e "  ${DIM}-a|--no-idle-shutdown${NORMAL}  Do not shutdown VPN node when idle"
+  echo -e "  ${DIM}-s|--show${NORMAL}              Show cloud resources to be created or changed but do not deploy"
+  echo -e "  ${DIM}-d|--debug${NORMAL}             Enable trace output${NC}"
+}
+
+function usage::reinit_node() {
+  echo -e "${NC}\nUSAGE: vs reinit-node $vpn_type $cloud [-r|--region <REGION>] [-d|--debug]\n${LIGHT_BLUE}"
+  echo -e "  This CLI command reinitializes the remote state of a VPN node in the given"
+  echo -e "  region.\n${LIGHT_GREEN}"
+  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region where the node is deployed"
+  echo -e "  ${DIM}-d|--debug${NORMAL}            Enable trace output${NC}"
+}
+
+function usage::destroy_node() {
+  echo -e "${NC}\nUSAGE: vs destroy-node $vpn_type $cloud [-r|--region <REGION>] [-d|--debug]\n${LIGHT_BLUE}"
+  echo -e "${LIGHT_BLUE}  This CLI command destroys a VPN node that has been deployed to the given region.\n${LIGHT_GREEN}"
+  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region where the node to be destroyed is deployed"
+  echo -e "  ${DIM}-d|--debug${NORMAL}            Enable trace output${NC}"
+}
+
+function usage::download_vpn_config() {
+  echo -e "\nUSAGE: vs download-vpn-config $vpn_type $cloud [-r|--region <REGION>] [-u|--user <USERNAME>] [-p|--password <PASSWORD>] [-d|--debug]\n"
+  echo -e "${LIGHT_BLUE}  This CLI command downloads the VPN client configuration from the VPN server deployed to the given region.\n${LIGHT_GREEN}"
+  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>      The region of the server from which the configuration should be downloaded"
+  echo -e "  ${BOLD}-u|--user${NORMAL} <USERNAME>      The name of the VPN user whose client configuration should be downloaded"
+  echo -e "  ${BOLD}-p|--password${NORMAL} <PASSWORD>  The password of the VPN user"
+  echo -e "  ${DIM}-d|--debug${NORMAL}                Enable trace output\n${NC}"
+}
+
+function usage::start_tunnel() {
+  echo -e "${NC}\nUSAGE: vs start-tunnel $cloud [-r|--region <REGION>] [-t|--type <TUNNEL_TYPE>] [-d|--debug]\n${LIGHT_BLUE}"
+  echo -e "${LIGHT_BLUE}  This CLI command starts tunnel services which obfuscate VPN traffic to a node.\n${LIGHT_GREEN}"
+  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>       The region where the node is deployed"
+  echo -e "  ${BOLD}-t|--type${NORMAL} <TUNNEL_TYPE>    The type of tunnel. This should be one of:\n"
+  echo -e "                             - udp_over_tcp"
+  echo -e "                             - udp_over_icmp"
+  echo -e "                             - udp_over_udp"
+  echo -e "                             - udp_over_udp_with_fec"
+  echo -e "                             - tcp_over_udp_with_fec\n"
+  echo -e "  ${DIM}-d|--debug${NORMAL}                 Enable trace output${NC}"
+}

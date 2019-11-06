@@ -1,24 +1,12 @@
 #!/bin/bash
 
-source $(dirname $BASH_SOURCE)/common
-set -euo pipefail
-
 workspace_dir=$1 && shift
 template_dir=$1 && shift
-vpn_type=$1 && shift
-cloud=$1 && shift
+vpn_type=${1:-<VPN_TYPE>} && shift
+cloud=${1:-<CLOUD>} && shift
 
-function command_usage() {
-  echo -e "\nUSAGE: vs deploy-node $vpn_type $cloud [-r|--region <REGION>] [-c|--clean] [-i|--init] [-u|--upgrade] [-a|--no-idle-shutdown] [-s|--show] [-d|--debug]\n${LIGHT_BLUE}"
-  echo -e "${LIGHT_BLUE}  This CLI command creates a VPN node in the given region.\n${LIGHT_GREEN}"
-  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region to create the server in"
-  echo -e "  ${DIM}-c|--clean${NORMAL}             Clean the terraform workspace context before deploying"
-  echo -e "  ${DIM}-i|--init${NORMAL}              Re-initialize terraform workspace context before deploying"
-  echo -e "  ${DIM}-u|--upgrade${NORMAL}           Re-builds/upgrades the VPN node using the most recent version"
-  echo -e "  ${DIM}-a|--no-idle-shutdown${NORMAL}  Do not shutdown VPN node when idle"
-  echo -e "  ${DIM}-s|--show${NORMAL}              Show cloud resources to be created or changed but do not deploy"
-  echo -e "  ${DIM}-d|--debug${NORMAL}             Enable trace output${NC}"
-}
+source $(dirname $BASH_SOURCE)/common
+set -euo pipefail
 
 region=""
 clean=no
@@ -27,10 +15,7 @@ upgrade=no
 idle_shutdown=yes
 plan=no
 
-if [[ $# -eq 0 ]]; then
-  command_usage
-  exit 1
-fi
+common::validate_workspace deploy_node
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -r|--region)
@@ -56,12 +41,12 @@ while [[ $# -gt 0 ]]; do
       set -x
       ;;
     -h|--help)
-      command_usage
+      usage::deploy_node
       exit 0
       ;;
     *)
       echo -e "${RED}\nERROR! Unknown option \"$1\".${NC}"
-      command_usage
+      usage::deploy_node
       exit 1
       ;;
   esac
@@ -69,6 +54,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z $region ]]; then
+  usage::deploy_node
   echo -e "${RED}\nERROR! Please provide a cloud region from the following list.${NC}"
   $(dirname $BASH_SOURCE)/show-regions $cloud
   exit 1

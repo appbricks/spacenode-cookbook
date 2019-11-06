@@ -1,29 +1,20 @@
 #!/bin/bash
 
-source $(dirname $BASH_SOURCE)/common
-set -euo pipefail
-
 workspace_dir=$1 && shift
 template_dir=$1 && shift
-vpn_type=$1 && shift
-cloud=$1 && shift
+cloud=${1:-<CLOUD>} && shift
 
-function command_usage() {
-  echo -e "${NC}\nUSAGE: vs start-tunnel $vpn_type $cloud [-r|--region <REGION>] [-t|--type <TUNNEL TYPE>] [-d|--debug]\n${LIGHT_BLUE}"
-  echo -e "${LIGHT_BLUE}  This CLI command starts tunnel services which obfuscate VPN traffic to a node.\n${LIGHT_GREEN}"
-  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>       The region where the node is deployed"
-  echo -e "  ${BOLD}-t|--type${NORMAL} <TUNNEL TYPE>    The type of tunnel. This should be one of:\n"
-  echo -e "                             - udp_over_tcp"
-  echo -e "                             - udp_over_icmp"
-  echo -e "                             - udp_over_udp"
-  echo -e "                             - udp_over_udp_with_fec"
-  echo -e "                             - tcp_over_udp_with_fec\n"
-  echo -e "  ${DIM}-d|--debug${NORMAL}                 Enable trace output${NC}"
-}
+# Obfuscation tunnel service available
+# only for ovpn-x VPN types
+vpn_type=ovpn-x
+
+source $(dirname $BASH_SOURCE)/common
+set -euo pipefail
 
 region=""
 tunnel_type=""
 
+common::validate_workspace start_tunnel
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -r|--region)
@@ -38,12 +29,12 @@ while [[ $# -gt 0 ]]; do
       set -x
       ;;
     -h|--help)
-      command_usage
+      usage::start_tunnel
       exit 0
       ;;
     *)
       echo -e "${RED}\nERROR! Unknown option \"$1\".${NC}"
-      command_usage
+      usage::start_tunnel
       exit 1
       ;;
   esac
@@ -51,8 +42,14 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z $region ]]; then
+  usage::start_tunnel
   echo -e "${RED}\nERROR! Please provide a cloud region from the following list.${NC}"
   $(dirname $BASH_SOURCE)/show-regions $cloud
+  exit 1
+fi
+if [[ -z $tunnel_type ]]; then
+  usage::start_tunnel
+  echo -e "${RED}\nERROR! Please provide a tunnel type.${NC}"
   exit 1
 fi
 if [[ ! -e ${workspace_dir}/${region}/output.json ]]; then
@@ -63,13 +60,10 @@ fi
 if [[ ! -e ${workspace_dir}/${region}/client_tunnel ]]; then
   echo -e "${RED}\nERROR! The client tunnel script for the node has not been"
   echo -e "       retrieved. You can retrieve it by running the \"download-vpn-config\""
-  echo -e "       command.${NC}"
+  echo -e "       command for this node.${NC}"
   exit 1
 fi
-if [[ -z $tunnel_type ]]; then
-  echo -e "${RED}\nERROR! Please provide a tunnel type.${NC}"
-  exit 1
-fi
+
 if [[ $tunnel_type != udp_over_tcp \
   && $tunnel_type != udp_over_icmp \
   && $tunnel_type != udp_over_udp \

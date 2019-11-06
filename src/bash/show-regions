@@ -1,13 +1,9 @@
 #!/bin/bash
 
 source $(dirname $BASH_SOURCE)/common
+set -euo pipefail
 
-function command_usage() {
-  echo -e "${NC}\nUSAGE: vs show-regions ${BOLD}<CLOUD>${NORMAL}\n"
-  echo -e "${LIGHT_BLUE}  This CLI command shows the regions that can be targeted for each of the supported clouds.${NC}"
-}
-
-cloud=${1:--h}
+cloud=${1:-help}
 case $cloud in
   aws)
     common::validate_cloud_credentials $cloud
@@ -39,12 +35,12 @@ case $cloud in
     echo -e "${GREEN}\nMore detail can be found at the following link:"
     echo -e "${BLUE}- https://cloud.google.com/compute/docs/regions-zones/"
     ;;
-  -h|--help)
-    command_usage
+  -h|--help|help)
+    usage::show_regions
     exit 0
     ;;
   *)
     echo -e "${RED}\nERROR! Unknown cloud \"$cloud\".${NC}"
-    command_usage
+    usage::show_regions
     exit 1
 esac

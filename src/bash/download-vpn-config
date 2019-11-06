@@ -1,21 +1,12 @@
 #!/bin/bash
 
-source $(dirname $BASH_SOURCE)/common
-set -euo pipefail
-
 workspace_dir=$1 && shift
 template_dir=$1 && shift
-vpn_type=$1 && shift
-cloud=$1 && shift
+vpn_type=${1:-<VPN_TYPE>} && shift
+cloud=${1:-<CLOUD>} && shift
 
-function command_usage() {
-  echo -e "\nUSAGE: vs download-vpn-config $vpn_type $cloud [-r|--region <REGION>] [-u|--user <USERNAME>] [-p|--password <PASSWORD>] [-d|--debug]\n"
-  echo -e "${LIGHT_BLUE}  This CLI command downloads the VPN client configuration from the VPN server deployed to the given region.\n${LIGHT_GREEN}"
-  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>      The region of the server from which the configuration should be downloaded"
-  echo -e "  ${BOLD}-u|--user${NORMAL} <USERNAME>      The name of the VPN user whose client configuration should be downloaded"
-  echo -e "  ${BOLD}-p|--password${NORMAL} <PASSWORD>  The password of the VPN user"
-  echo -e "  ${DIM}-d|--debug${NORMAL}                Enable trace output\n${NC}"
-}
+source $(dirname $BASH_SOURCE)/common
+set -euo pipefail
 
 function download_vpn_config() {
 
@@ -51,10 +42,7 @@ region=""
 user=""
 password=""
 
-if [[ $# -eq 0 ]]; then
-  command_usage
-  exit 1
-fi
+common::validate_workspace download_vpn_config
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -r|--region)
@@ -73,12 +61,12 @@ while [[ $# -gt 0 ]]; do
       set -x
       ;;
     -h|--help)
-      command_usage
+      usage::download_vpn_config
       exit 0
       ;;
     *)
       echo -e "${RED}\nERROR! Unknown option \"$1\".${NC}"
-      command_usage
+      usage::download_vpn_config
       exit 1
       ;;
   esac
@@ -86,18 +74,20 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z $region ]]; then
+  usage::download_vpn_config
   echo -e "${RED}\nERROR! A region must be specified to identify the"
   echo -e "       VPN server to retrieve the configuration from.${NC}"
+  exit 1
+fi
+if [[ -z "$user" || -z "$password" ]]; then
+  usage::download_vpn_config
+  echo -e "${RED}\nERROR! The user name and password of the VPN user whose"
+  echo -e "       configuration should be download cannot be empty.${NC}"
   exit 1
 fi
 if [[ ! -e ${workspace_dir}/${region} ]]; then
   echo -e "${RED}\nERROR! Deployment workspace path does not exist. The region"
   echo -e "       provided may be invalid or the server may not have been deployed.${NC}"
-  exit 1
-fi
-if [[ -z "$user" || -z "$password" ]]; then
-  echo -e "${RED}\nERROR! The user name and password of the VPN user whose"
-  echo -e "       configuration should be download cannot be empty.${NC}"
   exit 1
 fi
 

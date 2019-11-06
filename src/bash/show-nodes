@@ -2,11 +2,18 @@
 
 scripts_dir=$(dirname $BASH_SOURCE)
 root_dir=$(cd $scripts_dir/../.. && pwd)
+
 source ${scripts_dir}/common
 set -euo pipefail
 
 workspace_dir=$1 && shift
 template_dir=$1 && shift
+
+if [[ $# -gt 0 ]]; then
+  usage::main
+  echo -e "${RED}\nERROR! \"show-nodes\" command does accept any additional arguments.${NC}"
+  exit 1
+fi
 
 echo -e "\n${GREEN}${BOLD}VPN Nodes deployed to the cloud${NORMAL}"
 echo -e "===============================${NC}\n"
@@ -18,10 +25,15 @@ if [[ ${#vpn_nodes[@]} -eq 0 ]]; then
 fi
 ui::print_nodes_table "${vpn_nodes[@]}"
 
+re='^[0-9]+$'
+
 printf "\n${GREEN}Select node to perform an action on or (q)uit: ${NC}" && read option
 [[ -n $option && $option != q && $option != Q ]] || exit 0
 
-if [[ $option -lt 0 || $option -gt $((${#vpn_nodes[@]}-1)) ]]; then
+if [[ ! $option =~ $re \
+  || $option -lt 0 \
+  || $option -gt $((${#vpn_nodes[@]}-1)) ]]; then
+
   echo -e "${RED}\nERROR! Invalid node selected.${NC}"
   exit 1
 fi
@@ -50,15 +62,13 @@ echo -e "4) Delete Node"
 
 printf "\nSelect action or (q)uit: ${NC}" && read option
 [[ -n $option && $option != q && $option != Q ]] || exit 0
-
-if [[ $option -lt 1 || $option -gt 4 ]]; then
+if [[ ! $option =~ $re || $option -lt 1 || $option -gt 4 ]]; then
   echo -e "${RED}\nERROR! Invalid action selected.${NC}"
   exit 1
 fi
 
 case $option in
   1)
-    common::validate_workspace
     echo
     $scripts_dir/deploy-node \
       $workspace_dir $template_dir \
@@ -66,7 +76,6 @@ case $option in
     ;;
   2)
     if [[ $node_status == running ]]; then
-      common::validate_workspace
       echo -e -n "\n${GREEN}Please enter the VPN username: ${NC}" && read username
       echo -e -n "${GREEN}Please enter the VPN password: ${NC}" && read -s password
 
@@ -90,7 +99,6 @@ case $option in
     esac
     ;;
   4)
-    common::validate_workspace
     echo
     $scripts_dir/destroy-node \
       $workspace_dir $template_dir \

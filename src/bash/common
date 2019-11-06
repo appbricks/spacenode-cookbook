@@ -26,22 +26,6 @@ awz_cli_credentials_validated=no
 azure_cli_credentials_validated=no
 google_cli_credentials_validated=no
 
-function usage() {
-  echo -e "${NC}\nUSAGE: vs ${BOLD}<COMMAND>${NORMAL} [options]\n"
-  echo -e "  This CLI manages personal cloud VPN nodes in multiple cloud regions.\n"
-  echo -e "${LIGHT_BLUE}  ${BOLD}<COMMAND>${NORMAL} should be one of the following:\n${GREEN}"
-  echo -e "    ${BOLD}init${NORMAL}                                     Initializes the current folder with the"
-  echo -e "                                             control files which contain the environment"
-  echo -e "                                             for running deployment scripts."
-  echo -e "    ${BOLD}show-regions${NORMAL}         <CLOUD>             Show regions nodes can be created in."
-  echo -e "    ${BOLD}deploy-node${NORMAL}          <VPN_TYPE> <CLOUD>  Deploys or updates a personal VPN node."
-  echo -e "    ${BOLD}reinit-node${NORMAL}          <VPN_TYPE> <CLOUD>  Reinitializes a VPN node's remote state."
-  echo -e "    ${BOLD}destroy-node${NORMAL}         <VPN_TYPE> <CLOUD>  Destroys a VPN node."
-  echo -e "    ${BOLD}download-vpn-config${NORMAL}  <VPN_TYPE> <CLOUD>  Downloads the client VPN configuration."
-  echo -e "    ${BOLD}start-tunnel${NORMAL}                             Starts tunnel services which obfuscate VPN traffic to a node."
-  echo -e "    ${BOLD}show-nodes${NORMAL}                               Show all deployed nodes and their status.${NC}"
-}
-
 function common::set_working_dir() {
 
   working_dir=$(pwd)
@@ -72,20 +56,20 @@ function common::validate_environment() {
     echo -e "${GREEN}to download and install the AWS CLI.${NC}"
     exit 1
   fi
-  which gcloud >/dev/null 2>&1
-  if [[ $? -ne 0 ]]; then
-    echo -e "${RED}\nERROR! Unable to find Google Cloud CLI in the system path.\n" 
-    echo -e "${GREEN}Please follow the instructions at: "
-    echo -e "- ${BLUE}https://cloud.google.com/sdk/docs\n" 
-    echo -e "${GREEN}to download and install the Google Cloud SDK.${NC}"
-    exit 1
-  fi
   which az >/dev/null 2>&1
   if [[ $? -ne 0 ]]; then
     echo -e "${RED}\nERROR! Unable to find Microsoft Azure CLI in the system path.\n" 
     echo -e "${GREEN}Please follow the instructions at: "
     echo -e "- ${BLUE}https://docs.microsoft.com/en-us/cli/azure/install-azure-cli\n" 
     echo -e "${GREEN}to download and install the Microsoft Azure CLI.${NC}"
+    exit 1
+  fi
+  which gcloud >/dev/null 2>&1
+  if [[ $? -ne 0 ]]; then
+    echo -e "${RED}\nERROR! Unable to find Google Cloud CLI in the system path.\n" 
+    echo -e "${GREEN}Please follow the instructions at: "
+    echo -e "- ${BLUE}https://cloud.google.com/sdk/docs\n" 
+    echo -e "${GREEN}to download and install the Google Cloud SDK.${NC}"
     exit 1
   fi
   which terraform >/dev/null 2>&1
@@ -152,14 +136,15 @@ function common::validate_cloud_credentials() {
 
 function common::validate_workspace() {
 
+  local command=$1
   local first
 
-  if [[ ! -e $root_dir/cloud/recipes/$vpn_type ]]; then
-    usage
+  if [[ ! -e ${template_dir}/$vpn_type ]]; then
+    eval "usage::${command}"
     echo -e "${RED}\nERROR! Unknown VPN type.\n" 
     echo -e "${GREEN}Available VPN types for deployment are:\n"
     first=y
-    for d in $(find $root_dir/cloud/recipes -maxdepth 1 -type d -print); do
+    for d in $(find ${template_dir} -maxdepth 1 -type d -print); do
       if [[ $first == n ]]; then
         echo "- \"$(basename $d)\""
       else
@@ -169,12 +154,12 @@ function common::validate_workspace() {
     echo -e "${NC}"
     exit 1
   fi
-  if [[ ! -e $root_dir/cloud/recipes/$vpn_type/$cloud ]]; then
-    usage
+  if [[ ! -e ${template_dir}/$vpn_type/$cloud ]]; then
+    eval "usage::${command}"
     echo -e "${RED}\nERROR! Unknown cloud target for VPN of type \"$vpn_type\".\n" 
     echo -e "${GREEN}Cloud targets available for deployment are:\n"
     first=y
-    for d in $(find $root_dir/cloud/recipes/$vpn_type -maxdepth 1 -type d -print); do 
+    for d in $(find ${template_dir}/$vpn_type -maxdepth 1 -type d -print); do 
       if [[ $first == n ]]; then
         echo "- \"$(basename $d)\""
       else
@@ -260,5 +245,6 @@ function ui::print_nodes_table() {
 }
 
 scripts_dir=$(dirname $BASH_SOURCE)
+source ${scripts_dir}/common_usage
 source ${scripts_dir}/common_cloud
 source ${scripts_dir}/common_terraform
