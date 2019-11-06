@@ -1,4 +1,6 @@
-#!/bin/bash -x
+#!/bin/bash
+
+build_script_path=$(dirname $BASH_SOURCE)
 
 function usage {
   echo -e "\nUSAGE: ./build-release.sh [publish DOCKER_REPO DOCKER_USER DOCKER_PASSWORD]"
@@ -24,7 +26,7 @@ if [[ "$1" == "publish" ]]; then
   
   if [[ -n $2 && -n $3 && -n $4 ]]; then
 
-    TAG="$(git tag -l --points-at HEAD)"
+    TAG=${TRAVIS_TAG:-$(git tag -l --points-at HEAD)}
     if [[ -z "$TAG" ]] ; then
       echo "To build and push the release image their must be a version tag at the head of the branch."
       exit 1
@@ -43,9 +45,9 @@ if [[ "$1" == "publish" ]]; then
 
     # Create installer scripts
     sed "s|appbricks/vpn-server:latest|appbricks/vpn-server:$TAG|" \
-      $(dirname $BASH_SOURCE)/../install/install.sh > install.sh
+      ${build_script_path}/../install/install.sh > install.sh
     sed "s|appbricks/vpn-server:latest|appbricks/vpn-server:$TAG|" \
-      $(dirname $BASH_SOURCE)/../install/install.ps1 > install.ps1
+      ${build_script_path}/../install/install.ps1 > install.ps1
   else
     echo "To publish DOCKER_REPO, DOCKER_USER and DOCKER_PASSWORD arguments are required."
     exit 1
