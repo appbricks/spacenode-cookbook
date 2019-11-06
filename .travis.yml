@@ -18,7 +18,10 @@ deploy:
   - install.sh
   #- install.ps1
   body:
-  - "### Release Notes\n* test release note line 1\n* test release note line 2"
+  - |
+    ### Release Notes
+    * test release note line 1
+    * test release note line 2
   skip_cleanup: true
   on:
     repo: appbricks/vpn-server
