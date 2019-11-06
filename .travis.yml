@@ -12,13 +12,12 @@ script:
 - src/build/run-ci-build.sh
 deploy:
   provider: releases
-  edge: true
   api_key:
     secure: HPGN8lvadOQuquM0iJDj3h8zPtjT+r7h0OvP0bNXe8cXaQlKqIxxJ0iCKa1JTi/ByI9Pw5QUIcUfRkTHb24M79hCukO/TPxL3z8VdXzwFj2+wq8Zs/epkqQU+RNXLk1sDeaCJGgBNqP8zBkn9wNOfOEgcWJGUBWkMEyI/RFaXUnC9SC/nTospfmPkQu4OOl30uk5KNd5HudwJ7Xsc5EhoILYfzoJx7+GYZzt463xUWNpgC/kLCA9Ii0iCzH7zxO4ifCEfJdX5SvLzvHy5ox7tDhbL1pE3R2hg23NSC6sO3a0iS7iaOzpTuFMoybcGhB+w/EPbUfTBcEOJ/2ycSnMH/bNQIsjYrHGKhvQ7dPW4HwhoKXI8mf+sdnDOqvQZLnxgRydz7T9ed/z3bJU5H3hRAJgFXkfsAKKVedpRAC68gZzW//gZboYwP6eg6pMrqFpCZao+/mym/nvSb41Kt5V36ajlYXF881n2luN41uIGxkcUjHCsmnUrfxUzMDsztobAhKZhNwkZqVg0YVGZPvSHgyuNQ+rCySaXD+Lye4vr6C719YsN0dsmWw9mwzcVlpI4M9BeHsRGG4YaQob7AMJCCQy8j1ggDyoE8nwcRHH2r2GPRxBYTuJvPcIxx1JB+peotvLm2Gl3JCet1mXrjyfbGdnvw7i02254W1DlbYPD9s=
   file:
   - install.sh
   #- install.ps1
-  release_notes_file: release-notes.md
+  body: "[Release Notes](https://github.com/appbricks/vpn-server/blob/master/doc/release-notes.md)"
   skip_cleanup: true
   on:
     repo: appbricks/vpn-server
