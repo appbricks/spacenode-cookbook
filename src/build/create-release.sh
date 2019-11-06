@@ -23,7 +23,7 @@ echo "Creating release $TAG by merging changes from branch $MERGE_BRANCH"
 git checkout master
 git pull
 git merge $MERGE_BRANCH
-git tag -a $TAG -m "Concourse CF event resource type release $TAG - created by $(git config user.name)"
+git tag -a $TAG -m "VPN Server CLI release $TAG - created by $(git config user.name)"
 git push --follow-tags
 
 git checkout $MERGE_BRANCH

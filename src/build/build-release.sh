@@ -20,7 +20,7 @@ docker ps -a | awk '/^[0-9a-f]/{ print $1 }' | xargs docker rm -f
 docker rmi vpn-server 2>&1 >/dev/null
 
 set -e
-docker build . -t vpn-server
+# docker build . -t vpn-server
 
 if [[ "$1" == "publish" ]]; then
   
@@ -32,16 +32,16 @@ if [[ "$1" == "publish" ]]; then
       exit 1
     fi
 
-    docker login -u $3 -p $4
+    # docker login -u $3 -p $4
 
-    docker tag vpn-server $2/vpn-server:latest
-    docker tag vpn-server $2/vpn-server:$TAG
-    docker push $2/vpn-server
+    # docker tag vpn-server $2/vpn-server:latest
+    # docker tag vpn-server $2/vpn-server:$TAG
+    # docker push $2/vpn-server
 
-    # clean up
-    docker rmi $2/vpn-server:latest
-    docker rmi $2/vpn-server:$TAG
-    docker rmi vpn-server
+    # # clean up
+    # docker rmi $2/vpn-server:latest
+    # docker rmi $2/vpn-server:$TAG
+    # docker rmi vpn-server
 
     # Create installer scripts
     sed "s|appbricks/vpn-server:latest|appbricks/vpn-server:$TAG|" \
