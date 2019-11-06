@@ -54,7 +54,7 @@ if [[ "$1" == "publish" ]]; then
         ${build_script_path}/../../doc/release-notes-${TAG}.md > release-notes.md
     else
       sed "s|<VERSION>|${TAG}|" \
-        ${build_script_path}/../../doc/release-notes.md release-notes.md
+        ${build_script_path}/../../doc/release-notes.md > release-notes.md
     fi
   else
     echo "To publish DOCKER_REPO, DOCKER_USER and DOCKER_PASSWORD arguments are required."
