@@ -3,6 +3,9 @@
 build_script_path=$(dirname $BASH_SOURCE)
 set -e
 
+echo "TRAVIS_BRANCH=$TRAVIS_BRANCH"
+echo "TRAVIS_TAG=$TRAVIS_TAG"
+
 if [[ "$TRAVIS_BRANCH" == "master" && -n "$TRAVIS_TAG" ]]; then
     echo "Git commit is in master branch and has a commit tag - building and publishing the docker image..."
     ${build_script_path}/build-release.sh publish $DOCKER_REPO $DOCKER_USER $DOCKER_PASSWORD
