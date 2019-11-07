@@ -192,35 +192,6 @@ function common::validate_value_from_list() {
   set -e
 }
 
-function cloud::set_aws_credentials() {
-
-  if [[ $awz_cli_credentials_validated == no ]]; then
-
-    # AWS CLI credentials
-    export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY
-    export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY
-
-    # Required for generic queries but this value is overidden
-    export AWS_DEFAULT_REGION=us-east-1
-
-    awz_cli_credentials_validated=yes
-  fi
-}
-
-function cloud::set_azure_credentials() {
-
-  if [[ $azure_cli_credentials_validated == no ]]; then
-
-    # Set azure credentials
-    az login --service-principal \
-      --username "$ARM_CLIENT_ID" \
-      --password "$ARM_CLIENT_SECRET" \
-      --tenant "$ARM_TENANT_ID" 2>&1 >/dev/null
-
-    azure_cli_credentials_validated=yes
-  fi
-}
-
 function ui::print_nodes_table() {
 
   local vpn_nodes=("$@")
