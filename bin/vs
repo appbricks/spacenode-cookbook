@@ -6,6 +6,7 @@ source $root_dir/src/bash/common
 command=${1:-help}
 
 common::set_working_dir
+common::check_eula
 case "$command" in
   -h|--help|help)
     usage::main

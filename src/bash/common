@@ -45,6 +45,25 @@ function common::set_working_dir() {
   workspace_dir=$working_dir/.workspace
 }
 
+function common::check_eula() {
+
+  if [[ ! -e $workspace_dir/eula_accepted ]]; then
+
+    echo -e "${GREEN}\nBefore you can deploy Cloud VPN nodes you need to review"
+    echo -e "and accept the AppBricks, Inc. Software End User Agreement." 
+    echo -e "The agreement can be found at the following link.\n"
+    echo -e "${BLUE}https://appbricks.io/legal/\n"
+
+    printf "${GREEN}Type \"${BOLD}yes${NORMAL}\" if you agree to the terms or (q)uit: ${NC}" && read option
+    [[ -n $option && $option != q && $option != Q ]] || exit 1
+
+    [[ $option == yes ]] || exit 1
+    echo -e "${GREEN}\nThank you. You can proceed to launch, run and manage you VPN nodes in the cloud now...\n${NC}"
+
+    touch $workspace_dir/eula_accepted
+  fi
+}
+
 function common::validate_environment() {
 
   set +e
