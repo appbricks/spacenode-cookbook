@@ -51,7 +51,8 @@ function common::check_eula() {
 
     echo -e "${GREEN}\nBefore you can deploy Cloud VPN nodes you need to review"
     echo -e "and accept the AppBricks, Inc. Software End User Agreement." 
-    echo -e "The agreement can be found at the following link.\n"
+    echo -e "The terms of the agreement can be found at the following"
+    echo -e "link.\n"
     echo -e "${BLUE}https://appbricks.io/legal/\n"
 
     printf "${GREEN}Type \"${BOLD}yes${NORMAL}\" if you agree to the terms or (q)uit: ${NC}" && read option
