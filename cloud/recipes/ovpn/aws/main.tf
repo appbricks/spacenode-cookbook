@@ -1,11 +1,4 @@
 #
-# AWS specific inputs
-#
-variable "aws_dns_zone" {
-  type = string
-}
-
-#
 # Bootstrap VPN server
 #
 
@@ -15,15 +8,11 @@ module "bootstrap" {
   #
   # Company information used in certificate creation
   #
-  company_name = "${var.company_name}"
-
+  company_name      = "${var.company_name}"
   organization_name = "${var.organization_name}"
-
-  locality = "${var.locality}"
-
-  province = "${var.province}"
-
-  country = "${var.country}"
+  locality          = "${var.locality}"
+  province          = "${var.province}"
+  country           = "${var.country}"
 
   #
   # VPC details
@@ -35,7 +24,8 @@ module "bootstrap" {
   vpc_name = "${var.name}-ovpn-${var.region}"
 
   # DNS Name for VPC
-  vpc_dns_zone = "${var.name}-ovpn-${var.region}.${var.aws_dns_zone}"
+  vpc_dns_zone    = "${var.name}-ovpn-${var.region}.${var.aws_dns_zone}"
+  attach_dns_zone = "${local.configure_dns}"
 
   # Local DNS zone. This could also be the same as the public
   # which will enable setting up a split DNS of the public zone
@@ -47,24 +37,28 @@ module "bootstrap" {
 
   # VPN
   vpn_users = "${var.vpn_users}"
-  vpn_idle_action = "${var.vpn_idle_action}"
 
-  vpn_type = "openvpn"
+  vpn_type               = "openvpn"
   vpn_tunnel_all_traffic = "yes"
 
   ovpn_server_port = "4495"
-  ovpn_protocol = "udp"
+  ovpn_protocol    = "udp"
+
+  vpn_idle_action = "${var.vpn_idle_action}"
 
   # Whether to allow SSH access to bastion server
   bastion_allow_public_ssh = true
 
   bastion_host_name = "vpn"
-  bastion_use_fqdn = true
+  bastion_use_fqdn  = "${local.configure_dns}"
 
-  bastion_instance_type = "t2.micro"
+  bastion_instance_type = "${var.bastion_instance_type}"
+
+  bastion_image_name  = "${var.bastion_image_name}"
+  bastion_image_owner = "${var.bastion_image_owner}"
 
   # Issue certificates from letsencrypt.org
-  certify_bastion ="${var.certify_bastion}"
+  certify_bastion = "${var.certify_bastion}"
 
   # Whether to deploy a jumpbox in the admin network. The
   # jumpbox will be deployed only if a local DNS zone is
@@ -77,19 +71,4 @@ module "bootstrap" {
 #
 terraform {
   backend "s3" {}
-}
-
-#
-# Output
-#
-output "bastion_instance_id" {
-  value = "${module.bootstrap.bastion_instance_id}"
-}
-
-output "bastion_fqdn" {
-  value = "${module.bootstrap.bastion_fqdn}"
-}
-
-output "bastion_admin_password" {
-  value = "${module.bootstrap.bastion_admin_password}"
 }

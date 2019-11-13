@@ -28,7 +28,7 @@ function terraform::set_cloud_region() {
       regions=$(gcloud compute regions list | awk '$1 != "NAME" { print $1 }')
       common::validate_value_from_list \
         "$regions" "$region" \
-        "Unknown Azure region \"$region\"."
+        "Unknown Google Cloud Platform region \"$region\"."
       ;;
   esac
 
@@ -50,10 +50,12 @@ function terraform::init() {
       set +e
       aws s3 ls | grep "${bucket_name}" >/dev/null 2>&1
       if [[ $? -ne 0 ]]; then
+        set -e
         echo -e "${GREEN}\nCreating AWS S3 state bucket \"${bucket_name}\" to save terraform deployment state...${NC}"
         aws s3 mb s3://${bucket_name} --region $region
+      else
+        set -e
       fi
-      set -e
 
       # Initialize Terraform
       echo -e "${GREEN}Initializing terraform context...${NC}"
@@ -64,40 +66,27 @@ function terraform::init() {
       echo
       ;;
 
-    google)
-      # Check/Create Terraform state bucket
-      set +e
-      gsutil ls | awk -F'/' '{ print $3 }' | grep "${bucket_name}" >/dev/null 2>&1
-      if [[ $? -ne 0 ]]; then
-        echo -e "${GREEN}\nCreating Google Storage state bucket \"${bucket_name}\" to save terraform deployment state...${NC}"
-        gsutil mb -l $region gs://${bucket_name}
-      fi
-      set -e
-
-      # Initialize Terraform
-      echo -e "${GREEN}Initializing terraform context...${NC}"
-      terraform init \
-        -backend-config="prefix=${vpn_type}" \
-        -backend-config="bucket=${bucket_name}" \
-        $template_dir
-      echo
-      ;;
-
     azure)
       set +e
       az group list \
         | jq -r '.[].name' | grep default >/dev/null 2>&1
       if [[ $? -ne 0 ]]; then
+        set -e
         echo -e "${GREEN}\nCreating Azure resource group \"default\" in region \"$region\"...${NC}"
         az group create \
           --name default \
           --location "${region}" \
           --output none
+      else
+        set -e
       fi
       storage_account=vsstate${region}
+
+      set +e
       az storage account list \
         | jq -r '.[].name' | grep "${storage_account}" >/dev/null 2>&1
       if [[ $? -ne 0 ]]; then
+        set -e
         echo -e "${GREEN}\nCreating Azure Storage account \"${storage_account}\" to save terraform deployment state in...${NC}"
         az storage account create \
           --name "${storage_account}" \
@@ -105,18 +94,24 @@ function terraform::init() {
           --resource-group default \
           --sku Standard_LRS \
           --output none
+      else
+        set -e
       fi
+
+      set +e
       container_name="${TF_VAR_name}"
       az storage container list --account-name "${storage_account}" \
         | jq -r '.[].name' | grep "${container_name}" >/dev/null 2>&1
       if [[ $? -ne 0 ]]; then
+        set -e
         echo -e "${GREEN}\nCreating Azure container \"${container_name}\" in storage account \"${storage_account}\" to save terraform deployment state in...${NC}"
         az storage container create \
           --name "${container_name}" \
           --account-name "${storage_account}" \
           --output none
+      else
+        set -e
       fi
-      set -e
 
       # Initialize Terraform
       echo -e "${GREEN}Initializing terraform context...${NC}"
@@ -125,6 +120,27 @@ function terraform::init() {
         -backend-config="container_name=${container_name}" \
         -backend-config="key=terraform.tfstate" \
         -backend-config="storage_account_name=${storage_account}" \
+        $template_dir
+      echo
+      ;;
+      
+    google)
+      # Check/Create Terraform state bucket
+      set +e
+      gsutil ls | awk -F'/' '{ print $3 }' | grep "${bucket_name}" >/dev/null 2>&1
+      if [[ $? -ne 0 ]]; then
+        set -e
+        echo -e "${GREEN}\nCreating Google Storage state bucket \"${bucket_name}\" to save terraform deployment state...${NC}"
+        gsutil mb -l $region gs://${bucket_name}
+      else
+        set -e
+      fi
+
+      # Initialize Terraform
+      echo -e "${GREEN}Initializing terraform context...${NC}"
+      terraform init \
+        -backend-config="prefix=${vpn_type}" \
+        -backend-config="bucket=${bucket_name}" \
         $template_dir
       echo
       ;;

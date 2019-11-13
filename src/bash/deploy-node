@@ -64,7 +64,12 @@ mkdir -p ${workspace_dir}/${region}
 pushd ${workspace_dir}/${region} >/dev/null 2>&1
 
 if [[ $idle_shutdown == yes ]]; then
-  export TF_VAR_vpn_idle_action="shutdown"
+  if [[ -e ${workspace_dir}/${region}/output.json ]]; then
+    vpn_idle_action=$(cat ${workspace_dir}/${region}/output.json | jq -r .vpn_idle_action.value)
+    export TF_VAR_vpn_idle_action="$vpn_idle_action"
+  else
+    export TF_VAR_vpn_idle_action="shutdown"
+  fi
 else
   export TF_VAR_vpn_idle_action=""
 fi

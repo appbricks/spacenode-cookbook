@@ -91,19 +91,27 @@ if [[ ! -e ${workspace_dir}/${region} ]]; then
   exit 1
 fi
 
-vpn_server_url=$(cat ${workspace_dir}/${region}/output.json | jq -r .bastion_fqdn.value)
-echo -e "${GREEN}Downloading VPN configs for node $vpn_server_url...${NC}"
+bastion_fqdn=$(cat ${workspace_dir}/${region}/output.json | jq -r .bastion_fqdn.value)
+dns_configured=$(cat ${workspace_dir}/${region}/output.json | jq -r .dns_configured.value)
+if [[ $dns_configured == true ]]; then
+  vpn_server_host=$bastion_fqdn
+else
+  vpn_server_host=$(cat ${workspace_dir}/${region}/output.json | jq -r .bastion_public_ip.value)
+fi
+echo -e "${GREEN}Downloading VPN configs from \"https://${vpn_server_host}/~${user}/\"...${NC}"
 
 if [[ $vpn_type == ovpn-x ]]; then
   # Download tunnel script
   download_vpn_config $user $password \
-    https://$vpn_server_url/~$user/client_tunnel \
+    https://${vpn_server_host}/~${user}/client_tunnel \
     ${workspace_dir}/${region}/client_tunnel
 
   chmod +x ${workspace_dir}/${region}/client_tunnel
 fi
 
-working_dir=$(cd $workspace_dir/../../../ && pwd)
+working_dir=$(cd $workspace_dir/../../../ && pwd)/configs/${bastion_fqdn}
+mkdir -p $working_dir
+
 os_type="$(uname -s)"
 
 if [[ $os_type == Darwin ]]; then
@@ -118,7 +126,7 @@ if [[ $os_type == Darwin ]]; then
   esac
 
   download_vpn_config $user $password \
-    https://$vpn_server_url/~$user/${file} \
+    https://${vpn_server_host}/~${user}/${file} \
     ${working_dir}/${file}
 
   case $vpn_type in
@@ -138,36 +146,57 @@ if [[ $os_type == Darwin ]]; then
 elif [[ $os_type == Linux ]]; then
 
     if [[ $vpn_type == ipsec ]]; then
-        echo -e "${RED}\nERROR! No configuration file to download. You"
-        echo -e "       will need to setup the IPSEC client manually.${NC}"
-        exit 1
+
+      file=${TF_VAR_name}-${vpn_type}-${region}-vpn.mobileconfig
+      download_vpn_config $user $password \
+        https://${vpn_server_host}/~${user}/${file} \
+        ${working_dir}/${file}    
+
+      file=${user}.p12
+      download_vpn_config $user $password \
+        https://${vpn_server_host}/~${user}/${file} \
+        ${working_dir}/${file} 
+    else
+
+      file=openvpn-config.tunnelblick.zip
+      download_vpn_config $user $password \
+        https://${vpn_server_host}/~${user}/${file} \
+        ${working_dir}/${file}
+
+      rm -fr ${working_dir}/*.tblk
+      unzip -q -o ${working_dir}/${file} -d $working_dir
+      rm ${working_dir}/${file}
+      
+      file=${TF_VAR_name}-${vpn_type}-${region}-vpn.ovpn
+      download_vpn_config $user $password \
+        https://${vpn_server_host}/~${user}/${file} \
+        ${working_dir}/${file}    
     fi
 
-    file=openvpn-config.tunnelblick.zip
-    download_vpn_config $user $password \
-      https://$vpn_server_url/~$user/${file} \
-      ${working_dir}/${file}
+    echo -e "${GREEN}\nVPN client config files downloaded to folder \"configs/${bastion_fqdn}/\":\n"
+    first=y
+    for d in $(find ${working_dir} -maxdepth 1 -print); do
+      if [[ $first == n ]]; then
+        echo "- \"$(basename $d)\""
+      else
+        first=n
+      fi      
+    done
 
-    rm -fr ${working_dir}/*.tblk
-    unzip -q -o ${working_dir}/${file} -d $working_dir
-    rm ${working_dir}/${file}
-    
-    file=${TF_VAR_name}-${vpn_type}-${region}-vpn.ovpn
-    download_vpn_config $user $password \
-      https://$vpn_server_url/~$user/${file} \
-      ${working_dir}/${file}    
-
-    echo -e "${GREEN}\nVPN client config downloaded to file with names:\n"
-    echo -e "- ${TF_VAR_name}-${vpn_type}-${region}-vpn.ovpn"
-    echo -e "- ${TF_VAR_name}-${vpn_type}-${region}-vpn.tblk\n"
-    echo -e "Import it to your OpenVPN or Tunnelblick client and login using the credentials"
-    echo -e "below:\n${NC}"
-    echo -e "  user: ${user}"
-    echo -e "  password: ${password}\n"
+    if [[ $vpn_type == ovpn || $vpn_type == ovpn-x ]]; then
+      echo -e "\nImport it to your OpenVPN or Tunnelblick client and login using the credentials"
+      echo -e "below:\n${NC}"
+      echo -e "  user: ${user}"
+      echo -e "  password: ${password}\n"
+    else
+      echo -e "\nImport the \"*.mobileconfig\" profile if you are on an Apple device. For all"
+      echo -e "other systems you will need to configure your native IPsec client using the"
+      echo -e "provided PKCS key for the user."
+    fi
 else
     echo -e "${RED}\nERROR: Unable to determine OS type for which the VPN configurations should be"
     echo -e "       downloaded. Please download manually from:\n${NC}"
-    echo -e "       url: https://${vpn_server_url}/~${user}"
+    echo -e "       url: https://${vpn_server_host}/~${user}"
     echo -e "       user: ${user}"
     echo -e "       password: ${password}\n"
     exit 1

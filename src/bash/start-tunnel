@@ -75,18 +75,17 @@ if [[ $tunnel_type != udp_over_tcp \
 fi
 
 deployment_output=${workspace_dir}/${region}/output.json
-node_name=$(cat $deployment_output | jq -r .bastion_fqdn.value)
-node_id=$(cat $deployment_output | jq -r .bastion_instance_id.value)
-state=$(cloud::get_node_state "$cloud" "$region" "$node_id")
+bastion_instance_id=$(cat $deployment_output | jq -r .bastion_instance_id.value)
+state=$(cloud::get_node_state "$cloud" "$region" "$bastion_instance_id")
 
 if [[ $state == stopped ]]; then
   echo -n -e "\n${GREEN}${BOLD}Node is not running. Starting it.${NORMAL}"
-  response=$(cloud::start_node "$cloud" "$region" "$node_id")
+  response=$(cloud::start_node "$cloud" "$region" "$bastion_instance_id")
 
   i=0
   while [[ $state != running && $i -lt 24 ]]; do
     sleep 5
-    state=$(cloud::get_node_state "$cloud" "$region" "$node_id")
+    state=$(cloud::get_node_state "$cloud" "$region" "$bastion_instance_id")
     echo -n -e "."
     i=$((i+1))
   done

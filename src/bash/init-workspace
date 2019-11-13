@@ -6,7 +6,7 @@ set -euo pipefail
 workspace_dir=$1 && shift
 
 control_file_dir=$(dirname $workspace_dir)
-echo -e "${GREEN}\nCreating control files in \"${control_file_dir}\"...${NC}"
+echo -e "${GREEN}\nCreating control files in current folder...${NC}"
 
 if [[ ! -e ${control_file_dir}/cloud-credentials ]]; then
   cat << ---EOF > ${control_file_dir}/cloud-credentials

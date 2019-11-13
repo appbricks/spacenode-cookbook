@@ -26,6 +26,8 @@ awz_cli_credentials_validated=no
 azure_cli_credentials_validated=no
 google_cli_credentials_validated=no
 
+clouds_enabled=${CLOUDS_ENABLED:-'^aws$'}
+
 function common::set_working_dir() {
 
   working_dir=$(pwd)
@@ -190,6 +192,14 @@ function common::validate_workspace() {
     exit 1
   fi
 
+  if [[ ! $cloud =~ $clouds_enabled ]]; then
+    echo -e "${RED}\nERROR! Cloud target \"$cloud\" is not supported for public"
+    echo -e "deployments yet. Support for that cloud will be available"
+    echo -e "in a future release. If you would still like to deploy to the"
+    echo -e "cloud specified please contact AppBricks support.\n${NC}" 
+    exit 1
+  fi
+
   common::validate_cloud_credentials $cloud
 
   template_dir=${template_dir}/${vpn_type}/${cloud}
@@ -216,23 +226,24 @@ function ui::print_nodes_table() {
 
   local vpn_nodes=("$@")
 
-  printf "     +----------------+----------+----------------------+----------------------------------------------------+--------------+\n"
-  printf "     | ${BOLD}%-14s${NORMAL} | ${BOLD}%-8s${NORMAL} | ${BOLD}%-20s${NORMAL} | ${BOLD}%-50s${NORMAL} | ${BOLD}%-12s${NORMAL} |\n" \
-    'VPN Type' 'Cloud' 'Region' 'Name' 'Status'
-  printf "+----+----------------+----------+----------------------+----------------------------------------------------+--------------+\n"
+  printf "     +------------+----------+----------------------+----------------------------------------------------+--------------+----------+\n"
+  printf "     | ${BOLD}%-10s${NORMAL} | ${BOLD}%-8s${NORMAL} | ${BOLD}%-20s${NORMAL} | ${BOLD}%-50s${NORMAL} | ${BOLD}%-12s${NORMAL} | ${BOLD}%-8s${NORMAL} |\n" \
+    'VPN Type' 'Cloud' 'Region' 'Name' 'Status' 'Version'
+  printf "+----+------------+----------+----------------------+----------------------------------------------------+--------------+----------+\n"
 
   for ((i=0; i<${#vpn_nodes[@]}; i++)); do
     node_detail=( $(echo "${vpn_nodes[$i]}" | sed "s/|/ /g") )
-    printf "| %2d | %-14s | %-8s | %-20s | %-50s | %-12s |\n" \
+    printf "| %2d | %-10s | %-8s | %-20s | %-50s | %-12s | %-8s |\n" \
       $i \
       ${node_detail[0]} \
       ${node_detail[1]} \
       ${node_detail[2]} \
       ${node_detail[3]} \
-      ${node_detail[4]}
+      ${node_detail[4]} \
+      ${node_detail[5]}
   done
 
-  echo -e "+----+----------------+----------+----------------------+----------------------------------------------------+--------------+"  
+  echo -e "+----+------------+----------+----------------------+----------------------------------------------------+--------------+----------+"  
 }
 
 scripts_dir=$(dirname $BASH_SOURCE)
