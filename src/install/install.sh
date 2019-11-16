@@ -33,7 +33,7 @@ if [[ $? -ne 0 ]]; then
 fi
 
 # Remove existing vpn-server container images
-echo -e "${GREEN}\nRemoving any download VS CLI container images...${NC}"
+echo -e "${GREEN}\nRemoving downloaded VS CLI container images...${NC}"
 docker images \
   | awk '/appbricks\/vpn-server/{ print "appbricks/vpn-server:"$2 }' \
   | xargs docker rmi 2>&1 >/dev/null
