@@ -62,10 +62,3 @@ module "bootstrap" {
   # provided and the DNS will be jumpbox.[first local zone].
   deploy_jumpbox = false
 }
-
-#
-# Backend state
-#
-terraform {
-  backend "azurerm" {}
-}
