@@ -247,6 +247,6 @@ function ui::print_nodes_table() {
 }
 
 scripts_dir=$(dirname $BASH_SOURCE)
-source ${scripts_dir}/common_usage
-source ${scripts_dir}/common_cloud
-source ${scripts_dir}/common_terraform
+source ${scripts_dir}/common-usage
+source ${scripts_dir}/common-cloud
+source ${scripts_dir}/common-terraform
