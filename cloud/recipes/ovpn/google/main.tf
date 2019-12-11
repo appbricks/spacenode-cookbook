@@ -73,6 +73,5 @@ module "bootstrap" {
 # Backend state
 #
 terraform {
-  backend "gcs" {
-  }
+  backend "gcs" {}
 }

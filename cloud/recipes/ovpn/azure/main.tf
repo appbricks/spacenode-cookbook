@@ -67,6 +67,5 @@ module "bootstrap" {
 # Backend state
 #
 terraform {
-  backend "azurerm" {
-  }
+  backend "azurerm" {}
 }
