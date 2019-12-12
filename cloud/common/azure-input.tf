@@ -2,11 +2,7 @@
 # Azure specific inputs
 #
 variable "azure_dns_zone" {
-  type = string
-}
-
-variable "attach_dns_zone" {
-  default = false
+  default = ""
 }
 
 variable "bastion_instance_type" {
@@ -18,5 +14,5 @@ variable "bastion_instance_type" {
 #
 
 locals {
-  configure_dns = "${length(var.aws_dns_zone) == 0 ? false : var.attach_dns_zone}"
+  configure_dns = var.attach_dns_zone ? length(var.azure_dns_zone) > 0 : false
 }

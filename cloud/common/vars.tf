@@ -1,65 +1,94 @@
 #
+# @recipe_description: My Cloud Space VPN Node
+#
+
 # Deployment Identifier
 #
+# @order: 1
+#
 variable "name" {
-  type = string
+  description = "Name that uniquely identies your VPN node and resources created for it."
+  default = "myvpn"
 }
 
-#
 # Cloud region to deploy to
 #
+# @order: 2
+# @accepted_values: +iaas_regions
+# @accepted_values_message: Error! not a valid region
+#
 variable "region" {
+  description = "The cloud region or location to launch the VPN node in."
   type = string
 }
 
+# Whether a DNS zone should be attached
 #
-# Used for generating self-signed certificates
+# @order: 3
+# @accepted_values: false,true
+# @accepted_values_message: Please enter 'true' or 'false'.
 #
-variable "company_name" {
-  type = string
+variable "attach_dns_zone" {
+  description = "If you own a domain and wish the node to be looked up via that domain then set this value to 'true'."
+  default = false
 }
 
-variable "organization_name" {
-  type = string
-}
-
-variable "locality" {
-  type = string
-}
-
-variable "province" {
-  type = string
-}
-
-variable "country" {
-  type = string
-}
-
+# Issue valid letsencrypt certificate to bastion
 #
+# @order: 4
+# @accepted_values: false,true
+# @accepted_values_message: Please enter 'true' or 'false'.
+#
+variable "certify_bastion" {
+  description = "Issue a valid certificate for your VPN domain from https://letsencrypt.org/. You will need to provide a domain which you own for this to be successful."
+  default = false
+}
+
 # VPN Users - list of 'user|password' pairs
 #
+# @order: 5
+# @value_inclusion_filter: ^[a-zA-Z][-a-zA-Z0-9]*|[a-zA-Z0-9!@#%&:;<>_`~{}\^\$\*\+\-\.\?\"\'\[\]\(\)]*,?$
+# @value_inclusion_filter_message: User names cannot start with a numeric and must be only apha-numeric with the exception of a '-'. Passwords can contain special characters except for '|' and ','.
+# @sensitive: true
+#
 variable "vpn_users" {
-  type = list
+  description = "Initial list of VPN users to create. This should be a comma separated list of 'user|password' pairs."
+  default = "user1|p@ssw0rd"
 }
 
-#
 # Indicates action when no VPN clients have 
 # been connected to a node for some time
 #
+# @order: 6
+# @accepted_values: shutdown,none
+# @accepted_values_message: Please provide one of 'shutdown' or 'none'.
+# @sensitive: true
+#
 variable "vpn_idle_action" {
+  description = "Action to take when no VPN clients have been connected to the node for some time."
   type = string
 }
 
-#
 # SSH Key Path
 #
 variable "ssh_key_file_path" {
   default = ""
 }
 
+# Attributes for generating self-signed certificates
 #
-# Issue valid letsencrypt certificate to bastion
-#
-variable "certify_bastion" {
-  default = true
+variable "company_name" {
+  default = "AppBricks, Inc."
+}
+variable "organization_name" {
+  default = "My Cloud Space"
+}
+variable "locality" {
+  default = "Home"
+}
+variable "province" {
+  default = "Cloud"
+}
+variable "country" {
+  default = "Public"
 }
