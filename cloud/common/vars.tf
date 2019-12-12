@@ -66,7 +66,7 @@ variable "vpn_users" {
 #
 variable "vpn_idle_action" {
   description = "Action to take when no VPN clients have been connected to the node for some time."
-  type = string
+  default = "shutdown"
 }
 
 # SSH Key Path
