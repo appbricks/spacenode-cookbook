@@ -5,6 +5,9 @@
 # The DNS Zone to use
 #
 # @order: 6
+# @value_inclusion_filter: ^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$
+# @value_inclusion_filter_message: Entered value does not appear to be a valid DNS name.
+# @depends_on: attach_dns_zone=true
 #
 variable "google_dns_zone" {
   description = "The DNS Zone to use when naming VPN node's DNS name."
@@ -14,6 +17,7 @@ variable "google_dns_zone" {
 # The GCP Managed DNS zone name to register the DNS zone in
 #
 # @order: 7
+# @depends_on: attach_dns_zone=true
 #
 variable "google_dns_managed_zone_name" {
   description = "The Google Cloud Platform managed DNS Zone name to register the DNS zone in."
