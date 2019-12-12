@@ -4,7 +4,7 @@
 
 # The DNS Zone to use
 #
-# @order: 100
+# @order: 6
 #
 variable "aws_dns_zone" {
   description = "The DNS Zone to use when naming VPN node's DNS name."

@@ -18,13 +18,13 @@ variable "name" {
 # @accepted_values_message: Error! not a valid region
 #
 variable "region" {
-  description = "The cloud region or location to launch the VPN node in."
+  description = "The cloud region or location in which to deploy the VPN node."
   type = string
 }
 
 # Whether a DNS zone should be attached
 #
-# @order: 3
+# @order: 5
 # @accepted_values: false,true
 # @accepted_values_message: Please enter 'true' or 'false'.
 #
@@ -35,7 +35,7 @@ variable "attach_dns_zone" {
 
 # Issue valid letsencrypt certificate to bastion
 #
-# @order: 4
+# @order: 10
 # @accepted_values: false,true
 # @accepted_values_message: Please enter 'true' or 'false'.
 #
@@ -46,7 +46,7 @@ variable "certify_bastion" {
 
 # VPN Users - list of 'user|password' pairs
 #
-# @order: 5
+# @order: 15
 # @value_inclusion_filter: ^[a-zA-Z][-a-zA-Z0-9]*|[a-zA-Z0-9!@#%&:;<>_`~{}\^\$\*\+\-\.\?\"\'\[\]\(\)]*,?$
 # @value_inclusion_filter_message: User names cannot start with a numeric and must be only apha-numeric with the exception of a '-'. Passwords can contain special characters except for '|' and ','.
 # @sensitive: true
@@ -59,7 +59,7 @@ variable "vpn_users" {
 # Indicates action when no VPN clients have 
 # been connected to a node for some time
 #
-# @order: 6
+# @order: 20
 # @accepted_values: shutdown,none
 # @accepted_values_message: Please provide one of 'shutdown' or 'none'.
 # @sensitive: true
