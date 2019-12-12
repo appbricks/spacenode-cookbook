@@ -8,16 +8,16 @@ module "bootstrap" {
   #
   # Company information used in certificate creation
   #
-  company_name      = "${var.company_name}"
-  organization_name = "${var.organization_name}"
-  locality          = "${var.locality}"
-  province          = "${var.province}"
-  country           = "${var.country}"
+  company_name      = var.company_name
+  organization_name = var.organization_name
+  locality          = var.locality
+  province          = var.province
+  country           = var.country
 
   #
   # VPC details
   #
-  region = "${var.region}"
+  region = var.region
 
   # Name of VPC will be used to identify 
   # VPC specific cloud resources
@@ -25,7 +25,7 @@ module "bootstrap" {
 
   # DNS Name for VPC
   vpc_dns_zone    = "${var.name}-ipsec-${var.region}.${var.azure_dns_zone}"
-  attach_dns_zone = "${local.configure_dns}"
+  attach_dns_zone = local.configure_dns
 
   # Local DNS zone. This could also be the same as the public
   # which will enable setting up a split DNS of the public zone
@@ -33,24 +33,24 @@ module "bootstrap" {
   vpc_internal_dns_zones = ["local"]
 
   # Local file path to write SSH private key for bastion instance
-  ssh_key_file_path = "${length(var.ssh_key_file_path) > 0 ? var.ssh_key_file_path : path.cwd}"
+  ssh_key_file_path = length(var.ssh_key_file_path) > 0 ? var.ssh_key_file_path : path.cwd
 
   # VPN
-  vpn_users = "${var.vpn_users}"
+  vpn_users = split(",", var.vpn_users)
 
   vpn_type        = "ipsec"
-  vpn_idle_action = "${var.vpn_idle_action}"
+  vpn_idle_action = var.vpn_idle_action
 
   # Whether to allow SSH access to bastion server
   bastion_allow_public_ssh = true
 
   bastion_host_name = "vpn"
-  bastion_use_fqdn  = "${local.configure_dns}"
+  bastion_use_fqdn  = local.configure_dns
 
-  bastion_instance_type = "${var.bastion_instance_type}"
+  bastion_instance_type = var.bastion_instance_type
 
   # Issue certificates from letsencrypt.org
-  certify_bastion = "${var.certify_bastion}"
+  certify_bastion = var.certify_bastion
 
   # Whether to deploy a jumpbox in the admin network. The
   # jumpbox will be deployed only if a local DNS zone is
