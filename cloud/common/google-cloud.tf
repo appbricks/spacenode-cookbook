@@ -7,6 +7,5 @@ provider "google" {}
 # Backend state
 #
 terraform {
-  backend "gcs" {
-  }
+  backend "gcs" {}
 }

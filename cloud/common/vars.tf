@@ -5,6 +5,7 @@
 # Deployment Identifier
 #
 # @order: 1
+# @tags: recipe
 #
 variable "name" {
   description = "Name that uniquely identies your VPN node and resources created for it."
@@ -14,6 +15,7 @@ variable "name" {
 # Cloud region to deploy to
 #
 # @order: 2
+# @tags: target
 # @accepted_values: +iaas_regions
 # @accepted_values_message: Error! not a valid region
 #
@@ -25,6 +27,7 @@ variable "region" {
 # Whether a DNS zone should be attached
 #
 # @order: 5
+# @tags: recipe
 # @accepted_values: false,true
 # @accepted_values_message: Please enter 'true' or 'false'.
 #
@@ -36,6 +39,7 @@ variable "attach_dns_zone" {
 # Issue valid letsencrypt certificate to bastion
 #
 # @order: 10
+# @tags: recipe
 # @accepted_values: false,true
 # @accepted_values_message: Please enter 'true' or 'false'.
 #
@@ -47,6 +51,7 @@ variable "certify_bastion" {
 # VPN Users - list of 'user|password' pairs
 #
 # @order: 15
+# @tags: recipe
 # @value_inclusion_filter: ^[a-zA-Z][-a-zA-Z0-9]*|[a-zA-Z0-9!@#%&:;<>_`~{}\^\$\*\+\-\.\?\"\'\[\]\(\)]*,?$
 # @value_inclusion_filter_message: User names cannot start with a numeric and must be only apha-numeric with the exception of a '-'. Passwords can contain special characters except for '|' and ','.
 # @sensitive: true
@@ -60,9 +65,9 @@ variable "vpn_users" {
 # been connected to a node for some time
 #
 # @order: 20
+# @tags: recipe
 # @accepted_values: shutdown,none
 # @accepted_values_message: Please provide one of 'shutdown' or 'none'.
-# @sensitive: true
 #
 variable "vpn_idle_action" {
   description = "Action to take when no VPN clients have been connected to the node for some time."

@@ -7,6 +7,5 @@ provider "azurerm" {}
 # Backend state
 #
 terraform {
-  backend "azurerm" {
-  }
+  backend "azurerm" {}
 }
