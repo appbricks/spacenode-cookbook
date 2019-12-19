@@ -15,7 +15,6 @@ variable "name" {
 # Cloud region to deploy to
 #
 # @order: 2
-# @tags: target
 # @accepted_values: +iaas_regions
 # @accepted_values_message: Error! not a valid region
 #
