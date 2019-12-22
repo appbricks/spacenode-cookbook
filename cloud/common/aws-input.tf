@@ -23,7 +23,7 @@ variable "aws_dns_zone" {
 # @accepted_values_message: Not a valid AWS general purpose instance type
 #
 variable "bastion_instance_type" {
-  description = "The EC2 instance type of the VPN node."
+  description = "The AWS EC2 instance type of the VPN node."
   default = "t3.nano"
 }
 

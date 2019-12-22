@@ -1,7 +1,3 @@
-#
-# @recipe_description: My Cloud Space VPN Node
-#
-
 # Deployment Identifier
 #
 # @order: 1
