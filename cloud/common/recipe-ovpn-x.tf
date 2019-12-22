@@ -1,5 +1,5 @@
 #
-# @recipe_description: My Cloud Space OpenVPN based VPN Node with ability obfuscate tunnel to bypass DPI firewalls.
+# @recipe_description: My Cloud Space OpenVPN based VPN Node with ability obfuscate the VPN tunnel to bypass DPI firewalls.
 #
 
 # OpenVPN port
