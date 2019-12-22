@@ -41,8 +41,8 @@ module "bootstrap" {
   vpn_type               = "openvpn"
   vpn_tunnel_all_traffic = "yes"
 
-  ovpn_server_port = "4495"
-  ovpn_protocol    = "udp"
+  ovpn_server_port = var.ovpn_server_port
+  ovpn_protocol    = var.ovpn_protocol
 
   vpn_idle_action = var.vpn_idle_action
 
@@ -54,8 +54,8 @@ module "bootstrap" {
 
   bastion_instance_type = var.bastion_instance_type
 
-  bastion_image_name  = "${var.bastion_image_name}"
-  bastion_image_owner = "${var.bastion_image_owner}"
+  bastion_image_name  = var.bastion_image_name
+  bastion_image_owner = var.bastion_image_owner
 
   # Issue certificates from letsencrypt.org
   certify_bastion = var.certify_bastion

@@ -41,8 +41,8 @@ module "bootstrap" {
   vpn_type               = "openvpn"
   vpn_tunnel_all_traffic = "yes"
 
-  ovpn_server_port = "4495"
-  ovpn_protocol    = "udp"
+  ovpn_server_port = var.ovpn_server_port
+  ovpn_protocol    = var.ovpn_protocol
 
   vpn_idle_action = var.vpn_idle_action
 
