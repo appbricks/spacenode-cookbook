@@ -1,7 +1,7 @@
 # Deployment Identifier
 #
 # @order: 1
-# @tags: recipe
+# @tags: recipe,target
 # @target_key: true
 #
 variable "name" {
