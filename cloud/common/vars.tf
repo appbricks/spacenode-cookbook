@@ -2,6 +2,7 @@
 #
 # @order: 1
 # @tags: recipe
+# @target_key
 #
 variable "name" {
   description = "Name that uniquely identies your VPN node and resources created for it."
@@ -13,6 +14,7 @@ variable "name" {
 # @order: 2
 # @accepted_values: +iaas_regions
 # @accepted_values_message: Error! not a valid region
+# @target_key
 #
 variable "region" {
   description = "The cloud region or location in which to deploy the VPN node."
