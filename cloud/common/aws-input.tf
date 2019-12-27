@@ -18,7 +18,7 @@ variable "aws_dns_zone" {
 # The bastion VM's instance type
 #
 # @order: 101
-# @tags: recipe,target-deployed
+# @tags: recipe,target-undeployed,target-deployed
 # @accepted_values: t3.nano,t3.micro,t3.small,t3.medium,t3.large,t3.xlarge
 # @accepted_values_message: Not a valid AWS general purpose instance type
 #

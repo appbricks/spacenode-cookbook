@@ -31,7 +31,7 @@ variable "google_dns_managed_zone_name" {
 # @order: 101
 # @accepted_values: n1-standard-1,n1-standard-2,n2-standard-2,n1-standard-4,n2-standard-4
 # @accepted_values_message: Not a valid AWS general purpose instance type
-# @tags: recipe,target-deployed
+# @tags: recipe,target-undeployed,target-deployed
 #
 variable "bastion_instance_type" {
   description = "The Google Cloud Platform instance type of the VPN node."
