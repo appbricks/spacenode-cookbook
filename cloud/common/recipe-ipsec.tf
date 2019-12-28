@@ -3,6 +3,6 @@
 #
 
 variable "placeholder" {
-  description = "This is a placeholder variable to allow Terraform to parse this file."
+  description = "This is a placeholder variable that will cause cloud builder to parse this file."
   default = ""
 }

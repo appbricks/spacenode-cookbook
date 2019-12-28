@@ -1,4 +1,11 @@
 #
+# AWS specific resource names
+#
+# @resource_instance_list=module.bootstrap.aws_instance.bastion
+# @resource_instance_data_list=module.bootstrap.aws_ebs_volume.bastion-data
+#
+
+#
 # AWS specific inputs
 #
 
@@ -12,7 +19,7 @@
 #
 variable "aws_dns_zone" {
   description = "The DNS Zone to use when naming VPN node's DNS name."
-  default = ""
+  default = "local"
 }
 
 # The bastion VM's instance type

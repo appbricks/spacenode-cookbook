@@ -1,4 +1,11 @@
 #
+# Google specific resource names
+#
+# @resource_instance_list=module.bootstrap.google_compute_instance.bastion
+# @resource_instance_data_list=module.bootstrap.google_compute_disk.bastion-data
+#
+
+#
 # Google Cloud Platform specific inputs
 #
 
@@ -12,7 +19,7 @@
 #
 variable "google_dns_zone" {
   description = "The DNS Zone to use when naming VPN node's DNS name."
-  default = ""
+  default = "local"
 }
 
 # The GCP Managed DNS zone name to register the DNS zone in

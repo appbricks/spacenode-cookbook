@@ -1,3 +1,8 @@
+# Cloud Builder Bastion service cloud recipe
+#
+# @is_bastion: true
+#
+
 # Cloud region to deploy to
 #
 # @order: 1
