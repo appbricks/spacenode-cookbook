@@ -32,9 +32,6 @@ module "bootstrap" {
   # for names to map to external and internal addresses.
   vpc_internal_dns_zones = ["local"]
 
-  # Local file path to write SSH private key for bastion instance
-  ssh_key_file_path = length(var.ssh_key_file_path) > 0 ? var.ssh_key_file_path : path.cwd
-
   # VPN
   vpn_users = split(",", var.vpn_users)
 

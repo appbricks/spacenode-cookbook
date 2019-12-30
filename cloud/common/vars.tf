@@ -76,12 +76,6 @@ variable "vpn_idle_action" {
   default = "shutdown"
 }
 
-# SSH Key Path
-#
-variable "ssh_key_file_path" {
-  default = ""
-}
-
 # Attributes for generating self-signed certificates
 #
 variable "company_name" {
