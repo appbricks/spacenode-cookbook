@@ -45,8 +45,8 @@ module "bootstrap" {
 
   # Tunnel for VPN to handle situations where 
   # OpenVPN is blocked or throttled by ISP
-  tunnel_vpn_port_start = vars.tunnel_vpn_port_start
-  tunnel_vpn_port_end   = vars.tunnel_vpn_port_end
+  tunnel_vpn_port_start = var.tunnel_vpn_port_start
+  tunnel_vpn_port_end   = var.tunnel_vpn_port_end
 
   # Whether to allow SSH access to bastion server
   bastion_allow_public_ssh = true
@@ -57,7 +57,7 @@ module "bootstrap" {
   bastion_instance_type = var.bastion_instance_type
 
   bastion_image_name  = var.bastion_image_name
-  bastion_image_owner = var.bastion_image_owner
+  bastion_image_owner = "244289018343"
 
   # ICMP needs to be allowed to enable ICMP tunneling
   allow_bastion_icmp = true

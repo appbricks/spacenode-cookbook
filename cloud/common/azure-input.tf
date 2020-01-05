@@ -39,5 +39,5 @@ variable "bastion_instance_type" {
 #
 
 locals {
-  configure_dns = var.attach_dns_zone ? length(var.dns_zone) > 0 : false
+  configure_dns = var.attach_dns_zone ? length(var.azure_dns_zone) > 0 : false
 }

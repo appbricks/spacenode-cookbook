@@ -163,6 +163,7 @@ function terraform::apply() {
   local cloud=$2
   local region=$3
   local template_dir=$4
+  local start=`date +%s`
 
   echo -e "${GREEN}Deploying VPN node type \"${vpn_type}\" to region \"${region}\" of \"$cloud\" cloud...${NC}"
 
@@ -175,6 +176,13 @@ function terraform::apply() {
   # later reference.
   terraform output -json \
      -state=.terraform/terraform.tfstate > output.json
+
+  local end=`date +%s`
+  local time=$((end-start))
+  local minutes=$((time/60))
+  local seconds=$((time%60))
+
+  echo -e "${GREEN}Deploy operation completed in ${minutes}m and ${seconds}s."
 }
 
 function terraform::taint_bastion() {

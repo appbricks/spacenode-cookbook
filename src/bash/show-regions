@@ -23,7 +23,7 @@ case $cloud in
     cloud::set_azure_credentials
     az account list-locations -o table | awk '$4 != "Name" && $0 !~ /^-.*/ { print substr($0, 48) }' | sort
     echo -e "${GREEN}\nMore detail can be found at the following link:"
-    echo -e "${BLUE}- https://cloud.google.com/compute/docs/regions-zones/"
+    echo -e "${BLUE}- https://azure.microsoft.com/en-us/global-infrastructure/locations/"
     ;;
   google)
     common::validate_cloud_credentials $cloud

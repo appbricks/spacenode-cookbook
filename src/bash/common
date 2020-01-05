@@ -26,7 +26,7 @@ awz_cli_credentials_validated=no
 azure_cli_credentials_validated=no
 google_cli_credentials_validated=no
 
-clouds_enabled=${CLOUDS_ENABLED:-'^aws$'}
+clouds_enabled=${CLOUDS_ENABLED:-'^(aws|azure|google)$'}
 
 function common::set_working_dir() {
 

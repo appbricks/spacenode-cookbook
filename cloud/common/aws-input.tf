@@ -35,16 +35,6 @@ variable "bastion_instance_type" {
 }
 
 #
-# VPN image reference
-#
-variable "bastion_image_name" {
-  default = "appbricks-inceptor-bastion_0.0.3"
-}
-variable "bastion_image_owner" {
-  default = "244289018343"
-}
-
-#
 # Common local variables
 #
 
