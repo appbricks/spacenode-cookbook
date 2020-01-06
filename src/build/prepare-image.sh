@@ -3,7 +3,7 @@
 # Install APT packages
 apt-get update && apt-get install -y \
   ca-certificates apt-transport-https iptables lsb-release gnupg \
-  build-essential python3 python3-dev git curl zip
+  build-essential python2.7 python2.7-dev git curl zip
 
 # Setup APT repo for Azure CLI
 curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | \
