@@ -1,9 +1,11 @@
 #!/bin/bash
 
+set -xeuo pipefail
+
 # Install APT packages
 apt-get update && apt-get install -y \
   ca-certificates apt-transport-https iptables lsb-release gnupg \
-  build-essential python2.7 python2.7-dev git curl zip
+  build-essential python3 python3-dev git curl zip
 
 # Setup APT repo for Azure CLI
 curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | \
@@ -20,6 +22,10 @@ echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.clou
   tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
 
 # Install Azure and Google CLIs
+export CLOUDSDK_PYTHON=python3
+export CLOUDSDK_GSUTIL_PYTHON=python3
+export CLOUDSDK_BQ_PYTHON=python3
+
 apt-get update && apt-get install -y \
   azure-cli google-cloud-sdk
 
