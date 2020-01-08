@@ -1,5 +1,5 @@
 #
-# @recipe_description: My Cloud Space IPSEC/IKEv2 based VPN Node.
+# @recipe_description: My Cloud Space sandbox with IPSEC/IKEv2 based VPN Node.
 #
 
 variable "placeholder" {

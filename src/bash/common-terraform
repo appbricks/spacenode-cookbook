@@ -182,6 +182,9 @@ function terraform::apply() {
   local minutes=$((time/60))
   local seconds=$((time%60))
 
+  cat output.json | jq -r '.cb_managed_instances.value[0] | .ssh_key' > bastion-ssh-key.pem
+  chmod +0600 bastion-ssh-key.pem
+
   echo -e "${GREEN}Deploy operation completed in ${minutes}m and ${seconds}s."
 }
 

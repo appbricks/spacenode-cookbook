@@ -125,9 +125,9 @@ function cloud::nodes() {
 
   for o in $(find $workspace_dir -name "output.json" -type f -print); do
 
-    local bastion_instance_id=$(cat $o | jq -r .bastion_instance_id.value)
-    local bastion_fqdn=$(cat $o | jq -r .bastion_fqdn.value)
-    local bastion_version=$(cat $o | jq -r .bastion_version.value)
+    local bastion_instance_id=$(cat $o | jq -r '.cb_managed_instances.value[0] | .id')
+    local bastion_fqdn=$(cat $o | jq -r '.cb_managed_instances.value[0] | .fqdn')
+    local bastion_version=$(cat $o | jq -r .cb_recipe_version.value)
 
     local region_path=$(dirname $o)
     local region=$(basename $region_path)

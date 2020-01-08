@@ -1,5 +1,5 @@
 #
-# @recipe_description: My Cloud Space OpenVPN based VPN Node.
+# @recipe_description: My Cloud Space sandbox with OpenVPN based VPN Node.
 #
 
 # OpenVPN port
