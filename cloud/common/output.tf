@@ -22,6 +22,7 @@ output "cb_managed_instances" {
       "id": module.bootstrap.bastion_instance_id
       "fqdn": module.bootstrap.bastion_fqdn
       "public_ip": module.bootstrap.bastion_public_ip
+      "ssh_port": module.bootstrap.bastion_admin_ssh_port
       "ssh_user": module.bootstrap.bastion_admin_user 
       "ssh_key": module.bootstrap.bastion_admin_sshkey
       "root_passwd": module.bootstrap.bastion_admin_password
