@@ -1,8 +1,8 @@
 #
 # Google specific resource names
 #
-# @resource_instance_list=module.bootstrap.google_compute_instance.bastion
-# @resource_instance_data_list=module.bootstrap.google_compute_disk.bastion-data
+# @resource_instance_list: module.bootstrap.google_compute_instance.bastion
+# @resource_instance_data_list: module.bootstrap.google_compute_disk.bastion-data
 #
 
 #

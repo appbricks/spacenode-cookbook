@@ -1,8 +1,8 @@
 #
 # Azure specific resource names
 #
-# @resource_instance_list=module.bootstrap.azurerm_virtual_machine.bastion
-# @resource_instance_data_list=module.bootstrap.azurerm_managed_disk.bastion-data
+# @resource_instance_list: module.bootstrap.azurerm_virtual_machine.bastion
+# @resource_instance_data_list: module.bootstrap.azurerm_managed_disk.bastion-data
 #
 
 #

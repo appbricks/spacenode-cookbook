@@ -1,8 +1,8 @@
 #
 # AWS specific resource names
 #
-# @resource_instance_list=module.bootstrap.aws_instance.bastion
-# @resource_instance_data_list=module.bootstrap.aws_ebs_volume.bastion-data
+# @resource_instance_list: module.bootstrap.aws_instance.bastion
+# @resource_instance_data_list: module.bootstrap.aws_ebs_volume.bastion-data
 #
 
 #
