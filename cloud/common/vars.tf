@@ -98,5 +98,5 @@ variable "province" {
   default = "Cloud"
 }
 variable "country" {
-  default = "Public"
+  default = "US"
 }
