@@ -19,7 +19,7 @@ locals {
   users    = [for u in split(",", var.vpn_users) : 
     "* URL: https://${local.endpoint}/${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}" 
   ]
-  node_description = <<NODE_DESCRIPTION
+  bastion_description = <<NODE_DESCRIPTION
 The Bastion node runs a VPN service that can be used to securely and
 anonymously access the internet as well as personal cloud resources
 that have been deployed to the sandbox. You can download the VPN
@@ -40,6 +40,7 @@ output "cb_managed_instances" {
     {
       "order": 0
       "name": "Bastion VPN"
+      "description": local.bastion_description
       "id": module.bootstrap.bastion_instance_id
       "fqdn": module.bootstrap.bastion_fqdn
       "public_ip": module.bootstrap.bastion_public_ip
@@ -47,7 +48,6 @@ output "cb_managed_instances" {
       "ssh_user": module.bootstrap.bastion_admin_user 
       "ssh_key": module.bootstrap.bastion_admin_sshkey
       "root_passwd": module.bootstrap.bastion_admin_password
-      "node_description": local.node_description
     }
   ]
 }
