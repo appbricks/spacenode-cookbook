@@ -40,7 +40,7 @@ output "cb_managed_instances" {
   value = [
     {
       "order": 0
-      "name": "Bastion VPN"
+      "name": "bastion"
       "description": local.bastion_description
       "id": module.bootstrap.bastion_instance_id
       "fqdn": module.bootstrap.bastion_fqdn
