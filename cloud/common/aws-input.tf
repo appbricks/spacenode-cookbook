@@ -35,7 +35,7 @@ variable "bastion_instance_type" {
 }
 
 #
-# Common local variables
+# Amazon Web Services common local variables
 #
 
 locals {

@@ -45,3 +45,11 @@ variable "tunnel_vpn_port_end" {
   description = "The end port over which obfuscated VPN traffic will be tunnelled."
   default = "5596"
 }
+
+#
+# OpenVPN Masked common local variables
+#
+
+locals {
+  vpn_type = "OpenVPN-Masked"
+}

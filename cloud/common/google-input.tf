@@ -46,7 +46,7 @@ variable "bastion_instance_type" {
 }
 
 #
-# Common local variables
+# Google Cloud Platform common local variables
 #
 
 locals {

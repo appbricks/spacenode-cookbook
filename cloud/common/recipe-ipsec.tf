@@ -6,3 +6,11 @@ variable "placeholder" {
   description = "This is a placeholder variable that will cause cloud builder to parse this file."
   default = ""
 }
+
+#
+# IPSec VPN common local variables
+#
+
+locals {
+  vpn_type = "IPSec/IKEv2"
+}

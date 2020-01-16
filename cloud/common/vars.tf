@@ -23,7 +23,7 @@ variable "region" {
 #
 variable "name" {
   description = "Name that uniquely identies your VPN node and resources created for it."
-  default = "myvpn"
+  default = "MyVPN"
 }
 
 # Whether a DNS zone should be attached

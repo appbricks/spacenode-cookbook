@@ -35,7 +35,7 @@ variable "bastion_instance_type" {
 }
 
 #
-# Common local variables
+# Microsoft Azure common local variables
 #
 
 locals {

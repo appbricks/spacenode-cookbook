@@ -23,3 +23,11 @@ variable "ovpn_protocol" {
   description = "The IP protocol to use for the encrypted VPN tunnel."
   default = "udp"
 }
+
+#
+# OpenVPN
+#
+
+locals {
+  vpn_type = "OpenVPN"
+}

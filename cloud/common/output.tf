@@ -17,22 +17,18 @@ output "vpn_idle_action" {
 locals {
   endpoint = local.configure_dns ? module.bootstrap.bastion_fqdn : module.bootstrap.bastion_public_ip
   users    = [for u in split(",", var.vpn_users) : 
-    "* url: https://${local.endpoint}/${split("|", u)[0]}\n  user: ${split("|", u)[0]}\n  password: ${split("|", u)[1]}" 
+    "* URL: https://${local.endpoint}/${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}" 
   ]
-  help = <<HELP
-
-This My Cloud Space VPN service allows you to securely connect to
-your cloud space in the following provider region.
-
-provider: ${local.public_cloud_provider}
-region: '${var.region}'
-
-You can download the VPN configuration from the password protected
-links below. The same user and password used to access the link
-should be used as the login credentials for the VPN.
+  node_description = <<NODE_DESCRIPTION
+The Bastion node runs a VPN service that can be used to securely and
+anonymously access the internet as well as personal cloud resources
+that have been deployed to the sandbox. You can download the VPN
+configuration along with the VPN client software from the password
+protected links below. The same user and password used to access the
+link should be used as the login credentials for the VPN.
 
 ${join("\n\n", local.users)}
-HELP
+NODE_DESCRIPTION
 }
 
 #
@@ -43,7 +39,7 @@ output "cb_managed_instances" {
   value = [
     {
       "order": 0
-      "name": "bastion"
+      "name": "Bastion VPN"
       "id": module.bootstrap.bastion_instance_id
       "fqdn": module.bootstrap.bastion_fqdn
       "public_ip": module.bootstrap.bastion_public_ip
@@ -51,9 +47,20 @@ output "cb_managed_instances" {
       "ssh_user": module.bootstrap.bastion_admin_user 
       "ssh_key": module.bootstrap.bastion_admin_sshkey
       "root_passwd": module.bootstrap.bastion_admin_password
-      "help": local.help
+      "node_description": local.node_description
     }
   ]
+}
+
+output "cb_overview" {
+  value = <<OVERVIEW
+This My Cloud Space VPN service allows you to securely connect to
+your cloud space in the following provider region.
+
+Provider: ${local.public_cloud_provider}
+Region: ${var.region}
+VPN Type: ${local.vpn_type}
+OVERVIEW
 }
 
 output "cb_bastion_version" {
