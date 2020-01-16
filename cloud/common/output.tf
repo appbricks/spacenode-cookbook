@@ -20,12 +20,13 @@ locals {
     "* URL: https://${local.endpoint}/${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}" 
   ]
   bastion_description = <<BASTION_DESCRIPTION
-The Bastion instance runs a VPN service that can be used to securely
-and anonymously access the internet as well as personal cloud
-resources that have been deployed to the sandbox. You can download
-the VPN configuration along with the VPN client software from the
-password protected links below. The same user and password used to
-access the link should be used as the login credentials for the VPN.
+The Bastion instance runs the VPN service that can be used to
+securely and anonymously access the internet as well as personal
+cloud resources that have been deployed to the sandbox. You can
+download the VPN configuration along with the VPN client software
+from the password protected links below. The same user and password
+used to access the link should be used as the login credentials for
+the VPN.
 
 ${join("\n\n", local.users)}
 BASTION_DESCRIPTION
@@ -54,8 +55,10 @@ output "cb_managed_instances" {
 
 output "cb_node_description" {
   value = <<NODE_DESCRIPTION
-This My Cloud Space VPN service allows you to securely connect to
-your cloud space in the following provider region.
+This My Cloud Space sandbox has been deployed to the following public
+cloud environment. Along with a virtual private network it includes
+a VPN serivice which allows you to securely connect to your personal 
+cloud space services securely while maintaining your privacy.
 
 Provider: ${local.public_cloud_provider}
 Region: ${var.region}
