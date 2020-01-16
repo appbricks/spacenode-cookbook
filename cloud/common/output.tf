@@ -19,16 +19,16 @@ locals {
   users    = [for u in split(",", var.vpn_users) : 
     "* URL: https://${local.endpoint}/${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}" 
   ]
-  bastion_description = <<NODE_DESCRIPTION
-The Bastion node runs a VPN service that can be used to securely and
-anonymously access the internet as well as personal cloud resources
-that have been deployed to the sandbox. You can download the VPN
-configuration along with the VPN client software from the password
-protected links below. The same user and password used to access the
-link should be used as the login credentials for the VPN.
+  bastion_description = <<BASTION_DESCRIPTION
+The Bastion instance runs a VPN service that can be used to securely
+and anonymously access the internet as well as personal cloud
+resources that have been deployed to the sandbox. You can download
+the VPN configuration along with the VPN client software from the
+password protected links below. The same user and password used to
+access the link should be used as the login credentials for the VPN.
 
 ${join("\n\n", local.users)}
-NODE_DESCRIPTION
+BASTION_DESCRIPTION
 }
 
 #
