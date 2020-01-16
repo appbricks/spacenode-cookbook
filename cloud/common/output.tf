@@ -52,15 +52,15 @@ output "cb_managed_instances" {
   ]
 }
 
-output "cb_overview" {
-  value = <<OVERVIEW
+output "cb_node_description" {
+  value = <<NODE_DESCRIPTION
 This My Cloud Space VPN service allows you to securely connect to
 your cloud space in the following provider region.
 
 Provider: ${local.public_cloud_provider}
 Region: ${var.region}
 VPN Type: ${local.vpn_type}
-OVERVIEW
+NODE_DESCRIPTION
 }
 
 output "cb_bastion_version" {
