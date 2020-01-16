@@ -50,5 +50,7 @@ variable "bastion_instance_type" {
 #
 
 locals {
+  public_cloud_provider = "Google Cloud Platform"
+
   configure_dns = var.attach_dns_zone ? length(var.google_dns_managed_zone_name) > 0 && length(var.google_dns_zone) > 0 : false
 }

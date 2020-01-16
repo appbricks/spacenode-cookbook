@@ -39,5 +39,7 @@ variable "bastion_instance_type" {
 #
 
 locals {
+  public_cloud_provider = "Microsoft Azure"
+
   configure_dns = var.attach_dns_zone ? length(var.azure_dns_zone) > 0 : false
 }
