@@ -17,7 +17,7 @@ output "vpn_idle_action" {
 locals {
   endpoint = local.configure_dns ? module.bootstrap.bastion_fqdn : module.bootstrap.bastion_public_ip
   users    = [for u in split(",", var.vpn_users) : 
-    "* URL: https://${local.endpoint}/${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}" 
+    "* URL: https://${local.endpoint}/~${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}" 
   ]
   bastion_description = <<BASTION_DESCRIPTION
 The Bastion instance runs the VPN service that can be used to
