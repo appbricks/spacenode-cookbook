@@ -15,6 +15,8 @@ output "vpn_idle_action" {
 #
 
 locals {
+  version = reverse(split("_", var.bastion_image_name))[0]
+
   endpoint = local.configure_dns ? module.bootstrap.bastion_fqdn : module.bootstrap.bastion_public_ip
   users    = [for u in split(",", var.vpn_users) : 
     "* URL: https://${local.endpoint}/~${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}" 
@@ -63,9 +65,10 @@ cloud space services securely while maintaining your privacy.
 Provider: ${local.public_cloud_provider}
 Region: ${var.region}
 VPN Type: ${local.vpn_type}
+Version: ${local.version}
 NODE_DESCRIPTION
 }
 
 output "cb_bastion_version" {
-  value = reverse(split("_", var.bastion_image_name))[0]
+  value = local.version
 }
