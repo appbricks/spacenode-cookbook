@@ -58,9 +58,10 @@ output "cb_managed_instances" {
 output "cb_node_description" {
   value = <<NODE_DESCRIPTION
 This My Cloud Space sandbox has been deployed to the following public
-cloud environment. Along with a virtual private network it includes
-a VPN serivice which allows you to securely connect to your personal 
-cloud space services securely while maintaining your privacy.
+cloud environment. Along with a sandboxed virtual cloud network it
+includes a VPN service which allows you to access the internet as
+well your personal cloud space services securely while maintaining
+your privacy.
 
 Provider: ${local.public_cloud_provider}
 Region: ${var.region}
