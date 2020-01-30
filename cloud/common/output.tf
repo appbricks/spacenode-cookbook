@@ -70,6 +70,10 @@ Version: ${local.version}
 NODE_DESCRIPTION
 }
 
+output "cb_vpc_name" {
+  value = module.bootstrap.vpc_name
+}
+
 output "cb_bastion_version" {
   value = local.version
 }
