@@ -41,6 +41,7 @@ output "cb_managed_instances" {
   value = [
     {
       "order": 0
+      "vpc_name": module.bootstrap.vpc_name
       "name": "bastion"
       "description": local.bastion_description
       "id": module.bootstrap.bastion_instance_id
