@@ -63,19 +63,6 @@ variable "vpn_users" {
   default = "user1|p@ssw0rd"
 }
 
-# Indicates action when no VPN clients have 
-# been connected to a node for some time
-#
-# @order: 20
-# @tags: recipe
-# @accepted_values: shutdown,none
-# @accepted_values_message: Please provide one of 'shutdown' or 'none'.
-#
-variable "vpn_idle_action" {
-  description = "Action to take when no VPN clients have been connected to the node for some time."
-  default = "shutdown"
-}
-
 #
 # Bastion image
 #

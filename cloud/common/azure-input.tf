@@ -5,6 +5,17 @@
 # @resource_instance_data_list: module.bootstrap.azurerm_managed_disk.bastion-data
 #
 
+# Indicates action when no VPN clients have 
+# been connected to a node for some time
+# 
+# NOTE: This value is not configurable for Azure as instances need to 
+#       be explicitely shutdown in order to deallocated resources.
+#
+variable "vpn_idle_action" {
+  description = "Action to take when no VPN clients have been connected to the node for some time."
+  default = "none"
+}
+
 #
 # Azure specific inputs
 #
