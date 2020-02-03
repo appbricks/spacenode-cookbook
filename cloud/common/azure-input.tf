@@ -26,12 +26,12 @@ variable "azure_dns_zone" {
 #
 # @order: 101
 # @tags: recipe,target-undeployed,target-deployed
-# @accepted_values: Standard_B1ls,Standard_B1s,Standard_B1ms,Standard_B2s,Standard_B2ms,Standard_B4ms
+# @accepted_values: Standard_B1s,Standard_B1ms,Standard_B2s,Standard_B2ms,Standard_B4ms
 # @accepted_values_message: Not a valid AWS general purpose instance type
 #
 variable "bastion_instance_type" {
   description = "The Azure instance type of the VPN node."
-  default = "Standard_B1ls"
+  default = "Standard_B1s"
 }
 
 #
