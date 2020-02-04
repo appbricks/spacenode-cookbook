@@ -24,7 +24,7 @@ module "bootstrap" {
   vpc_name = "${var.name}-ovpn-x-${var.region}"
 
   # DNS Name for VPC
-  vpc_dns_zone    = "${var.name}-ovpn-x-${var.region}.${var.azure_dns_zone}"
+  vpc_dns_zone    = lower("${var.name}-ovpn-x-${var.region}.${var.azure_dns_zone}")
   attach_dns_zone = local.configure_dns
 
   # Local DNS zone. This could also be the same as the public

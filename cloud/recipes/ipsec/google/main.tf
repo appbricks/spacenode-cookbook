@@ -24,7 +24,7 @@ module "bootstrap" {
   vpc_name = "${var.name}-ipsec-${var.region}"
 
   # DNS Name for VPC
-  vpc_dns_zone    = "${var.name}-ipsec-${var.region}.${var.google_dns_zone}"
+  vpc_dns_zone    = lower("${var.name}-ipsec-${var.region}.${var.google_dns_zone}")
   attach_dns_zone = local.configure_dns
 
   # Name of parent zone 'gcp.appbricks.cloud' to which the 
