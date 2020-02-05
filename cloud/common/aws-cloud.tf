@@ -1,9 +1,7 @@
 #
 # AWS Provider
 #
-provider "aws" {
-  # region = var.region
-}
+provider "aws" {}
 
 #
 # Backend state
