@@ -21,7 +21,7 @@ module "bootstrap" {
 
   # Name of VPC will be used to identify 
   # VPC specific cloud resources
-  vpc_name = "${var.name}-ovpn-${var.region}"
+  vpc_name = lower("${var.name}-ovpn-${var.region}")
 
   # DNS Name for VPC
   vpc_dns_zone    = lower("${var.name}-ovpn-${var.region}.${var.aws_dns_zone}")

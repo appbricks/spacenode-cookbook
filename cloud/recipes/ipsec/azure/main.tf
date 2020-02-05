@@ -21,7 +21,7 @@ module "bootstrap" {
 
   # Name of VPC will be used to identify 
   # VPC specific cloud resources
-  vpc_name = "${var.name}-ipsec-${var.region}"
+  vpc_name = lower("${var.name}-ipsec-${var.region}")
 
   # DNS Name for VPC
   vpc_dns_zone    = lower("${var.name}-ipsec-${var.region}.${var.azure_dns_zone}")

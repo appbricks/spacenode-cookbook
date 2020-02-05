@@ -21,7 +21,7 @@ module "bootstrap" {
 
   # Name of VPC will be used to identify 
   # VPC specific cloud resources
-  vpc_name = "${var.name}-ovpn-x-${var.region}"
+  vpc_name = lower("${var.name}-ovpn-x-${var.region}")
 
   # DNS Name for VPC
   vpc_dns_zone    = lower("${var.name}-ovpn-x-${var.region}.${var.google_dns_zone}")
