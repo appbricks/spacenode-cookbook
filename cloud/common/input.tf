@@ -87,7 +87,7 @@ variable "vpn_users" {
 # @depends_on: vpn_type=ovpn|ovpn-x
 #
 variable "ovpn_server_port" {
-  description = "The port on which the OpenVPN service will listen for connections."
+  description = "The port on which the OpenVPN service will listen for connections. Applies only when vpn_type is 'ovpn' or 'ovpn-x'."
   default = "4495"
 }
 
@@ -99,7 +99,7 @@ variable "ovpn_server_port" {
 # @depends_on: vpn_type=ovpn|ovpn-x
 #
 variable "ovpn_protocol" {
-  description = "The IP protocol to use for the encrypted VPN tunnel."
+  description = "The IP protocol to use for the encrypted VPN tunnel. Applies only when vpn_type is 'ovpn' or 'ovpn-x'."
   default = "udp"
 }
 
@@ -114,7 +114,7 @@ variable "ovpn_protocol" {
 # @depends_on: vpn_type=ovpn-x
 #
 variable "tunnel_vpn_port_start" {
-  description = "The start port over which an obfuscated Open VPN traffic will be tunnelled."
+  description = "The start port over which an obfuscated Open VPN traffic will be tunnelled. Applies only when vpn_type is 'ovpn-x'."
   default = "4496"
 }
 
@@ -126,7 +126,7 @@ variable "tunnel_vpn_port_start" {
 # @depends_on: vpn_type=ovpn-x
 #
 variable "tunnel_vpn_port_end" {
-  description = "The end port over which an obfuscated Open VPN traffic will be tunnelled."
+  description = "The end port over which an obfuscated Open VPN traffic will be tunnelled. Applies only when vpn_type is 'ovpn-x'."
   default = "5596"
 }
 
