@@ -6,6 +6,10 @@ output "dns_configured" {
   value = local.configure_dns
 }
 
+output "vpn_type" {
+  value = local.vpn_type
+}
+
 output "vpn_idle_action" {
   value = var.vpn_idle_action
 }
@@ -65,7 +69,7 @@ your privacy.
 
 Provider: ${local.public_cloud_provider}
 Region: ${var.region}
-VPN Type: ${local.vpn_type}
+VPN Type: ${local.vpn_type_name}
 Version: ${local.version}
 NODE_DESCRIPTION
 }
