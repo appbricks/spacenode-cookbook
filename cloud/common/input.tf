@@ -82,6 +82,7 @@ variable "vpn_users" {
 # OpenVPN port
 #
 # @order: 110
+# @tags: recipe
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
 # @depends_on: vpn_type=ovpn|ovpn-x
@@ -94,6 +95,7 @@ variable "ovpn_server_port" {
 # OpenVPN protocol
 #
 # @order: 111
+# @tags: recipe
 # @accepted_values: udp,tcp
 # @accepted_values_message: The protocol must be one of "udp" or "tcp".
 # @depends_on: vpn_type=ovpn|ovpn-x
@@ -109,6 +111,7 @@ variable "ovpn_protocol" {
 # VPN traffic obfuscation tunnel start port
 #
 # @order: 112
+# @tags: recipe
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
 # @depends_on: vpn_type=ovpn-x
@@ -121,6 +124,7 @@ variable "tunnel_vpn_port_start" {
 # VPN traffic obfuscation tunnel end port
 #
 # @order: 113
+# @tags: recipe
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
 # @depends_on: vpn_type=ovpn-x
