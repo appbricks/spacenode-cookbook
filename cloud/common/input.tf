@@ -76,7 +76,7 @@ variable "vpn_users" {
   default = "user1|p@ssw0rd"
 }
 
-# OVPN specifc inputs
+# OpenVPN specific inputs
 #
 
 # OpenVPN port
@@ -84,6 +84,7 @@ variable "vpn_users" {
 # @order: 110
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
+# @depends_on: vpn_type=ovpn
 #
 variable "ovpn_server_port" {
   description = "The port on which the OpenVPN service will listen for connections."
@@ -95,42 +96,22 @@ variable "ovpn_server_port" {
 # @order: 111
 # @accepted_values: udp,tcp
 # @accepted_values_message: The protocol must be one of "udp" or "tcp".
+# @depends_on: vpn_type=ovpn
 #
 variable "ovpn_protocol" {
   description = "The IP protocol to use for the encrypted VPN tunnel."
   default = "udp"
 }
 
-# OVPN-X specific inputs
+# Masked OpenVPN specific inputs
 #
 
-# OpenVPN port
+# VPN traffic obfuscation tunnel start port
 #
 # @order: 112
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
-#
-variable "ovpn_server_port" {
-  description = "The port on which the OpenVPN service will listen for connections."
-  default = "4495"
-}
-
-# OpenVPN protocol
-#
-# @order: 113
-# @accepted_values: udp,tcp
-# @accepted_values_message: The protocol must be one of "udp" or "tcp".
-#
-variable "ovpn_protocol" {
-  description = "The IP protocol to use for the encrypted VPN tunnel."
-  default = "udp"
-}
-
-# VPN traffic obfuscation tunnel start port
-#
-# @order: 114
-# @value_inclusion_filter: ^[0-9]+$
-# @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
+# @depends_on: vpn_type=ovpn-x
 #
 variable "tunnel_vpn_port_start" {
   description = "The start port over which obfuscated VPN traffic will be tunnelled."
@@ -139,9 +120,10 @@ variable "tunnel_vpn_port_start" {
 
 # VPN traffic obfuscation tunnel end port
 #
-# @order: 115
+# @order: 113
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
+# @depends_on: vpn_type=ovpn-x
 #
 variable "tunnel_vpn_port_end" {
   description = "The end port over which obfuscated VPN traffic will be tunnelled."
