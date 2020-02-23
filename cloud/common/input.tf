@@ -84,7 +84,7 @@ variable "vpn_users" {
 # @order: 110
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
-# @depends_on: vpn_type=ovpn|vpn_type=ovpn-x
+# @depends_on: vpn_type=ovpn|ovpn-x
 #
 variable "ovpn_server_port" {
   description = "The port on which the OpenVPN service will listen for connections."
@@ -96,7 +96,7 @@ variable "ovpn_server_port" {
 # @order: 111
 # @accepted_values: udp,tcp
 # @accepted_values_message: The protocol must be one of "udp" or "tcp".
-# @depends_on: vpn_type=ovpn|vpn_type=ovpn-x
+# @depends_on: vpn_type=ovpn|ovpn-x
 #
 variable "ovpn_protocol" {
   description = "The IP protocol to use for the encrypted VPN tunnel."
