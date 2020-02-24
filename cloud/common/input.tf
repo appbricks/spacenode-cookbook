@@ -24,7 +24,7 @@ variable "region" {
 #
 variable "name" {
   description = "Name that uniquely identies your VPN node and resources created for it."
-  default = "MyVPN"
+  default = "MyCloudSpace"
 }
 
 # Whether a DNS zone should be attached
