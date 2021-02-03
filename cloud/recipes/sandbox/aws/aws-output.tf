@@ -1,0 +1,1 @@
+../../../common/sandbox/aws-output.tf

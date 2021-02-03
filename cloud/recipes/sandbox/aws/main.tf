@@ -38,15 +38,17 @@ module "bootstrap" {
   vpn_type               = local.vpn_type
   vpn_tunnel_all_traffic = "yes"
 
-  ovpn_server_port = local.vpn_type == "openvpn" ? var.ovpn_server_port : ""
-  ovpn_protocol    = local.vpn_type == "openvpn" ? var.ovpn_protocol : ""
+  ovpn_service_port = local.vpn_type == "openvpn" ? var.ovpn_service_port : ""
+  ovpn_protocol     = local.vpn_type == "openvpn" ? var.ovpn_protocol : ""
+
+  wireguard_service_port = var.wireguard_service_port
 
   vpn_idle_action = var.vpn_idle_action
 
   # Tunnel for VPN to handle situations where 
   # OpenVPN is blocked or throttled by ISP.
-  tunnel_vpn_port_start = var.vpn_type == "ovpn-x" ? var.tunnel_vpn_port_start : ""
-  tunnel_vpn_port_end   = var.vpn_type == "ovpn-x" ? var.tunnel_vpn_port_end : ""
+  tunnel_vpn_port_start = local.tunnel_vpn_port_start
+  tunnel_vpn_port_end   = local.tunnel_vpn_port_end
 
   # Whether to allow SSH access to bastion server
   bastion_allow_public_ssh = true

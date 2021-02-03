@@ -1,1 +1,1 @@
-../../../common/input.tf
+../../../common/sandbox/input.tf

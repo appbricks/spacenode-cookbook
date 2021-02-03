@@ -24,7 +24,7 @@ variable "region" {
 #
 variable "name" {
   description = "Name that uniquely identies your VPN node and resources created for it."
-  default = "MyCloudSpace"
+  default = "MyCS"
 }
 
 # Whether a DNS zone should be attached
@@ -55,12 +55,12 @@ variable "certify_bastion" {
 #
 # @order: 15
 # @tags: recipe
-# @accepted_values: ipsec,ovpn,ovpn-x
-# @accepted_values_message: VPN type must be one of ipsec, ovpn or ovpn-x.
+# @accepted_values: wg,ovpn,ipsec
+# @accepted_values_message: VPN type must be one of wg (WireGuard), ovpn (OpenVPN) or ipsec (IPSec/IKEv2).
 #
 variable "vpn_type" {
   description = "Type of VPN to deploy for the sandbox."
-  default = "ovpn"
+  default = "wg"
 }
 
 # VPN Users - list of 'user|password' pairs
@@ -76,61 +76,90 @@ variable "vpn_users" {
   default = "user1|p@ssw0rd"
 }
 
-# OpenVPN specific inputs
+# Wireguard specific inputs
 #
 
-# OpenVPN port
+# Wireguard port
 #
 # @order: 110
 # @tags: recipe
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
-# @depends_on: vpn_type=ovpn|ovpn-x
+# @depends_on: vpn_type=wg
 #
-variable "ovpn_server_port" {
-  description = "The port on which the OpenVPN service will listen for connections. Applies only when vpn_type is 'ovpn' or 'ovpn-x'."
+variable "wireguard_service_port" {
+  description = "The port on which the WireGuard service will listen for connections.."
+  default = "3399"
+}
+
+# OpenVPN specific inputs
+#
+
+# OpenVPN port
+#
+# @order: 111
+# @tags: recipe
+# @value_inclusion_filter: ^[0-9]+$
+# @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
+# @depends_on: vpn_type=ovpn
+#
+variable "ovpn_service_port" {
+  description = "The port on which the OpenVPN service will listen for connections."
   default = "4495"
 }
 
 # OpenVPN protocol
 #
-# @order: 111
+# @order: 112
 # @tags: recipe
 # @accepted_values: udp,tcp
 # @accepted_values_message: The protocol must be one of "udp" or "tcp".
-# @depends_on: vpn_type=ovpn|ovpn-x
+# @depends_on: vpn_type=ovpn
 #
 variable "ovpn_protocol" {
-  description = "The IP protocol to use for the encrypted VPN tunnel. Applies only when vpn_type is 'ovpn' or 'ovpn-x'."
+  description = "The IP protocol to use for the encrypted VPN tunnel."
   default = "udp"
 }
 
+# VPN traffic masking
+#
+
 # Masked OpenVPN specific inputs
 #
+# @order: 113
+# @tags: recipe
+# @accepted_values: false,true
+# @accepted_values_message: Please enter 'true' or 'false'.
+# @depends_on: vpn_type=wg|ovpn
+#
+variable "mask_vpn_traffic" {
+  description = "Obfusucate VPN traffic to bypass ISP/Firewall VPN detection."
+  default = "no"
+}
 
 # VPN traffic obfuscation tunnel start port
 #
-# @order: 112
+# @order: 114
 # @tags: recipe
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
-# @depends_on: vpn_type=ovpn-x
+# @depends_on: vpn_type=wg|ovpn
 #
 variable "tunnel_vpn_port_start" {
-  description = "The start port over which an obfuscated Open VPN traffic will be tunnelled. Applies only when vpn_type is 'ovpn-x'."
+  description = "The start port over which an obfuscated VPN traffic will be tunnelled."
   default = "4496"
 }
 
 # VPN traffic obfuscation tunnel end port
 #
-# @order: 113
+# @order: 114
 # @tags: recipe
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
-# @depends_on: vpn_type=ovpn-x
+# @depends_on: vpn_type=wg|ovpn
 #
 variable "tunnel_vpn_port_end" {
-  description = "The end port over which an obfuscated Open VPN traffic will be tunnelled. Applies only when vpn_type is 'ovpn-x'."
+  description = "The end port over which an obfuscated VPN traffic will be tunnelled."
   default = "5596"
 }
 
@@ -163,6 +192,26 @@ variable "bastion_image_name" {
 # Common local variables
 #
 locals {
-  vpn_type = var.vpn_type == "ipsec" ? "ipsec" : "openvpn"
-  vpn_type_name = var.vpn_type == "ipsec" ? "IPSec/IKEv2" : var.vpn_type == "ovpn" ? "OpenVPN" : "OpenVPN-Masked"
+  vpn_type = (
+    var.vpn_type == "wg" 
+      ? "wireguard" 
+      : var.vpn_type == "ovpn" 
+        ? "openvpn" 
+        : "ipsec"
+  )
+  vpn_type_name = (
+    var.vpn_type == "wg" 
+      ? "WireGuard" 
+      : var.vpn_type == "ovpn" 
+        ? "OpenVPN" 
+        : "IPSec/IKEv2"
+  )
+  tunnel_vpn_port_start = (
+    var.mask_vpn_traffic == "yes" 
+      ? var.tunnel_vpn_port_start : ""
+  )
+  tunnel_vpn_port_end = (
+    var.mask_vpn_traffic == "yes" 
+      ? var.tunnel_vpn_port_end : ""
+  )
 }

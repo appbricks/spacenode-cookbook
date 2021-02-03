@@ -1,1 +1,1 @@
-../../../common/azure-input.tf
+../../../common/sandbox/azure-input.tf
