@@ -36,14 +36,13 @@ module "bootstrap" {
   vpn_users = split(",", var.vpn_users)
 
   vpn_type               = local.vpn_type
+  vpn_idle_action        = var.idle_action
   vpn_tunnel_all_traffic = "yes"
 
   ovpn_service_port = local.vpn_type == "openvpn" ? var.ovpn_service_port : ""
   ovpn_protocol     = local.vpn_type == "openvpn" ? var.ovpn_protocol : ""
 
   wireguard_service_port = var.wireguard_service_port
-
-  vpn_idle_action = var.vpn_idle_action
 
   # Tunnel for VPN to handle situations where 
   # OpenVPN is blocked or throttled by ISP.

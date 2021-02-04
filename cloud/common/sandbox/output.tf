@@ -10,8 +10,12 @@ output "vpn_type" {
   value = local.vpn_type
 }
 
-output "vpn_idle_action" {
-  value = var.vpn_idle_action
+output "vpn_masking_available" {
+  value = var.mask_vpn_traffic
+}
+
+output "idle_action" {
+  value = var.idle_action
 }
 
 #

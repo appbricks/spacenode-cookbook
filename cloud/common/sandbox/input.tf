@@ -63,9 +63,22 @@ variable "vpn_type" {
   default = "wg"
 }
 
-# VPN Users - list of 'user|password' pairs
+# Indicates action when no VPN clients have 
+# been connected to a node for some time
 #
 # @order: 16
+# @tags: recipe
+# @accepted_values: shutdown,none
+# @accepted_values_message: Please provide one of 'shutdown' or 'none'.
+#
+variable "idle_action" {
+  description = "Action to take when no VPN clients have been connected to the node for some time."
+  default = "shutdown"
+}
+
+# VPN Users - list of 'user|password' pairs
+#
+# @order: 17
 # @tags: recipe
 # @value_inclusion_filter: ^[a-zA-Z][-a-zA-Z0-9]*|[a-zA-Z0-9!@#%&:;<>_`~{}\^\$\*\+\-\.\?\"\'\[\]\(\)]*,?$
 # @value_inclusion_filter_message: User names cannot start with a numeric and must be only apha-numeric with the exception of a '-'. Passwords can contain special characters except for '|' and ','.
