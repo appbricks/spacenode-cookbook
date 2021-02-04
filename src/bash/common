@@ -51,8 +51,8 @@ function common::check_eula() {
 
   if [[ ! -e $workspace_dir/eula_accepted ]]; then
 
-    echo -e "${GREEN}\nBefore you can deploy Cloud VPN nodes you need to review"
-    echo -e "and accept the AppBricks, Inc. Software End User Agreement." 
+    echo -e "${GREEN}\nBefore you can deploy Cloud nodes you need to review and"
+    echo -e "accept the AppBricks, Inc. Software End User Agreement." 
     echo -e "The terms of the agreement can be found at the following"
     echo -e "link.\n"
     echo -e "${BLUE}https://appbricks.io/legal/\n"
@@ -61,7 +61,7 @@ function common::check_eula() {
     [[ -n $option && $option != q && $option != Q ]] || exit 1
 
     [[ $option == yes ]] || exit 1
-    echo -e "${GREEN}\nThank you. You can proceed to launch, run and manage you VPN nodes in the cloud now...\n${NC}"
+    echo -e "${GREEN}\nThank you. You can proceed to launch, run and manage you nodes in the cloud now...\n${NC}"
 
     touch $workspace_dir/eula_accepted
   fi
@@ -161,10 +161,10 @@ function common::validate_workspace() {
   local command=$1
   local first
 
-  if [[ ! -e ${template_dir}/$vpn_type ]]; then
+  if [[ ! -e ${template_dir}/$node_type ]]; then
     eval "usage::${command}"
-    echo -e "${RED}\nERROR! Unknown VPN type.\n" 
-    echo -e "${GREEN}Available VPN types for deployment are:\n"
+    echo -e "${RED}\nERROR! Unknown node type.\n" 
+    echo -e "${GREEN}Available node types for deployment are:\n"
     first=y
     for d in $(find ${template_dir} -maxdepth 1 -type d -print); do
       if [[ $first == n ]]; then
@@ -176,12 +176,12 @@ function common::validate_workspace() {
     echo -e "${NC}"
     exit 1
   fi
-  if [[ ! -e ${template_dir}/$vpn_type/$cloud ]]; then
+  if [[ ! -e ${template_dir}/$node_type/$cloud ]]; then
     eval "usage::${command}"
-    echo -e "${RED}\nERROR! Unknown cloud target for VPN of type \"$vpn_type\".\n" 
+    echo -e "${RED}\nERROR! Unknown cloud target for node of type \"$node_type\".\n" 
     echo -e "${GREEN}Cloud targets available for deployment are:\n"
     first=y
-    for d in $(find ${template_dir}/$vpn_type -maxdepth 1 -type d -print); do 
+    for d in $(find ${template_dir}/$node_type -maxdepth 1 -type d -print); do 
       if [[ $first == n ]]; then
         echo "- \"$(basename $d)\""
       else
@@ -202,8 +202,8 @@ function common::validate_workspace() {
 
   common::validate_cloud_credentials $cloud
 
-  template_dir=${template_dir}/${vpn_type}/${cloud}
-  workspace_dir=${workspace_dir}/${vpn_type}/${cloud}
+  template_dir=${template_dir}/${node_type}/${cloud}
+  workspace_dir=${workspace_dir}/${node_type}/${cloud}
   mkdir -p $workspace_dir
 }
 
@@ -224,23 +224,23 @@ function common::validate_value_from_list() {
 
 function ui::print_nodes_table() {
 
-  local vpn_nodes=("$@")
+  local nodes=("$@")
 
   printf "     +------------+----------+----------------------+----------------------------------------------------+--------------+----------+\n"
   printf "     | ${BOLD}%-10s${NORMAL} | ${BOLD}%-8s${NORMAL} | ${BOLD}%-20s${NORMAL} | ${BOLD}%-50s${NORMAL} | ${BOLD}%-12s${NORMAL} | ${BOLD}%-8s${NORMAL} |\n" \
-    'VPN Type' 'Cloud' 'Region' 'Name' 'Status' 'Version'
+    'Node' 'Cloud' 'Region' 'Address' 'Status' 'Version'
   printf "+----+------------+----------+----------------------+----------------------------------------------------+--------------+----------+\n"
 
-  for ((i=0; i<${#vpn_nodes[@]}; i++)); do
-    node_detail=( $(echo "${vpn_nodes[$i]}" | sed "s/|/ /g") )
+  for ((i=0; i<${#nodes[@]}; i++)); do
+    node_detail=${nodes[$i]}
     printf "| %2d | %-10s | %-8s | %-20s | %-50s | %-12s | %-8s |\n" \
       $i \
-      ${node_detail[0]} \
-      ${node_detail[1]} \
-      ${node_detail[2]} \
-      ${node_detail[3]} \
-      ${node_detail[4]} \
-      ${node_detail[5]}
+      "$(echo "$node_detail" | awk -F '|' '{ print $1 }')" \
+      "$(echo "$node_detail" | awk -F '|' '{ print $2 }')" \
+      "$(echo "$node_detail" | awk -F '|' '{ print $3 }')" \
+      "$(echo "$node_detail" | awk -F '|' '{ print $4 }')" \
+      "$(echo "$node_detail" | awk -F '|' '{ print $5 }')" \
+      "$(echo "$node_detail" | awk -F '|' '{ print $6 }')"
   done
 
   echo -e "+----+------------+----------+----------------------+----------------------------------------------------+--------------+----------+"  

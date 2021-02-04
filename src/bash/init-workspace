@@ -32,9 +32,11 @@ if [[ ! -e ${control_file_dir}/deployment-vars ]]; then
 export TF_VAR_name=
 
 # DNS Zone for all deployments
-export TF_VAR_aws_dns_zone=
-export TF_VAR_azure_dns_zone=
-export TF_VAR_google_dns_zone=
+export TF_VAR_attach_dns_zone=false
+# Uncomment only if attaching to a DNS zone 
+# export TF_VAR_aws_dns_zone=
+# export TF_VAR_azure_dns_zone=
+# export TF_VAR_google_dns_zone=
 
 # Values to used for creating self-signed X509 certs
 export TF_VAR_company_name="appbricks"
@@ -43,8 +45,6 @@ export TF_VAR_locality="Boston"
 export TF_VAR_province="MA"
 export TF_VAR_country="US"
 
-export TF_VAR_vpn_users='[
-  "user|password"
-]'
+export TF_VAR_vpn_users="user|password"
 ---EOF
 fi

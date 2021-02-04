@@ -126,20 +126,21 @@ function cloud::nodes() {
   for o in $(find $workspace_dir -name "output.json" -type f -print); do
 
     local bastion_instance_id=$(cat $o | jq -r '.cb_managed_instances.value[0] | .id')
-    local bastion_fqdn=$(cat $o | jq -r '.cb_managed_instances.value[0] | .fqdn')
+    local bastion_address=$(cat $o | jq -r '.cb_managed_instances.value[0] | .fqdn')
+    [[ -n $bastion_address ]] || bastion_address=$(cat $o | jq -r '.cb_managed_instances.value[0] | .public_ip')
     local bastion_version=$(cat $o | jq -r .cb_recipe_version.value)
 
     local region_path=$(dirname $o)
     local region=$(basename $region_path)
     local cloud_path=$(dirname $region_path)
     local cloud=$(basename $cloud_path)
-    local vpn_type_path=$(dirname $cloud_path)
-    local vpn_type=$(basename $vpn_type_path)
+    local node_type_path=$(dirname $cloud_path)
+    local node_type=$(basename $node_type_path)
 
-    >&2 echo -e -n "${BROWN_ORANGE}Retrieving details of instance \"${bastion_fqdn}\"...                                                  ${NC}\r"
+    >&2 echo -e -n "${BROWN_ORANGE}Retrieving details of instance \"${bastion_address}\"...                                                  ${NC}\r"
     local state=$(cloud::get_node_state "$cloud" "$region" "$bastion_instance_id")
     
-    echo "${vpn_type}|${cloud}|${region}|${bastion_fqdn}|${state}|${bastion_version}|${bastion_instance_id}"
+    echo "${node_type}|${cloud}|${region}|${bastion_address}|${state}|${bastion_version}|${bastion_instance_id}"
   done
 
   set -e

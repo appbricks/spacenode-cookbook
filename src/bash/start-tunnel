@@ -4,10 +4,6 @@ workspace_dir=$1 && shift
 template_dir=$1 && shift
 cloud=${1:-<CLOUD>} && shift
 
-# Obfuscation tunnel service available
-# only for ovpn-x VPN types
-vpn_type=ovpn-x
-
 source $(dirname $BASH_SOURCE)/common
 set -euo pipefail
 
@@ -74,8 +70,14 @@ if [[ $tunnel_type != udp_over_tcp \
   exit 1
 fi
 
+vpn_masking_available=$(cat $deployment_output | jq -r .vpn_masking_available.value)
+if [[ $vpn_masking_available != true ]]; then
+  echo -e "${RED}\nERROR! Node does not provide a VPN with a masking service.${NC}"
+  exit 1
+fi
+
 deployment_output=${workspace_dir}/${region}/output.json
-bastion_instance_id=$(cat $deployment_output | jq -r .bastion_instance_id.value)
+bastion_instance_id=$(cat $deployment_output | jq -r '.cb_managed_instances.value[0] | .id')
 state=$(cloud::get_node_state "$cloud" "$region" "$bastion_instance_id")
 
 if [[ $state == stopped ]]; then

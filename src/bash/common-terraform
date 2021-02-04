@@ -2,7 +2,7 @@
 
 function terraform::set_cloud_region() {
 
-  local vpn_type=$1
+  local node_type=$1
   local cloud=$2
   local region=$3
 
@@ -37,7 +37,7 @@ function terraform::set_cloud_region() {
 
 function terraform::init() {
 
-  local vpn_type=$1
+  local node_type=$1
   local cloud=$2
   local region=$3
   local template_dir=$4
@@ -60,7 +60,7 @@ function terraform::init() {
       # Initialize Terraform
       echo -e "${GREEN}Initializing terraform context...${NC}"
       terraform init \
-        -backend-config="key=${vpn_type}" \
+        -backend-config="key=${node_type}" \
         -backend-config="bucket=${bucket_name}" \
         $template_dir
       echo
@@ -139,7 +139,7 @@ function terraform::init() {
       # Initialize Terraform
       echo -e "${GREEN}Initializing terraform context...${NC}"
       terraform init \
-        -backend-config="prefix=${vpn_type}" \
+        -backend-config="prefix=${node_type}" \
         -backend-config="bucket=${bucket_name}" \
         $template_dir
       echo
@@ -159,13 +159,13 @@ terraform {
 
 function terraform::apply() {
 
-  local vpn_type=$1
+  local node_type=$1
   local cloud=$2
   local region=$3
   local template_dir=$4
   local start=`date +%s`
 
-  echo -e "${GREEN}Deploying VPN node type \"${vpn_type}\" to region \"${region}\" of \"$cloud\" cloud...${NC}"
+  echo -e "${GREEN}Deploying VPN node type \"${node_type}\" to region \"${region}\" of \"$cloud\" cloud...${NC}"
 
   # Apply Terraform template and filter out
   # any output values for security purposes.
@@ -190,12 +190,12 @@ function terraform::apply() {
 
 function terraform::taint_bastion() {
 
-  local vpn_type=$1
+  local node_type=$1
   local cloud=$2
   local region=$3
   local template_dir=$4
 
-  echo -e "${GREEN}Flagging VPN node type \"${vpn_type}\" in region \"${region}\" of \"$cloud\" cloud to be rebuilt...${NC}"
+  echo -e "${GREEN}Flagging VPN node type \"${node_type}\" in region \"${region}\" of \"$cloud\" cloud to be rebuilt...${NC}"
 
   case $cloud in
     aws)
@@ -212,12 +212,12 @@ function terraform::taint_bastion() {
 
 function terraform::plan() {
 
-  local vpn_type=$1
+  local node_type=$1
   local cloud=$2
   local region=$3
   local template_dir=$4
 
-  echo -e "${GREEN}Showing deployment plan for VPN node type \"${vpn_type}\" in region \"${region}\" of \"$cloud\" cloud...${NC}"
+  echo -e "${GREEN}Showing deployment plan for VPN node type \"${node_type}\" in region \"${region}\" of \"$cloud\" cloud...${NC}"
 
   # Output Terraform plan
   terraform plan $template_dir
@@ -225,12 +225,12 @@ function terraform::plan() {
 
 function terraform::destroy() {
 
-  local vpn_type=$1
+  local node_type=$1
   local cloud=$2
   local region=$3
   local template_dir=$4
 
-  echo -e "${GREEN}Destroying VPN node type \"${vpn_type}\" deployed to region \"${region}\" of \"$cloud\" cloud...${NC}"
+  echo -e "${GREEN}Destroying VPN node type \"${node_type}\" deployed to region \"${region}\" of \"$cloud\" cloud...${NC}"
 
   # Apply Terraform template and filter out
   # any output values for security purposes.

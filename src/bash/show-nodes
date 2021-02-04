@@ -15,8 +15,8 @@ if [[ $# -gt 0 ]]; then
   exit 1
 fi
 
-echo -e "\n${GREEN}${BOLD}VPN Nodes deployed to the cloud${NORMAL}"
-echo -e "===============================${NC}\n"
+echo -e "\n${GREEN}${BOLD}Nodes deployed to the cloud${NORMAL}"
+echo -e "===========================${NC}\n"
 
 vpn_nodes=( $(cloud::nodes $workspace_dir) )
 if [[ ${#vpn_nodes[@]} -eq 0 ]]; then
@@ -38,13 +38,13 @@ if [[ ! $option =~ $re \
   exit 1
 fi
 
-node_detail=( $(echo "${vpn_nodes[$option]}" | sed "s/|/ /g") )
-vpn_type=${node_detail[0]}
-cloud=${node_detail[1]}
-region=${node_detail[2]}
-node_name=${node_detail[3]}
-node_status=${node_detail[4]}
-node_id=${node_detail[6]}
+node_detail=${vpn_nodes[$option]}
+node_type=$(echo "$node_detail" | awk -F '|' '{ print $1 }')
+cloud=$(echo "$node_detail" | awk -F '|' '{ print $2 }')
+region=$(echo "$node_detail" | awk -F '|' '{ print $3 }')
+node_name=$(echo "$node_detail" | awk -F '|' '{ print $4 }')
+node_status=$(echo "$node_detail" | awk -F '|' '{ print $5 }')
+node_id=$(echo "$node_detail" | awk -F '|' '{ print $7 }')
 
 echo -e "\n${GREEN}${BOLD}What do you want to do:${NORMAL}"
 echo -e "1) Update Node"
@@ -72,7 +72,7 @@ case $option in
     echo
     $scripts_dir/deploy-node \
       $workspace_dir $template_dir \
-      $vpn_type $cloud -r $region -u
+      $node_type $cloud -r $region -u
     ;;
   2)
     if [[ $node_status == running ]]; then
@@ -82,7 +82,7 @@ case $option in
       echo
       $scripts_dir/download-vpn-config \
         $workspace_dir $template_dir \
-        $vpn_type $cloud -r $region \
+        $node_type $cloud -r $region \
         -u $username -p $password
     fi
     ;;
@@ -102,6 +102,6 @@ case $option in
     echo
     $scripts_dir/destroy-node \
       $workspace_dir $template_dir \
-      $vpn_type $cloud -r $region
+      $node_type $cloud -r $region
     ;;
 esac
