@@ -93,16 +93,16 @@ fi
 
 output=$(cat ${workspace_dir}/${region}/output.json)
 
-vpn_type=$(echo "$output" | jq -r .vpn_type.value)
+vpn_type=$(echo "$output" | jq -r .cb_vpn_type.value)
 if [[ -z $vpn_type ]]; then
   echo -e "${RED}\nERROR! Node does not provide a VPN service.${NC}"
   exit 1
 fi
 
 node_name=$(echo "$output" | jq -r .cb_vpc_name.value)
-vpn_masking_available=$(echo "$output" | jq -r .vpn_masking_available.value)
+vpn_masking_available=$(echo "$output" | jq -r .cb_vpn_masking_available.value)
 bastion_fqdn=$(echo "$output" | jq -r '.cb_managed_instances.value[0] | .fqdn')
-dns_configured=$(echo "$output" | jq -r .dns_configured.value)
+dns_configured=$(echo "$output" | jq -r .cb_dns_configured.value)
 if [[ $dns_configured == true ]]; then
   vpn_server_host=$bastion_fqdn
 else

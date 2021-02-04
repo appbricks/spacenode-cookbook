@@ -70,7 +70,7 @@ if [[ $tunnel_type != udp_over_tcp \
   exit 1
 fi
 
-vpn_masking_available=$(cat $deployment_output | jq -r .vpn_masking_available.value)
+vpn_masking_available=$(cat $deployment_output | jq -r .cb_vpn_masking_available.value)
 if [[ $vpn_masking_available != true ]]; then
   echo -e "${RED}\nERROR! Node does not provide a VPN with a masking service.${NC}"
   exit 1

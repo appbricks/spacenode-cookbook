@@ -65,7 +65,7 @@ pushd ${workspace_dir}/${region} >/dev/null 2>&1
 
 if [[ $idle_shutdown == yes ]]; then
   if [[ -e ${workspace_dir}/${region}/output.json ]]; then
-    idle_action=$(cat ${workspace_dir}/${region}/output.json | jq -r .idle_action.value)
+    idle_action=$(cat ${workspace_dir}/${region}/output.json | jq -r .cb_idle_action.value)
     export TF_VAR_idle_action="$idle_action"
   else
     export TF_VAR_idle_action="shutdown"

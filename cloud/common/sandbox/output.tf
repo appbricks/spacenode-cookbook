@@ -2,19 +2,19 @@
 # Output
 #
 
-output "dns_configured" {
+output "cb_dns_configured" {
   value = local.configure_dns
 }
 
-output "vpn_type" {
+output "cb_vpn_type" {
   value = local.vpn_type
 }
 
-output "vpn_masking_available" {
+output "cb_vpn_masking_available" {
   value = var.mask_vpn_traffic
 }
 
-output "idle_action" {
+output "cb_idle_action" {
   value = var.idle_action
 }
 
