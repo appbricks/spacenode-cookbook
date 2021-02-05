@@ -2,22 +2,6 @@
 # Output
 #
 
-output "cb_dns_configured" {
-  value = local.configure_dns
-}
-
-output "cb_vpn_type" {
-  value = local.vpn_type
-}
-
-output "cb_vpn_masking_available" {
-  value = var.mask_vpn_traffic
-}
-
-output "cb_idle_action" {
-  value = var.idle_action
-}
-
 #
 # Create help/usage text for the node
 #
@@ -55,6 +39,7 @@ output "cb_managed_instances" {
       "id": module.bootstrap.bastion_instance_id
       "fqdn": module.bootstrap.bastion_fqdn
       "public_ip": module.bootstrap.bastion_public_ip
+      "private_ip": ""
       "ssh_port": module.bootstrap.bastion_admin_ssh_port
       "ssh_user": module.bootstrap.bastion_admin_user 
       "ssh_key": module.bootstrap.bastion_admin_sshkey
@@ -78,10 +63,38 @@ Version: ${local.version}
 NODE_DESCRIPTION
 }
 
+output "cb_node_version" {
+  value = local.version
+}
+
+output "cb_vpc_id" {
+  value = module.bootstrap.vpc_id
+}
+
 output "cb_vpc_name" {
   value = module.bootstrap.vpc_name
 }
 
-output "cb_bastion_version" {
-  value = local.version
+output "cb_deployment_networks" {
+  value = module.bootstrap.admin_subnetworks
+}
+
+output "cb_dns_configured" {
+  value = local.configure_dns
+}
+
+output "cb_internal_pdns_api_key" {
+  value = module.bootstrap.powerdns_api_key
+}
+
+output "cb_vpn_type" {
+  value = local.vpn_type
+}
+
+output "cb_vpn_masking_available" {
+  value = var.mask_vpn_traffic
+}
+
+output "cb_idle_action" {
+  value = var.idle_action
 }
