@@ -44,7 +44,7 @@ curl -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /u
 chmod +x /usr/local/bin/jq
 
 # Install latest version of Terraform
-terraform_version=0.12.13
+terraform_version=0.14.5
 curl -OL https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_amd64.zip
 unzip terraform_${terraform_version}_linux_amd64.zip
 mv terraform /usr/local/bin
