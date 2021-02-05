@@ -1,0 +1,1 @@
+../../../common/minecraft/output.tf
