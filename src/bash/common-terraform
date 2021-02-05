@@ -165,7 +165,7 @@ function terraform::apply() {
   local template_dir=$4
   local start=`date +%s`
 
-  echo -e "${GREEN}Deploying VPN node type \"${node_type}\" to region \"${region}\" of \"$cloud\" cloud...${NC}"
+  echo -e "${GREEN}Deploying node type \"${node_type}\" to region \"${region}\" of \"$cloud\" cloud...${NC}"
 
   # Apply Terraform template and filter out
   # any output values for security purposes.
@@ -182,8 +182,10 @@ function terraform::apply() {
   local minutes=$((time/60))
   local seconds=$((time%60))
 
-  cat output.json | jq -r '.cb_managed_instances.value[0] | .ssh_key' > bastion-ssh-key.pem
-  chmod +0600 bastion-ssh-key.pem
+  o=$(cat output.json)
+  instance_name=$(echo "$o" | jq -r '.cb_managed_instances.value[0] | .name')
+  echo "$o" | jq -r '.cb_managed_instances.value[0] | .ssh_key' > ${instance_name}-ssh-key.pem
+  chmod +0600 ${instance_name}-ssh-key.pem
 
   echo -e "${GREEN}Deploy operation completed in ${minutes}m and ${seconds}s."
 }
@@ -195,7 +197,7 @@ function terraform::taint_bastion() {
   local region=$3
   local template_dir=$4
 
-  echo -e "${GREEN}Flagging VPN node type \"${node_type}\" in region \"${region}\" of \"$cloud\" cloud to be rebuilt...${NC}"
+  echo -e "${GREEN}Flagging node type \"${node_type}\" in region \"${region}\" of \"$cloud\" cloud to be rebuilt...${NC}"
 
   case $cloud in
     aws)
@@ -217,7 +219,7 @@ function terraform::plan() {
   local region=$3
   local template_dir=$4
 
-  echo -e "${GREEN}Showing deployment plan for VPN node type \"${node_type}\" in region \"${region}\" of \"$cloud\" cloud...${NC}"
+  echo -e "${GREEN}Showing deployment plan for node type \"${node_type}\" in region \"${region}\" of \"$cloud\" cloud...${NC}"
 
   # Output Terraform plan
   terraform plan $template_dir
@@ -230,7 +232,7 @@ function terraform::destroy() {
   local region=$3
   local template_dir=$4
 
-  echo -e "${GREEN}Destroying VPN node type \"${node_type}\" deployed to region \"${region}\" of \"$cloud\" cloud...${NC}"
+  echo -e "${GREEN}Destroying node type \"${node_type}\" deployed to region \"${region}\" of \"$cloud\" cloud...${NC}"
 
   # Apply Terraform template and filter out
   # any output values for security purposes.

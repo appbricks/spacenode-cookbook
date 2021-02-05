@@ -48,7 +48,7 @@ function cloud::get_node_state() {
 
   local cloud=$1
   local region=$2
-  local bastion_instance_id=$3
+  local managed_instance_id=$3
 
   local state=""
 
@@ -57,7 +57,7 @@ function cloud::get_node_state() {
       cloud::set_aws_credentials
       local instance_detail=$(aws \
         ec2 describe-instances \
-          --instance-ids "$bastion_instance_id" \
+          --instance-ids "$managed_instance_id" \
           --region "$region")
       
       if [[ $? -eq 0 ]]; then
@@ -68,7 +68,7 @@ function cloud::get_node_state() {
     azure)
       cloud::set_azure_credentials
       local instance_detail=$(az vm show \
-        --id "$bastion_instance_id" --show-details)
+        --id "$managed_instance_id" --show-details)
 
       if [[ $? -eq 0 ]]; then
         azure_vm_state=$(echo "$instance_detail" \
@@ -94,7 +94,7 @@ function cloud::get_node_state() {
         | jq -r --arg region "$region" \
           '[ .[] | select(.region | match($region)) | .name ] | sort | .[0]')
       local instance_detail=$(gcloud compute instances describe \
-        "$bastion_instance_id" --zone "$gcp_zone" --format json)
+        "$managed_instance_id" --zone "$gcp_zone" --format json)
 
       if [[ $? -eq 0 ]]; then
         local gcp_state=$(echo "$instance_detail" \
@@ -125,11 +125,15 @@ function cloud::nodes() {
 
   for o in $(find $workspace_dir -name "output.json" -type f -print); do
 
-    local bastion_instance_id=$(cat $o | jq -r '.cb_managed_instances.value[0] | .id')
-    local bastion_address=$(cat $o | jq -r '.cb_managed_instances.value[0] | .fqdn')
-    [[ -n $bastion_address ]] || bastion_address=$(cat $o | jq -r '.cb_managed_instances.value[0] | .public_ip')
-    local bastion_version=$(cat $o | jq -r .cb_recipe_version.value)
-
+    local managed_instance_name=$(cat $o | jq -r '.cb_managed_instances.value[0] | .name')
+    local managed_instance_id=$(cat $o | jq -r '.cb_managed_instances.value[0] | .id')
+    local instance_address=$(cat $o | jq -r '.cb_managed_instances.value[0] | .fqdn')
+    [[ -n $instance_address ]] || instance_address=$(cat $o | jq -r '.cb_managed_instances.value[0] | .public_ip')
+    [[ -n $instance_address ]] || instance_address="$(cat $o | jq -r '.cb_managed_instances.value[0] | .private_ip')[private]"
+    local instance_version=$(cat $o | jq -r .cb_node_version.value)
+    local version="${instance_version##*_}"
+    [[ "$instance_version" != "$version" ]] || version=""
+    
     local region_path=$(dirname $o)
     local region=$(basename $region_path)
     local cloud_path=$(dirname $region_path)
@@ -137,10 +141,10 @@ function cloud::nodes() {
     local node_type_path=$(dirname $cloud_path)
     local node_type=$(basename $node_type_path)
 
-    >&2 echo -e -n "${BROWN_ORANGE}Retrieving details of instance \"${bastion_address}\"...                                                  ${NC}\r"
-    local state=$(cloud::get_node_state "$cloud" "$region" "$bastion_instance_id")
+    >&2 echo -e -n "${BROWN_ORANGE}Retrieving details of instance \"${managed_instance_name}\"...                                                  ${NC}\r"
+    local state=$(cloud::get_node_state "$cloud" "$region" "$managed_instance_id")
     
-    echo "${node_type}|${cloud}|${region}|${bastion_address}|${state}|${bastion_version}|${bastion_instance_id}"
+    echo "${node_type}|${cloud}|${region}|${instance_address}|${state}|${version}|${managed_instance_id}"
   done
 
   set -e
