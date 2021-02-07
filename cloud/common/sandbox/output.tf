@@ -79,6 +79,18 @@ output "cb_deployment_networks" {
   value = module.bootstrap.admin_subnetworks
 }
 
+output "cb_deployment_security_group" {
+  value = module.bootstrap.admin_security_group
+}
+
+output "cb_default_openssh_private_key" {
+  value = module.bootstrap.default_openssh_private_key
+}
+
+output "cb_default_ssh_key_pair" {
+  value = module.bootstrap.default_ssh_key_pair
+}
+
 output "cb_dns_configured" {
   value = local.configure_dns
 }
