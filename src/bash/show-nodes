@@ -6,7 +6,7 @@ root_dir=$(cd $scripts_dir/../.. && pwd)
 source ${scripts_dir}/common
 set -euo pipefail
 
-workspace_dir=$1 && shift
+workspace_root=$1 && shift
 template_dir=$1 && shift
 
 if [[ $# -gt 0 ]]; then
@@ -18,7 +18,7 @@ fi
 echo -e "\n${GREEN}${BOLD}Nodes deployed to the cloud${NORMAL}"
 echo -e "===========================${NC}\n"
 
-vpn_nodes=( $(cloud::nodes $workspace_dir) )
+vpn_nodes=( $(cloud::nodes $workspace_root) )
 if [[ ${#vpn_nodes[@]} -eq 0 ]]; then
   echo -e "${GREEN}No nodes have been deployed.${NC}"
   exit 0
@@ -71,7 +71,7 @@ case $option in
   1)
     echo
     $scripts_dir/deploy-node \
-      $workspace_dir $template_dir \
+      $workspace_root $template_dir \
       $node_type $cloud -r $region -u
     ;;
   2)
@@ -81,7 +81,7 @@ case $option in
 
       echo
       $scripts_dir/download-vpn-config \
-        $workspace_dir $template_dir \
+        $workspace_root $template_dir \
         $node_type $cloud -r $region \
         -u $username -p $password
     fi
@@ -101,7 +101,7 @@ case $option in
   4)
     echo
     $scripts_dir/destroy-node \
-      $workspace_dir $template_dir \
+      $workspace_root $template_dir \
       $node_type $cloud -r $region
     ;;
 esac

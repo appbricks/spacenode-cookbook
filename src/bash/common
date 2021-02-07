@@ -31,7 +31,7 @@ clouds_enabled=${CLOUDS_ENABLED:-'^(aws|azure|google)$'}
 function common::set_working_dir() {
 
   working_dir=$(pwd)
-  while [[ $working_dir != / ]]; do    
+  while [[ $working_dir != / ]]; do
     if [[ -e $working_dir/.workspace ]]; then
       break
     fi
@@ -40,19 +40,19 @@ function common::set_working_dir() {
 
   if [[ $working_dir == / ]]; then
     working_dir=$(pwd)
-    mkdir -p $working_dir/.workspace    
+    mkdir -p $working_dir/.workspace
   fi
 
   template_dir=$root_dir/cloud/recipes
-  workspace_dir=$working_dir/.workspace
+  workspace_root=$working_dir/.workspace
 }
 
 function common::check_eula() {
 
-  if [[ ! -e $workspace_dir/eula_accepted ]]; then
+  if [[ ! -e $workspace_root/eula_accepted ]]; then
 
     echo -e "${GREEN}\nBefore you can deploy Cloud nodes you need to review and"
-    echo -e "accept the AppBricks, Inc. Software End User Agreement." 
+    echo -e "accept the AppBricks, Inc. Software End User Agreement."
     echo -e "The terms of the agreement can be found at the following"
     echo -e "link.\n"
     echo -e "${BLUE}https://appbricks.io/legal/\n"
@@ -63,7 +63,7 @@ function common::check_eula() {
     [[ $option == yes ]] || exit 1
     echo -e "${GREEN}\nThank you. You can proceed to launch, run and manage you nodes in the cloud now...\n${NC}"
 
-    touch $workspace_dir/eula_accepted
+    touch $workspace_root/eula_accepted
   fi
 }
 
@@ -72,42 +72,42 @@ function common::validate_environment() {
   set +e
   which aws >/dev/null 2>&1
   if [[ $? -ne 0 ]]; then
-    echo -e "${RED}\nERROR! Unable to find AWS CLI in the system path.\n" 
+    echo -e "${RED}\nERROR! Unable to find AWS CLI in the system path.\n"
     echo -e "${GREEN}Please follow the instructions at: "
-    echo -e "- ${BLUE}https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html\n" 
+    echo -e "- ${BLUE}https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html\n"
     echo -e "${GREEN}to download and install the AWS CLI.${NC}"
     exit 1
   fi
   which az >/dev/null 2>&1
   if [[ $? -ne 0 ]]; then
-    echo -e "${RED}\nERROR! Unable to find Microsoft Azure CLI in the system path.\n" 
+    echo -e "${RED}\nERROR! Unable to find Microsoft Azure CLI in the system path.\n"
     echo -e "${GREEN}Please follow the instructions at: "
-    echo -e "- ${BLUE}https://docs.microsoft.com/en-us/cli/azure/install-azure-cli\n" 
+    echo -e "- ${BLUE}https://docs.microsoft.com/en-us/cli/azure/install-azure-cli\n"
     echo -e "${GREEN}to download and install the Microsoft Azure CLI.${NC}"
     exit 1
   fi
   which gcloud >/dev/null 2>&1
   if [[ $? -ne 0 ]]; then
-    echo -e "${RED}\nERROR! Unable to find Google Cloud CLI in the system path.\n" 
+    echo -e "${RED}\nERROR! Unable to find Google Cloud CLI in the system path.\n"
     echo -e "${GREEN}Please follow the instructions at: "
-    echo -e "- ${BLUE}https://cloud.google.com/sdk/docs\n" 
+    echo -e "- ${BLUE}https://cloud.google.com/sdk/docs\n"
     echo -e "${GREEN}to download and install the Google Cloud SDK.${NC}"
     exit 1
   fi
   which terraform >/dev/null 2>&1
   if [[ $? -ne 0 ]]; then
-    echo -e "${RED}\nERROR! Unable to find Terraform CLI in the system path.\n" 
+    echo -e "${RED}\nERROR! Unable to find Terraform CLI in the system path.\n"
     echo -e "${GREEN}Please download the CLI from:"
-    echo -e "- ${BLUE}https://www.terraform.io/downloads.html\n" 
+    echo -e "- ${BLUE}https://www.terraform.io/downloads.html\n"
     echo -e "${GREEN}and unzip and copy it to a system path location such as"
     echo -e "'/usr/local/bin'.${NC}"
     exit 1
   fi
   which jq >/dev/null 2>&1
   if [[ $? -ne 0 ]]; then
-    echo -e "${RED}\nERROR! Unable to find JQ CLI in the system path.\n" 
+    echo -e "${RED}\nERROR! Unable to find JQ CLI in the system path.\n"
     echo -e "${GREEN}Please download the CLI from:"
-    echo -e "- ${BLUE}https://stedolan.github.io/jq/\n" 
+    echo -e "- ${BLUE}https://stedolan.github.io/jq/\n"
     echo -e "${GREEN}rename it to 'jq' and copy it to a system path location such as"
     echo -e "'/usr/local/bin'.${NC}"
     exit 1
@@ -115,11 +115,11 @@ function common::validate_environment() {
   set -e
 
   if [[ ! -e $working_dir/cloud-credentials ]]; then
-    echo -e "${RED}\nERROR! Unable to find the Cloud Credentials file at \"./cloud-credentials\".${NC}" 
+    echo -e "${RED}\nERROR! Unable to find the Cloud Credentials file at \"./cloud-credentials\".${NC}"
     exit 1
   fi
   if [[ ! -e $working_dir/deployment-vars ]]; then
-    echo -e "${RED}\nERROR! Unable to find the Deployment variables file at \"./deployment-vars\".${NC}" 
+    echo -e "${RED}\nERROR! Unable to find the Deployment variables file at \"./deployment-vars\".${NC}"
     exit 1
   fi
 
@@ -134,7 +134,7 @@ function common::validate_cloud_credentials() {
     aws)
       if [[ -z $AWS_ACCESS_KEY \
         || -z $AWS_SECRET_KEY ]]; then
-        echo -e "${RED}\nERROR! The environment variables \"AWS_ACCESS_KEY\" and \"AWS_SECRET_KEY\" must be set in the \"cloud-credentials\" file.${NC}" 
+        echo -e "${RED}\nERROR! The environment variables \"AWS_ACCESS_KEY\" and \"AWS_SECRET_KEY\" must be set in the \"cloud-credentials\" file.${NC}"
         exit 1
       fi
       ;;
@@ -142,18 +142,30 @@ function common::validate_cloud_credentials() {
       if [[ -z $ARM_CLIENT_ID \
         || -z $ARM_CLIENT_SECRET \
         || -z $ARM_TENANT_ID ]]; then
-        echo -e "${RED}\nERROR! The environment variables \"ARM_CLIENT_ID\", \"ARM_CLIENT_SECRET\" and \"ARM_TENANT_ID\" must be set in the \"cloud-credentials\" file.${NC}" 
+        echo -e "${RED}\nERROR! The environment variables \"ARM_CLIENT_ID\", \"ARM_CLIENT_SECRET\" and \"ARM_TENANT_ID\" must be set in the \"cloud-credentials\" file.${NC}"
         exit 1
       fi
       ;;
     google)
       if [[ -z $GOOGLE_CREDENTIALS \
         || -z $GOOGLE_PROJECT ]]; then
-        echo -e "${RED}\nERROR! The environment variables \"GOOGLE_CREDENTIALS\" and \"GOOGLE_PROJECT\" must be set in the \"cloud-credentials\" file.${NC}" 
+        echo -e "${RED}\nERROR! The environment variables \"GOOGLE_CREDENTIALS\" and \"GOOGLE_PROJECT\" must be set in the \"cloud-credentials\" file.${NC}"
         exit 1
       fi
       ;;
   esac
+}
+
+function common::check_help_requested() {
+
+  local command=$1
+
+  for arg in "${@:2:99}"; do
+    if [[ $arg == -h || $arg == --help ]]; then
+      eval "usage::${command}"
+      exit 0
+    fi
+  done
 }
 
 function common::validate_workspace() {
@@ -163,7 +175,7 @@ function common::validate_workspace() {
 
   if [[ ! -e ${template_dir}/$node_type ]]; then
     eval "usage::${command}"
-    echo -e "${RED}\nERROR! Unknown node type.\n" 
+    echo -e "${RED}\nERROR! Unknown node type.\n"
     echo -e "${GREEN}Available node types for deployment are:\n"
     first=y
     for d in $(find ${template_dir} -maxdepth 1 -type d -print); do
@@ -171,22 +183,22 @@ function common::validate_workspace() {
         echo "- \"$(basename $d)\""
       else
         first=n
-      fi      
+      fi
     done
     echo -e "${NC}"
     exit 1
   fi
   if [[ ! -e ${template_dir}/$node_type/$cloud ]]; then
     eval "usage::${command}"
-    echo -e "${RED}\nERROR! Unknown cloud target for node of type \"$node_type\".\n" 
+    echo -e "${RED}\nERROR! Unknown cloud target for node of type \"$node_type\".\n"
     echo -e "${GREEN}Cloud targets available for deployment are:\n"
     first=y
-    for d in $(find ${template_dir}/$node_type -maxdepth 1 -type d -print); do 
+    for d in $(find ${template_dir}/$node_type -maxdepth 1 -type d -print); do
       if [[ $first == n ]]; then
         echo "- \"$(basename $d)\""
       else
         first=n
-      fi      
+      fi
     done
     echo -e "${NC}"
     exit 1
@@ -196,14 +208,14 @@ function common::validate_workspace() {
     echo -e "${RED}\nERROR! Cloud target \"$cloud\" is not supported for public"
     echo -e "deployments yet. Support for that cloud will be available"
     echo -e "in a future release. If you would still like to deploy to the"
-    echo -e "cloud specified please contact AppBricks support.\n${NC}" 
+    echo -e "cloud specified please contact AppBricks support.\n${NC}"
     exit 1
   fi
 
   common::validate_cloud_credentials $cloud
 
   template_dir=${template_dir}/${node_type}/${cloud}
-  workspace_dir=${workspace_dir}/${node_type}/${cloud}
+  workspace_dir=${workspace_root}/${node_type}/${cloud}
   mkdir -p $workspace_dir
 }
 
@@ -243,7 +255,7 @@ function ui::print_nodes_table() {
       "$(echo "$node_detail" | awk -F '|' '{ print $6 }')"
   done
 
-  echo -e "+----+------------+----------+----------------------+----------------------------------------------------+--------------+----------+"  
+  echo -e "+----+------------+----------+----------------------+----------------------------------------------------+--------------+----------+"
 }
 
 scripts_dir=$(dirname $BASH_SOURCE)

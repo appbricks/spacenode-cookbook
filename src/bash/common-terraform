@@ -185,7 +185,13 @@ function terraform::apply() {
   o=$(cat output.json)
   instance_name=$(echo "$o" | jq -r '.cb_managed_instances.value[0] | .name')
   echo "$o" | jq -r '.cb_managed_instances.value[0] | .ssh_key' > ${instance_name}-ssh-key.pem
-  chmod +0600 ${instance_name}-ssh-key.pem
+  chmod 0600 ${instance_name}-ssh-key.pem
+
+  default_ssh_key=$(echo "$o" | jq -r '.cb_default_openssh_private_key.value')
+  if [[ -n "$default_ssh_key" && "$default_ssh_key" != "null" ]]; then
+    echo "$default_ssh_key" > default-ssh-key.pem
+    chmod 0600 default-ssh-key.pem
+  fi
 
   echo -e "${GREEN}Deploy operation completed in ${minutes}m and ${seconds}s."
 }

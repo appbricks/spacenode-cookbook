@@ -3,7 +3,7 @@
 source $(dirname $BASH_SOURCE)/common
 set -euo pipefail
 
-workspace_dir=$1 && shift
+workspace_root=$1 && shift
 
 control_file_dir=$(dirname $workspace_dir)
 echo -e "${GREEN}\nCreating control files in current folder...${NC}"

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-workspace_dir=$1 && shift
+workspace_root=$1 && shift
 template_dir=$1 && shift
 cloud=${1:-<CLOUD>} && shift
 

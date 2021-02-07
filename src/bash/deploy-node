@@ -1,6 +1,6 @@
 #!/bin/bash
 
-workspace_dir=$1 && shift
+workspace_root=$1 && shift
 template_dir=$1 && shift
 node_type=${1:-<NODE_TYPE>} && shift
 cloud=${1:-<CLOUD>} && shift
@@ -9,6 +9,7 @@ source $(dirname $BASH_SOURCE)/common
 set -euo pipefail
 
 region=""
+input_node=""
 clean=no
 init=no
 upgrade=no
@@ -20,6 +21,10 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     -r|--region)
       region=$2
+      shift
+      ;;
+    -x|--in)
+      input_node=$2
       shift
       ;;
     -c|--clean)
@@ -72,6 +77,16 @@ if [[ $idle_shutdown == yes ]]; then
   fi
 else
   export TF_VAR_idle_action=""
+fi
+
+if [[ -n $input_node ]]; then  
+  echo "# inputs from node '$input_node'" > ${workspace_dir}/${region}/input-vars.sh
+
+  o=$(cat ${workspace_root}/${input_node}/${cloud}/${region}/output.json)
+  for name in $(echo "$o" | jq -r 'keys[]'); do 
+    echo "export TF_VAR_$name='$(echo $o | jq -r .${name}.value)'" >> ${workspace_dir}/${region}/input-vars.sh
+  done
+  source ${workspace_dir}/${region}/input-vars.sh
 fi
 
 terraform::set_cloud_region "$node_type" "$cloud" "$region"
