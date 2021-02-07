@@ -27,18 +27,14 @@ output "cb_managed_instances" {
       "vpc_name": var.cb_vpc_name
       "name": "minecraft"
       "description": local.minecraft_node_description
-      "id": module.minecraft.instance_id
+      "id": aws_instance.minecraft.id
       "fqdn": ""
-      "public_ip": ""
-      "private_ip": module.minecraft.private_ip
+      "public_ip": aws_instance.minecraft.public_ip
+      "private_ip": aws_instance.minecraft.private_ip
       "ssh_port": "22"
-      "ssh_user": "ec2-user"
-      "ssh_key": module.minecraft.ssh_key
+      "ssh_user": "ubuntu"
+      "ssh_key": var.cb_default_openssh_private_key
       "root_passwd": ""
     }
   ]
-}
-
-output "mc_port" {
-  value = module.minecraft.port
 }

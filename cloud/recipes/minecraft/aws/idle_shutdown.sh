@@ -1,0 +1,1 @@
+../../../common/minecraft/idle_shutdown.sh
