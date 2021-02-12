@@ -5,7 +5,7 @@ set -xeuo pipefail
 # Install APT packages
 apt-get update && apt-get install -y \
   ca-certificates apt-transport-https iptables lsb-release gnupg \
-  build-essential python3 python3-dev git curl zip
+  build-essential python3 python3-dev git curl zip qrencode
 
 # Setup APT repo for Azure CLI
 curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | \

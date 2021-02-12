@@ -128,7 +128,7 @@ if [[ $os_type == Darwin ]]; then
 
   case $vpn_type in
     wireguard)
-      file=${TF_VAR_name}-wg-${region}-vpn.conf
+      file=${TF_VAR_name}-wg-${region}-vpn-${user}.conf
       ;;
     openvpn)
       file=${TF_VAR_name}-ovpn-${region}-vpn.ovpn
@@ -143,6 +143,9 @@ if [[ $os_type == Darwin ]]; then
     ${working_dir}/${file}
 
   case $vpn_type in
+    wireguard)
+      qrencode -t ansiutf8 < ${working_dir}/${file}
+      ;;
     ipsec|openvpn)
       open ${working_dir}/${file}
       ;;
@@ -152,7 +155,7 @@ elif [[ $os_type == Linux ]]; then
 
   case $vpn_type in
     wireguard)
-      file=${TF_VAR_name}-wg-${region}-vpn.conf
+      file=${TF_VAR_name}-wg-${region}-vpn-${user}.conf
       download_vpn_config $user $password \
         https://${vpn_server_host}/~${user}/${file} \
         ${working_dir}/${file}
@@ -200,6 +203,9 @@ elif [[ $os_type == Linux ]]; then
   case $vpn_type in
     wireguard)
       echo -e "\nImport the \"${file}\" tunnel file into your WireGuard client."
+      echo -e "Use the QR code below to configure mobile clients.\n"
+      qrencode -t ansiutf8 < ${working_dir}/${file}
+      echo
       ;;
     openvpn)
       echo -e "\nImport it to your OpenVPN or Tunnelblick client and login using the credentials"
@@ -210,7 +216,7 @@ elif [[ $os_type == Linux ]]; then
     ipsec)
       echo -e "\nImport the \"${file}\" profile if you are on an Apple device. For"
       echo -e "all other systems you will need to configure your native client using the"
-      echo -e "provided PKCS key for the user."
+      echo -e "provided PKCS key for the user.\n"
       ;;
   esac
 else
