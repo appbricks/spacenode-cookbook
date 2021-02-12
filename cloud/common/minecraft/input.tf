@@ -44,7 +44,6 @@ variable "java_mx_mem" {
   default     = "2G"
 }
 
-
 #
 # Inputs from MySpace node
 #
@@ -73,6 +72,6 @@ variable "cb_default_ssh_key_pair" {
   type = string
 }
 
-# variable "cb_internal_pdns_api_key" {
-#   type = string
-# }
+variable "cb_internal_pdns_api_key" {
+  type = string
+}
