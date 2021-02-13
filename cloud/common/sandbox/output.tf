@@ -39,7 +39,7 @@ output "cb_managed_instances" {
       "id": module.bootstrap.bastion_instance_id
       "fqdn": module.bootstrap.bastion_fqdn
       "public_ip": module.bootstrap.bastion_public_ip
-      "private_ip": ""
+      "private_ip": module.bootstrap.bastion_admin_ip
       "ssh_port": module.bootstrap.bastion_admin_ssh_port
       "ssh_user": module.bootstrap.bastion_admin_user 
       "ssh_key": module.bootstrap.bastion_admin_sshkey
@@ -93,6 +93,10 @@ output "cb_default_ssh_key_pair" {
 
 output "cb_dns_configured" {
   value = local.configure_dns
+}
+
+output "cb_internal_pdns_url" {
+  value = module.bootstrap.powerdns_url
 }
 
 output "cb_internal_pdns_api_key" {

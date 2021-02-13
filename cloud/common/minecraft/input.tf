@@ -2,6 +2,18 @@
 # Inputs for Minecraft Server
 #
 
+variable "minecraft_server_name" {
+  description = "Name of minecraft server"
+  type        = string
+  default     = "my-minecraft"
+}
+
+variable "minecraft_server_description" {
+  description = "Description of minecraft server"
+  type        = string
+  default     = "Personal minecraft server for sharing amongst friends."
+}
+
 variable "minecraft_root" {
   description = "Where to install minecraft on your instance"
   type        = string
@@ -72,6 +84,14 @@ variable "cb_default_ssh_key_pair" {
   type = string
 }
 
+variable "cb_internal_pdns_url" {
+  type = string
+}
+
 variable "cb_internal_pdns_api_key" {
   type = string
+}
+
+variable "cb_internal_domain" {
+  default  = "local"
 }

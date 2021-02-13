@@ -87,6 +87,12 @@ if [[ ! -e "${mc_root}/$MINECRAFT_JAR" ]]; then
   download_minecraft_server
 fi
 
+if [[ -e "${mc_root}/server.properties" ]]; then
+  sed -i -E 's|motd=.*|motd=${mc_description}|' ${mc_root}/server.properties
+else
+  echo "motd=${mc_description}" > ${mc_root}/server.properties
+fi
+
 # Cron job to sync data to S3 every five mins
 /bin/cat <<CRON > /etc/cron.d/minecraft
 SHELL=/bin/bash
@@ -102,6 +108,24 @@ PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 * * * * *  $SSH_USER  test -x ${mc_root}/idle_shutdown.sh && ${mc_root}/idle_shutdown.sh
 ---EOF
 
+# Script to update local DNS
+mv /tmp/update_dns.sh ${mc_root}
+
+cat <<SYSTEMD > /etc/systemd/system/update-dns.service
+[Unit]
+Description=Update DNS
+After=network.target
+
+[Service]
+ExecStart=${mc_root}/update_dns.sh
+
+[Install]
+WantedBy=multi-user.target
+SYSTEMD
+
+# Run on boot
+/usr/bin/systemctl enable update-dns
+
 # Update minecraft EULA
 /bin/cat >${mc_root}/eula.txt<<EULA
 #By changing the setting below to TRUE you are indicating your agreement to our EULA (https://account.mojang.com/documents/minecraft_eula).
@@ -111,6 +135,9 @@ EULA
 
 # Not root
 /bin/chown -R $SSH_USER ${mc_root}
+
+/usr/bin/systemctl daemon-reload
+/usr/bin/systemctl start update-dns
 /usr/bin/systemctl start minecraft
 
 # Clean up

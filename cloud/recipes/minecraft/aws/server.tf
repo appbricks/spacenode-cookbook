@@ -14,7 +14,7 @@ resource "aws_instance" "minecraft" {
   iam_instance_profile = aws_iam_instance_profile.minecraft.id
 
   tags = {
-    Name = "${var.cb_vpc_name}: minecraft server"
+    Name = "${var.cb_vpc_name}: ${var.minecraft_server_name} server"
   }
 
   user_data = <<USERDATA
@@ -30,6 +30,11 @@ write_files:
   content: ${base64encode(data.template_file.minecraft-idle-shutdown.rendered)}
   path: /tmp/idle_shutdown.sh
   permissions: '0744'
+
+- encoding: b64
+  content: ${base64encode(data.template_file.minecraft-update-dns.rendered)}
+  path: /tmp/update_dns.sh
+  permissions: '0744'  
 
 runcmd: 
 - /tmp/install.sh
@@ -98,6 +103,8 @@ data "template_file" "minecraft-install" {
   template = file("${path.module}/install.sh")
 
   vars = {
+    mc_description = var.minecraft_server_description
+
     mc_root        = var.minecraft_root
     mc_version     = var.minecraft_version
     mc_type        = var.minecraft_type
@@ -116,5 +123,15 @@ data "template_file" "minecraft-idle-shutdown" {
 
   vars = {
     mc_root = var.minecraft_root
+  }
+}
+
+data "template_file" "minecraft-update-dns" {
+  template = file("${path.module}/update_dns.sh")
+
+  vars = {
+    mc_dns_name    = "${var.minecraft_server_name}.${var.cb_internal_domain}"
+    pdns_url       = var.cb_internal_pdns_url
+    pdns_api_key   = var.cb_internal_pdns_api_key
   }
 }
