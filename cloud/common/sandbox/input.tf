@@ -141,8 +141,8 @@ variable "ovpn_protocol" {
 #
 # @order: 113
 # @tags: recipe
-# @accepted_values: false,true
-# @accepted_values_message: Please enter 'true' or 'false'.
+# @accepted_values: yes,no
+# @accepted_values_message: Please enter 'yes' or 'no'.
 # @depends_on: vpn_type=wg|ovpn
 #
 variable "mask_vpn_traffic" {
@@ -156,7 +156,7 @@ variable "mask_vpn_traffic" {
 # @tags: recipe
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
-# @depends_on: vpn_type=wg|ovpn
+# @depends_on: mask_vpn_traffic=yes
 #
 variable "tunnel_vpn_port_start" {
   description = "The start port over which an obfuscated VPN traffic will be tunnelled."
@@ -169,7 +169,7 @@ variable "tunnel_vpn_port_start" {
 # @tags: recipe
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
-# @depends_on: vpn_type=wg|ovpn
+# @depends_on: mask_vpn_traffic=yes
 #
 variable "tunnel_vpn_port_end" {
   description = "The end port over which an obfuscated VPN traffic will be tunnelled."
