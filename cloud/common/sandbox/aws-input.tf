@@ -27,11 +27,11 @@ variable "aws_dns_zone" {
 # @order: 101
 # @tags: recipe,target-undeployed,target-deployed
 # @accepted_values: t4g.nano,t4g.micro,t4g.small,t4g.medium,t4g.large,t4g.xlarge,t4g.2xlarge
-# @accepted_values_message: Not a valid AWS general purpose instance type
+# @accepted_values_message: Not a valid AWS general purpose ARM t4g.* instance type
 #
 variable "bastion_instance_type" {
   description = "The AWS EC2 instance type of the VPN node."
-  default = "t4g.nano"
+  default = "t4g.micro"
 }
 
 #
