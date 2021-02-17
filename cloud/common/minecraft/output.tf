@@ -9,10 +9,14 @@
 locals {
   
   minecraft_node_description = <<MINECRAFT_DESCRIPTION
-The Minecraft instance runs a Minecraft server that periodically
-saves its state to s3. This allows the server to be shutdown when
-not in use and restarted without losing any worlds created for
-gameplay.
+The Minecraft instance runs a Minecraft cloud server within a Cloud
+Space. The server is secured behind the Cloud Space's VPN and can 
+only be accessed by users that have a Cloud Space account and have 
+been granted access to the Minecraft service by the owner of the 
+Cloud Space to which the Minecraft instance has been deployed.
+The instance will periodically save its state securely to the Cloud. 
+This allows the server to be shutdown when not in use and restarted 
+without losing any worlds created for gameplay.
 MINECRAFT_DESCRIPTION
 }
 
@@ -37,4 +41,18 @@ output "cb_managed_instances" {
       "root_passwd": ""
     }
   ]
+}
+
+output "cb_node_description" {
+  value = <<NODE_DESCRIPTION
+This Minecraft instance has been deployed to the Cloud Space. It can
+be accessed by logging in to the Cloud Space's VPN and looking up the
+server via the private cloud server name given below.
+
+Minecraft Server Network Name: ${var.minecraft_server_name}.${var.cb_internal_domain}
+NODE_DESCRIPTION
+}
+
+output "cb_node_version" {
+  value = var.minecraft_version
 }

@@ -105,7 +105,7 @@ data "template_file" "minecraft-install" {
   vars = {
     mc_description = var.minecraft_server_description
 
-    mc_root        = var.minecraft_root
+    mc_root        = local.minecraft_root
     mc_version     = var.minecraft_version
     mc_type        = var.minecraft_type
     mc_port        = var.minecraft_port
@@ -122,7 +122,7 @@ data "template_file" "minecraft-idle-shutdown" {
   template = file("${path.module}/idle_shutdown.sh")
 
   vars = {
-    mc_root = var.minecraft_root
+    mc_root = local.minecraft_root
   }
 }
 
