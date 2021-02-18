@@ -137,7 +137,7 @@ variable "ovpn_protocol" {
 # VPN traffic masking
 #
 
-# Masked OpenVPN specific inputs
+# Mask VPN traffic
 #
 # @order: 113
 # @tags: recipe
@@ -165,7 +165,7 @@ variable "tunnel_vpn_port_start" {
 
 # VPN traffic obfuscation tunnel end port
 #
-# @order: 114
+# @order: 115
 # @tags: recipe
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
@@ -198,7 +198,7 @@ variable "country" {
 # Bastion image
 #
 variable "bastion_image_name" {
-  default = "appbricks-bastion-inceptor_0.0.1"
+  default = "appbricks-bastion-inceptor_0.0.2"
 }
 
 #
