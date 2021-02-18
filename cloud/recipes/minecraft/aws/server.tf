@@ -4,7 +4,7 @@
 
 resource "aws_instance" "minecraft" {
 
-  instance_type = "t4g.medium"
+  instance_type = var.minecraft_instance_type
   ami           = data.aws_ami.ubuntu.id
   key_name      = var.cb_default_ssh_key_pair
   subnet_id     = data.aws_subnet.deployment.id
