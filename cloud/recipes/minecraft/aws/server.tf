@@ -14,7 +14,7 @@ resource "aws_instance" "minecraft" {
   iam_instance_profile = aws_iam_instance_profile.minecraft.id
 
   tags = {
-    Name = "${var.cb_vpc_name}: ${var.minecraft_server_name} server"
+    Name = "${var.cb_vpc_name}: ${var.name} server"
   }
 
   user_data = <<USERDATA
@@ -130,7 +130,7 @@ data "template_file" "minecraft-update-dns" {
   template = file("${path.module}/update_dns.sh")
 
   vars = {
-    mc_dns_name    = "${var.minecraft_server_name}.${var.cb_internal_domain}"
+    mc_dns_name    = "${var.name}.${var.cb_internal_domain}"
     pdns_url       = var.cb_internal_pdns_url
     pdns_api_key   = var.cb_internal_pdns_api_key
   }

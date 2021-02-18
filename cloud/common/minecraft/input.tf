@@ -10,7 +10,7 @@
 # @tags: recipe,target-undeployed
 # @target_key: true
 #
-variable "minecraft_server_name" {
+variable "name" {
   description = "The name of the Minecraft server. This must be unique within your cloud space."
   type        = string
   default     = "my-minecraft"

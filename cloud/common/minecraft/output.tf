@@ -49,7 +49,7 @@ This Minecraft instance has been deployed to the Cloud Space. It can
 be accessed by logging in to the Cloud Space's VPN and looking up the
 server via the private cloud server name given below.
 
-Minecraft Server Network Name: ${var.minecraft_server_name}.${var.cb_internal_domain}
+Minecraft Server Network Name: ${var.name}.${var.cb_internal_domain}
 NODE_DESCRIPTION
 }
 

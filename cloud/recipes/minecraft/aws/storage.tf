@@ -13,7 +13,7 @@ resource "aws_s3_bucket" "minecraft" {
   }
 
   tags = {
-    Name = "${var.cb_vpc_name}: ${var.minecraft_server_name} server storage"
+    Name = "${var.cb_vpc_name}: ${var.name} server storage"
   }
 }
 
