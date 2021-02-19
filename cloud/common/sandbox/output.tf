@@ -33,10 +33,9 @@ output "cb_managed_instances" {
   value = [
     {
       "order": 0
-      "vpc_name": module.bootstrap.vpc_name
+      "id": module.bootstrap.bastion_instance_id
       "name": "bastion"
       "description": local.bastion_description
-      "id": module.bootstrap.bastion_instance_id
       "fqdn": module.bootstrap.bastion_fqdn
       "public_ip": module.bootstrap.bastion_public_ip
       "private_ip": module.bootstrap.bastion_admin_ip

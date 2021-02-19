@@ -7,6 +7,8 @@
 #
 
 locals {
+
+  server_fqdn = "${var.name}.${var.cb_internal_domain}"
   
   minecraft_node_description = <<MINECRAFT_DESCRIPTION
 The Minecraft instance runs a Minecraft cloud server within a Cloud
@@ -28,11 +30,10 @@ output "cb_managed_instances" {
   value = [
     {
       "order": 0
-      "vpc_name": var.cb_vpc_name
+      "id": aws_instance.minecraft.id
       "name": "minecraft"
       "description": local.minecraft_node_description
-      "id": aws_instance.minecraft.id
-      "fqdn": ""
+      "fqdn": local.server_fqdn
       "public_ip": aws_instance.minecraft.public_ip
       "private_ip": aws_instance.minecraft.private_ip
       "ssh_port": "22"
@@ -49,7 +50,7 @@ This Minecraft instance has been deployed to the Cloud Space. It can
 be accessed by logging in to the Cloud Space's VPN and looking up the
 server via the private cloud server name given below.
 
-Minecraft Server Network Name: ${var.name}.${var.cb_internal_domain}
+Minecraft Server Network Name: ${local.server_fqdn}
 NODE_DESCRIPTION
 }
 
