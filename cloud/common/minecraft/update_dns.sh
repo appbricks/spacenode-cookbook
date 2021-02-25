@@ -21,8 +21,17 @@ read -r -d '' setRecordBody << EOM
   } ] 
 }
 EOM
-set -e
 
-curl -s -X PATCH ${pdns_url}/api/v1/servers/localhost/zones/local \
+curl -s -f -X PATCH ${pdns_url}/api/v1/servers/localhost/zones/local \
   -H 'X-API-Key: ${pdns_api_key}' \
   --data "$setRecordBody"
+
+while [[ $? -ne 0 ]]; do
+  echo "Waiting for DNS API endpoint to become available..."
+  sleep 5
+
+  curl -s -f -X PATCH ${pdns_url}/api/v1/servers/localhost/zones/local \
+    -H 'X-API-Key: ${pdns_api_key}' \
+    --data "$setRecordBody"
+done
+set -e
