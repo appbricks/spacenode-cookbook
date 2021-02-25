@@ -128,7 +128,7 @@ if [[ $os_type == Darwin ]]; then
 
   case $vpn_type in
     wireguard)
-      file=${TF_VAR_name}-wg-${region}-vpn-${user}.conf
+      file=${TF_VAR_name}-${region}-vpn-${user}.conf
       ;;
     openvpn)
       file=${TF_VAR_name}-ovpn-${region}-vpn.ovpn
@@ -155,7 +155,7 @@ elif [[ $os_type == Linux ]]; then
 
   case $vpn_type in
     wireguard)
-      file=${TF_VAR_name}-wg-${region}-vpn-${user}.conf
+      file=${TF_VAR_name}-${region}-vpn-${user}.conf
       download_vpn_config $user $password \
         https://${vpn_server_host}/~${user}/${file} \
         ${working_dir}/${file}
