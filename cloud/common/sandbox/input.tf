@@ -85,8 +85,8 @@ variable "idle_action" {
 # @sensitive: true
 #
 variable "vpn_users" {
-  description = "Initial list of VPN users to create. This should be a comma separated list of 'user|password' pairs."
-  default = "user1|p@ssw0rd"
+  description = "List of additonal VPN users to create. This is a comma separated list of 'user|password' pairs."
+  default = ""
 }
 
 # Wireguard specific inputs
@@ -227,4 +227,14 @@ locals {
     var.mask_vpn_traffic == "yes" 
       ? var.tunnel_vpn_port_end : ""
   )
+
+  vpn_users = (length(var.vpn_users) > 0 
+    ? join(",", ["user|${random_string.non-root-passwd.result}", var.vpn_users])
+    : "user|${random_string.non-root-passwd.result}"
+  )
+}
+
+resource "random_string" "non-root-passwd" {
+  length  = 32
+  special = false
 }

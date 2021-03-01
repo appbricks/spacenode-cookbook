@@ -10,7 +10,7 @@ locals {
   version = reverse(split("_", var.bastion_image_name))[0]
 
   endpoint = local.configure_dns ? module.bootstrap.bastion_fqdn : module.bootstrap.bastion_public_ip
-  users    = [for u in split(",", var.vpn_users) : 
+  users    = [for u in split(",", local.vpn_users) : 
     "* URL: https://${local.endpoint}/~${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}" 
   ]
   bastion_description = <<BASTION_DESCRIPTION
@@ -19,7 +19,7 @@ securely and anonymously access your cloud space resources and the
 internet. You can download the VPN configuration along with the VPN
 client software from the password protected links below. The same
 user and password used to access the link should be used as the login
-credentials for the VPN.
+credentials for the VPN if required.
 
 ${join("\n\n", local.users)}
 BASTION_DESCRIPTION
@@ -43,6 +43,7 @@ output "cb_managed_instances" {
       "ssh_user": module.bootstrap.bastion_admin_user 
       "ssh_key": module.bootstrap.bastion_admin_sshkey
       "root_passwd": module.bootstrap.bastion_admin_password
+      "user_passwd": random_string.non-root-passwd.result
     }
   ]
 }

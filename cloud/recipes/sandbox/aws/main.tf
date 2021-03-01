@@ -33,7 +33,7 @@ module "bootstrap" {
   vpc_internal_dns_zones = ["local"]
 
   # VPN
-  vpn_users = split(",", var.vpn_users)
+  vpn_users = split(",", local.vpn_users)
 
   vpn_type               = local.vpn_type
   vpn_idle_action        = var.idle_action
