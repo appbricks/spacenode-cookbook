@@ -66,6 +66,10 @@ output "cb_node_version" {
   value = local.version
 }
 
+output "cb_root_ca_cert" {
+  value = module.bootstrap.root_ca_cert
+}
+
 output "cb_vpc_id" {
   value = module.bootstrap.vpc_id
 }
