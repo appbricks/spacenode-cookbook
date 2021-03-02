@@ -198,7 +198,7 @@ variable "country" {
 # Bastion image
 #
 variable "bastion_image_name" {
-  default = "appbricks-bastion-inceptor_0.0.2"
+  default = "appbricks-bastion-inceptor_0.0.3"
 }
 
 #
