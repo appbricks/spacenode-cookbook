@@ -155,7 +155,7 @@ elif [[ $os_type == Linux ]]; then
 
   case $vpn_type in
     wireguard)
-      file=${TF_VAR_name}-${region}-vpn-${user}.conf
+      file=${TF_VAR_name}-${region}.conf
       download_vpn_config $user $password \
         https://${vpn_server_host}/~${user}/${file} \
         ${working_dir}/${file}
@@ -171,7 +171,7 @@ elif [[ $os_type == Linux ]]; then
       unzip -q -o ${working_dir}/${file} -d $working_dir
       rm ${working_dir}/${file}
       
-      file=${TF_VAR_name}-${node_type}-${region}-vpn.ovpn
+      file=${TF_VAR_name}-${region}.ovpn
       download_vpn_config $user $password \
         https://${vpn_server_host}/~${user}/${file} \
         ${working_dir}/${file}       
