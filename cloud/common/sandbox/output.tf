@@ -43,8 +43,10 @@ output "cb_managed_instances" {
       "ssh_port": module.bootstrap.bastion_admin_ssh_port
       "ssh_user": module.bootstrap.bastion_admin_user 
       "ssh_key": module.bootstrap.bastion_admin_sshkey
+      "root_user": module.bootstrap.bastion_admin_user 
       "root_passwd": module.bootstrap.bastion_admin_password
-      "user_passwd": random_string.non-root-passwd.result
+      "non_root_user": "mycs-user"
+      "non_root_passwd": random_string.non-root-passwd.result
     }
   ]
 }

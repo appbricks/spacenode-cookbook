@@ -55,6 +55,8 @@ module "bootstrap" {
   bastion_host_name = "vpn"
   bastion_use_fqdn  = local.configure_dns
 
+  bastion_admin_user = "mycs-admin"
+
   bastion_instance_type = var.bastion_instance_type
 
   bastion_image_name  = var.bastion_image_name

@@ -229,12 +229,12 @@ locals {
   )
 
   vpn_users = (length(var.vpn_users) > 0 
-    ? join(",", ["user|${random_string.non-root-passwd.result}", var.vpn_users])
-    : "user|${random_string.non-root-passwd.result}"
+    ? join(",", ["mycs-user|${random_string.non-root-passwd.result}", var.vpn_users])
+    : "mycs-user|${random_string.non-root-passwd.result}"
   )
 }
 
 resource "random_string" "non-root-passwd" {
   length  = 32
-  special = false
+  special = true
 }
