@@ -18,8 +18,8 @@ The Bastion instance runs the VPN service that can be used to
 securely and anonymously access your cloud space resources and the
 internet. You can download the VPN configuration along with the VPN
 client software from the password protected links below. The same
-user and password used to access the link should be used as the login
-credentials for the VPN if required.
+user and password used to access the link should be used to the login
+to the VPN if required.
 
 ${join("\n\n", local.users)}
 BASTION_DESCRIPTION
