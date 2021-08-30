@@ -30,6 +30,7 @@ BASTION_DESCRIPTION
 #
 
 output "cb_managed_instances" {
+  sensitive = true
   value = [
     {
       "order": 0
@@ -91,6 +92,7 @@ output "cb_deployment_security_group" {
 }
 
 output "cb_default_openssh_private_key" {
+  sensitive = true
   value = module.bootstrap.default_openssh_private_key
 }
 

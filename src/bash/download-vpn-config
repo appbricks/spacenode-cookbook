@@ -108,12 +108,12 @@ if [[ $dns_configured == true ]]; then
 else
   vpn_server_host=$(echo "$output" | jq -r '.cb_managed_instances.value[0] | .public_ip')
 fi
-echo -e "${GREEN}\nDownloading VPN configs from \"https://${vpn_server_host}/~${user}/\"...${NC}"
+echo -e "${GREEN}\nDownloading VPN configs from \"https://${vpn_server_host}/static/~${user}/\"...${NC}"
 
 if [[ $vpn_masking_available == yes ]]; then
   # Download tunnel script
   download_vpn_config $user $password \
-    https://${vpn_server_host}/~${user}/client_tunnel \
+    https://${vpn_server_host}/static/~${user}/client_tunnel \
     ${workspace_dir}/${region}/client_tunnel
 
   chmod +x ${workspace_dir}/${region}/client_tunnel
@@ -139,7 +139,7 @@ if [[ $os_type == Darwin ]]; then
   esac
 
   download_vpn_config $user $password \
-    https://${vpn_server_host}/~${user}/${file} \
+    https://${vpn_server_host}/static/~${user}/${file} \
     ${working_dir}/${file}
 
   case $vpn_type in
@@ -157,14 +157,14 @@ elif [[ $os_type == Linux ]]; then
     wireguard)
       file=${TF_VAR_name}-${region}.conf
       download_vpn_config $user $password \
-        https://${vpn_server_host}/~${user}/${file} \
+        https://${vpn_server_host}/static/~${user}/${file} \
         ${working_dir}/${file}
       ;;
 
     openvpn)
       file=openvpn-config.tunnelblick.zip
       download_vpn_config $user $password \
-        https://${vpn_server_host}/~${user}/${file} \
+        https://${vpn_server_host}/static/~${user}/${file} \
         ${working_dir}/${file}
 
       rm -fr ${working_dir}/*.tblk
@@ -173,19 +173,19 @@ elif [[ $os_type == Linux ]]; then
       
       file=${TF_VAR_name}-${region}.ovpn
       download_vpn_config $user $password \
-        https://${vpn_server_host}/~${user}/${file} \
+        https://${vpn_server_host}/static/~${user}/${file} \
         ${working_dir}/${file}       
       ;;
 
     ipsec)      
       file=${TF_VAR_name}-${node_type}-${region}-vpn.mobileconfig
       download_vpn_config $user $password \
-        https://${vpn_server_host}/~${user}/${file} \
+        https://${vpn_server_host}/static/~${user}/${file} \
         ${working_dir}/${file}    
 
       file=${user}.p12
       download_vpn_config $user $password \
-        https://${vpn_server_host}/~${user}/${file} \
+        https://${vpn_server_host}/static/~${user}/${file} \
         ${working_dir}/${file} 
       ;;
   esac
@@ -222,7 +222,7 @@ elif [[ $os_type == Linux ]]; then
 else
     echo -e "${RED}\nERROR: Unable to determine OS type for which the VPN configurations should be"
     echo -e "       downloaded. Please download manually from:\n${NC}"
-    echo -e "       url: https://${vpn_server_host}/~${user}"
+    echo -e "       url: https://${vpn_server_host}/static/~${user}"
     echo -e "       user: ${user}"
     echo -e "       password: ${password}\n"
     exit 1

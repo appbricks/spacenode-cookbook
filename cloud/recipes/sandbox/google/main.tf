@@ -15,6 +15,12 @@ module "bootstrap" {
   country           = var.country
 
   #
+  # MyCS node keys
+  #
+  mycs_node_private_key = var.mycs_node_private_key
+  mycs_node_id_key = var.mycs_node_id_key
+
+  #
   # VPC details
   #
   region = var.region
@@ -58,6 +64,8 @@ module "bootstrap" {
 
   bastion_host_name = "vpn"
   bastion_use_fqdn  = local.configure_dns
+
+  bastion_admin_user = "mycs-admin"
 
   bastion_instance_type = var.bastion_instance_type
 

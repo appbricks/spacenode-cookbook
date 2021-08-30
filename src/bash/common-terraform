@@ -59,10 +59,9 @@ function terraform::init() {
 
       # Initialize Terraform
       echo -e "${GREEN}Initializing terraform context...${NC}"
-      terraform init \
+      terraform -chdir=$template_dir init \
         -backend-config="key=${node_type}" \
-        -backend-config="bucket=${bucket_name}" \
-        $template_dir
+        -backend-config="bucket=${bucket_name}"        
       echo
       ;;
 
@@ -115,12 +114,11 @@ function terraform::init() {
 
       # Initialize Terraform
       echo -e "${GREEN}Initializing terraform context...${NC}"
-      terraform init \
+      terraform -chdir=$template_dir init \
         -backend-config="resource_group_name=default" \
         -backend-config="container_name=${container_name}" \
         -backend-config="key=terraform.tfstate" \
-        -backend-config="storage_account_name=${storage_account}" \
-        $template_dir
+        -backend-config="storage_account_name=${storage_account}"
       echo
       ;;
       
@@ -138,10 +136,9 @@ function terraform::init() {
 
       # Initialize Terraform
       echo -e "${GREEN}Initializing terraform context...${NC}"
-      terraform init \
+      terraform -chdir=$template_dir init \
         -backend-config="prefix=${node_type}" \
-        -backend-config="bucket=${bucket_name}" \
-        $template_dir
+        -backend-config="bucket=${bucket_name}"
       echo
       ;;
   esac
@@ -169,7 +166,7 @@ function terraform::apply() {
 
   # Apply Terraform template and filter out
   # any output values for security purposes.
-  terraform apply -auto-approve $template_dir 2>&1 \
+  terraform -chdir=$template_dir apply -auto-approve 2>&1 \
     | tee apply.log | awk '/Outputs:/ {l=999}; (l-- > 0) {next} 1'
 
   # Save Terraform output in a JSON file for
@@ -228,7 +225,7 @@ function terraform::plan() {
   echo -e "${GREEN}Showing deployment plan for node type \"${node_type}\" in region \"${region}\" of \"$cloud\" cloud...${NC}"
 
   # Output Terraform plan
-  terraform plan $template_dir
+  terraform -chdir=$template_dir plan
 }
 
 function terraform::destroy() {
@@ -242,9 +239,8 @@ function terraform::destroy() {
 
   # Apply Terraform template and filter out
   # any output values for security purposes.
-  terraform destroy -auto-approve \
-    -state=.terraform/terraform.tfstate \
-    $template_dir 2>&1 | tee apply.log
+  terraform -chdir=$template_dir destroy -auto-approve \
+    -state=.terraform/terraform.tfstate 2>&1 | tee apply.log
 
   rm -fr output.json
 }

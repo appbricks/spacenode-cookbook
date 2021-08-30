@@ -15,6 +15,12 @@ module "bootstrap" {
   country           = var.country
 
   #
+  # MyCS node keys
+  #
+  mycs_node_private_key = var.mycs_node_private_key
+  mycs_node_id_key = var.mycs_node_id_key
+
+  #
   # VPC details
   #
   region = var.region

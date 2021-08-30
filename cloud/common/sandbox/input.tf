@@ -176,6 +176,7 @@ variable "tunnel_vpn_port_end" {
   default = "5596"
 }
 
+#
 # Attributes for generating self-signed certificates
 #
 variable "company_name" {
@@ -195,10 +196,23 @@ variable "country" {
 }
 
 #
+# Node keys
+#
+variable "mycs_node_private_key" {
+  description = "RSA private key of the MyCS node used for authentication with client devices"
+  default = ""
+}
+
+variable "mycs_node_id_key" {
+  description = "The id key identifies this node with MyCS account services"
+  default = ""
+}
+
+#
 # Bastion image
 #
 variable "bastion_image_name" {
-  default = "appbricks-bastion-inceptor_0.0.3"
+  default = "appbricks-bastion-inceptor"
 }
 
 #
