@@ -249,6 +249,7 @@ locals {
 }
 
 resource "random_string" "non-root-passwd" {
-  length  = 32
-  special = true
+  length           = 32
+  special          = true
+  override_special = "@#%&*()-_=+[]{}<>:?"
 }
