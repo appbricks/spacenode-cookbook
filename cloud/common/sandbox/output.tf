@@ -7,7 +7,10 @@
 #
 
 locals {
-  version = reverse(split("_", var.bastion_image_name))[0]
+  name_suffix = reverse(split("_", var.bastion_image_name))[0]
+  version = (local.name_suffix == "appbricks-bastion-inceptor" 
+    ? "dev" 
+    : local.name_suffix)
 
   endpoint = local.configure_dns ? module.bootstrap.bastion_fqdn : module.bootstrap.bastion_public_ip
   users    = [for u in split(",", local.vpn_users) : 
@@ -68,9 +71,7 @@ NODE_DESCRIPTION
 }
 
 output "cb_node_version" {
-  value = (local.version == "appbricks-bastion-inceptor" 
-    ? "dev" 
-    : local.version)
+  value = local.version
 }
 
 output "cb_root_ca_cert" {
