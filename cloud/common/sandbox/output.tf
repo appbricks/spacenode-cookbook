@@ -68,7 +68,9 @@ NODE_DESCRIPTION
 }
 
 output "cb_node_version" {
-  value = local.version
+  value = (local.version == "appbricks-bastion-inceptor" 
+    ? "dev" 
+    : local.version)
 }
 
 output "cb_root_ca_cert" {
