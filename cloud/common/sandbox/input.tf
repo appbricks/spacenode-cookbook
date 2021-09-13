@@ -198,13 +198,12 @@ variable "country" {
 #
 # Node keys
 #
+# RSA private key of the MyCS node used for authentication with client devices
 variable "mycs_node_private_key" {
-  description = "RSA private key of the MyCS node used for authentication with client devices"
   default = ""
 }
-
+# The id key identifies this node with MyCS account services
 variable "mycs_node_id_key" {
-  description = "The id key identifies this node with MyCS account services"
   default = ""
 }
 
