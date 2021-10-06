@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ip=$(ip a | grep -A 2 '^2:' | awk '/inet/{ split($2,ip,"/"); print ip[1] }')
+ip=$(ip a | grep -A 6 '^2:' | awk '/inet /{ split($2,ip,"/"); print ip[1] }')
 
 set +e
 read -r -d '' setRecordBody << EOM
