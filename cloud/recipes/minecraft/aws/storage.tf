@@ -3,7 +3,7 @@
 #
 
 resource "aws_s3_bucket" "minecraft" {
-  bucket_prefix = "${var.cb_vpc_name}-minecraft-server-"
+  bucket_prefix = "${var.cb_vpc_name}-mc-"
   
   acl           = "private"
   force_destroy = true
