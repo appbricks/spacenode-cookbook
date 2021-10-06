@@ -8,8 +8,6 @@ MINECRAFT_JAR="minecraft_server.jar"
 
 # Update OS and install start script
 ubuntu_linux_setup() {
-  set -ex
-
   export SSH_USER="ubuntu"
   export DEBIAN_FRONTEND=noninteractive
 
@@ -17,7 +15,7 @@ ubuntu_linux_setup() {
   apt-get -yq install \
     -o Dpkg::Options::="--force-confdef" \
     -o Dpkg::Options::="--force-confold" \
-    unattended-upgrades wget awscli jq openjdk-17-jre \
+    unattended-upgrades openjdk-17-jre wget awscli jq \
     python3.9 python3-pip python-is-python3
 
   sed -r \
@@ -52,11 +50,12 @@ SYSTEMD
 
   # Start on boot
   /usr/bin/systemctl enable minecraft
+
+  # Install minecraft status query tool
+  pip3 install mcstatus
 }
 
 download_minecraft_server() {
-  set -ex
-
   WGET=$(which wget)
 
   # version_manifest.json lists available MC versions
@@ -73,9 +72,6 @@ download_minecraft_server() {
   SERVER_URL=$(curl -s $VERSIONS_URL | jq -r '.downloads | .server | .url')
   # And finally download it to our local MC dir
   $WGET -O ${mc_root}/$MINECRAFT_JAR $SERVER_URL
-
-  # Install minecraft status query tool
-  pip3 install mcstatus
 }
 
 ubuntu_linux_setup
