@@ -8,6 +8,8 @@ MINECRAFT_JAR="minecraft_server.jar"
 
 # Update OS and install start script
 ubuntu_linux_setup() {
+  set -ex
+
   export SSH_USER="ubuntu"
   export DEBIAN_FRONTEND=noninteractive
 
@@ -15,7 +17,7 @@ ubuntu_linux_setup() {
   apt-get -yq install \
     -o Dpkg::Options::="--force-confdef" \
     -o Dpkg::Options::="--force-confold" \
-    unattended-upgrades wget awscli jq openjdk-8-jre \
+    unattended-upgrades wget awscli jq openjdk-17-jre \
     python3.9 python3-pip python-is-python3
 
   sed -r \
@@ -53,6 +55,7 @@ SYSTEMD
 }
 
 download_minecraft_server() {
+  set -ex
 
   WGET=$(which wget)
 
