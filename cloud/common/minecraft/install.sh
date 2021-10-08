@@ -15,8 +15,8 @@ ubuntu_linux_setup() {
   apt-get -yq install \
     -o Dpkg::Options::="--force-confdef" \
     -o Dpkg::Options::="--force-confold" \
-    unattended-upgrades openjdk-17-jre wget awscli jq \
-    python3.9 python3-pip python-is-python3
+    unattended-upgrades openjdk-17-jre wget lynx \
+    awscli jq python3.9 python3-pip python-is-python3
 
   sed -r \
     -e 's|^//Unattended-Upgrade::MinimalSteps "true";$|Unattended-Upgrade::MinimalSteps "true";|' \
