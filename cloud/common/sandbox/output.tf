@@ -13,19 +13,27 @@ locals {
     : local.name_suffix)
 
   endpoint = local.configure_dns ? module.bootstrap.bastion_fqdn : module.bootstrap.bastion_public_ip
-  users    = [for u in split(",", local.vpn_users) : 
+  users    = (length(local.vpn_users) > 0 ? [for u in split(",", local.vpn_users) : 
     "* URL: https://${local.endpoint}/static/~${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}" 
-  ]
-  bastion_description = <<BASTION_DESCRIPTION
+  ]: [])
+  bastion_description_non_wg = <<BASTION_DESCRIPTION
 The Bastion instance runs the VPN service that can be used to
 securely and anonymously access your cloud space resources and the
 internet. You can download the VPN configuration along with the VPN
-client software from the password protected links below. The same
-user and password used to access the link should be used to the login
-to the VPN if required.
+client software using the CloudBuilder CLI or the password protected
+links below. The same user and password used to access the link 
+should be used to login to the VPN if required.
 
 ${join("\n\n", local.users)}
 BASTION_DESCRIPTION
+  bastion_description_wg = <<BASTION_DESCRIPTION
+The Bastion space node runs the cloud space network mesh control 
+services. It also provides a VPN service that can be used to
+securely and anonymously connect to your cloud space to manage
+cloud resources and applications. You will need to use the Cloud
+Builder client to connect and use space resources securely.
+BASTION_DESCRIPTION
+  bastion_description = var.vpn_type == "wg" ? local.bastion_description_wg : local.bastion_description_non_wg
 }
 
 #
@@ -58,10 +66,7 @@ output "cb_managed_instances" {
 output "cb_node_description" {
   value = <<NODE_DESCRIPTION
 This My Cloud Space sandbox has been deployed to the following public
-cloud environment. Along with a sandboxed virtual cloud network it
-includes a VPN service which allows you to access the internet as
-well as your personal cloud space services securely while maintaining
-your privacy.
+cloud environment. 
 
 Provider: ${local.public_cloud_provider}
 Region: ${var.region}
