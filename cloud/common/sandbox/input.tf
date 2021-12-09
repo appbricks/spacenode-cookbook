@@ -255,9 +255,10 @@ locals {
       ? var.tunnel_vpn_port_end : ""
   )
 
+  # Add a non-admin VPN user for VPN types other than wireguard
   vpn_users = (length(var.vpn_users) > 0 
     ? join(",", ["mycs-user|${random_string.non-root-passwd.result}", var.vpn_users])
-    : "mycs-user|${random_string.non-root-passwd.result}"
+    : var.vpn_type != "wg" ? "mycs-user|${random_string.non-root-passwd.result}" : ""
   )
 }
 
