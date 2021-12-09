@@ -49,6 +49,7 @@ module "bootstrap" {
 
   vpn_type               = local.vpn_type
   vpn_idle_action        = var.idle_action  
+  vpn_idle_shutdown_time = var.idle_shutdown_time
   vpn_tunnel_all_traffic = "yes"
 
   ovpn_service_port = local.vpn_type == "openvpn" ? var.ovpn_service_port : ""

@@ -72,20 +72,34 @@ variable "vpn_type" {
 # @accepted_values_message: Please provide one of 'shutdown' or 'none'.
 #
 variable "idle_action" {
-  description = "Action to take when no VPN clients have been connected to the node for some time."
+  description = "Action to take when no VPN clients have been connected to the space for some time."
   default = "shutdown"
+}
+
+# Time interval in minutes before node is shut
+# as no VPN clients connected during that time.
+#
+# @order: 17
+# @tags: recipe,target-undeployed,target-deployed
+# @value_inclusion_filter: ^[0-9]+$
+# @value_inclusion_filter_message: The time interval should be a value greater than 0.
+#
+variable "idle_shutdown_time" {
+  description = "Time interval after last client disconnects from the space when the space node is shut down."
+  default = 10
 }
 
 # VPN Users - list of 'user|password' pairs
 #
-# @order: 17
+# @order: 18
 # @tags: recipe
 # @value_inclusion_filter: ^[a-zA-Z][-a-zA-Z0-9]*|[a-zA-Z0-9!@#%&:;<>_`~{}\^\$\*\+\-\.\?\"\'\[\]\(\)]*,?$
 # @value_inclusion_filter_message: User names cannot start with a numeric and must be only apha-numeric with the exception of a '-'. Passwords can contain special characters except for '|' and ','.
 # @sensitive: true
+# @depends_on: vpn_type=ovpn,vpn_type=ipsec
 #
 variable "vpn_users" {
-  description = "List of additonal VPN users to create. This is a comma separated list of 'user|password' pairs."
+  description = "List of VPN users that can connect directly to the space node. This is a comma separated list of 'user|password' pairs."
   default = ""
 }
 
