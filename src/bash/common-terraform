@@ -146,7 +146,7 @@ function terraform::init() {
   # Seems to be a bug in terraform where 'output' and 'taint' command are 
   # unable to load the backend state when the working directory does not 
   # have the backend resource template file.
-  local backend_type=$(cat .terraform/terraform.tfstate | jq -r .backend.type)
+  local backend_type=$(cat ${template_dir}/.terraform/terraform.tfstate | jq -r .backend.type)
   cat << ---EOF > backend.tf
 terraform {
   backend "$backend_type" {}
