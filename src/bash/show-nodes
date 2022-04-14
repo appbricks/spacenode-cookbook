@@ -69,7 +69,7 @@ echo -e "5) Delete Node"
 
 printf "\nSelect action or (q)uit: ${NC}" && read option
 [[ -n $option && $option != q && $option != Q ]] || exit 0
-if [[ ! $option =~ $re || $option -lt 1 || $option -gt 4 ]]; then
+if [[ ! $option =~ $re || $option -lt 1 || $option -gt 5 ]]; then
   echo -e "${RED}\nERROR! Invalid action selected.${NC}"
   exit 1
 fi
