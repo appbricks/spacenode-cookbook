@@ -133,10 +133,10 @@ if [[ $os_type == Darwin ]]; then
 
   case $vpn_type in
     openvpn)
-      file=${TF_VAR_name}-ovpn-${region}-vpn.ovpn
+      file=${TF_VAR_name}-${region}-vpn.ovpn
       ;;
     ipsec)
-      file=${TF_VAR_name}-ipsec-${region}-vpn.mobileconfig
+      file=${TF_VAR_name}-${region}-vpn.mobileconfig
       ;;
   esac
 
@@ -171,7 +171,7 @@ elif [[ $os_type == Linux ]]; then
       ;;
 
     ipsec)      
-      file=${TF_VAR_name}-${node_type}-${region}-vpn.mobileconfig
+      file=${TF_VAR_name}-${region}.mobileconfig
       download_vpn_config $user $password \
         https://${vpn_server_host}/static/~${user}/${file} \
         ${working_dir}/${file}    
