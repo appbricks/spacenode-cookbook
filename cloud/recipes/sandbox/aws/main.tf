@@ -30,7 +30,7 @@ module "bootstrap" {
   vpc_name = lower("${var.name}-${var.region}")
 
   # DNS Name for VPC
-  vpc_dns_zone    = lower("${var.name}-${var.vpn_type}-${var.region}.${var.aws_dns_zone}")
+  vpc_dns_zone    = lower("${var.name}-${var.region}.${var.aws_dns_zone}")
   attach_dns_zone = local.configure_dns
 
   # Optional internal admin network
