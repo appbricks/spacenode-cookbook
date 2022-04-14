@@ -48,6 +48,9 @@ root_user=$(echo "$node_detail" | awk -F '|' '{ print $7 }')
 root_passwd=$(echo "$node_detail" | awk -F '|' '{ print $8 }')
 node_id=$(echo "$node_detail" | awk -F '|' '{ print $9 }')
 
+[[ -z $root_user ]] ||
+  echo -e "\n${CYAN}Node Admin =>\n  User: ${root_user}\n  Password: ${root_passwd}${NC}"
+
 echo -e "\n${GREEN}${BOLD}What do you want to do:${NORMAL}"
 echo -e "1) Update Node"
 if [[ $node_status == running ]]; then
@@ -92,7 +95,7 @@ case $option in
     ;;
   3)
     if [[ $node_status == running ]]; then
-      echo -e "\n${CYAN}Sudo Password: ${root_passwd}${NC}\n"
+      echo
       /usr/bin/ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
         -i .workspace/${node_type}/${cloud}/${region}/bastion-ssh-key.pem \
         mycs-admin@${node_name}
