@@ -142,16 +142,6 @@ function terraform::init() {
       echo
       ;;
   esac
-
-  # Seems to be a bug in terraform where 'output' and 'taint' command are 
-  # unable to load the backend state when the working directory does not 
-  # have the backend resource template file.
-  local backend_type=$(cat ${template_dir}/.terraform/terraform.tfstate | jq -r .backend.type)
-  cat << ---EOF > backend.tf
-terraform {
-  backend "$backend_type" {}
-}
----EOF
 }
 
 function terraform::apply() {
@@ -171,8 +161,11 @@ function terraform::apply() {
 
   # Save Terraform output in a JSON file for
   # later reference.
+  local working_dir=$(pwd)
+  pushd $template_dir 2>&1 > /dev/null
   terraform output -json \
-     -state=.terraform/terraform.tfstate > output.json
+     -state=.terraform/terraform.tfstate > ${working_dir}/output.json
+  popd 2>&1 > /dev/null
 
   local end=`date +%s`
   local time=$((end-start))

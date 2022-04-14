@@ -98,6 +98,11 @@ if [[ -z $vpn_type ]]; then
   echo -e "${RED}\nERROR! Node does not provide a VPN service.${NC}"
   exit 1
 fi
+if [[ $vpn_type == wireguard ]]; then
+  echo -e "${YELLOW}\nThe Space node is configured with a wireguard VPN which"
+  echo -e "can be configured only via the MyCS node service API.${NC}"
+  exit
+fi
 
 node_name=$(echo "$output" | jq -r .cb_vpc_name.value)
 vpn_masking_available=$(echo "$output" | jq -r .cb_vpn_masking_available.value)
@@ -127,9 +132,6 @@ os_type="$(uname -s)"
 if [[ $os_type == Darwin ]]; then
 
   case $vpn_type in
-    wireguard)
-      file=${TF_VAR_name}-${region}-vpn-${user}.conf
-      ;;
     openvpn)
       file=${TF_VAR_name}-ovpn-${region}-vpn.ovpn
       ;;
@@ -143,9 +145,6 @@ if [[ $os_type == Darwin ]]; then
     ${working_dir}/${file}
 
   case $vpn_type in
-    wireguard)
-      qrencode -t ansiutf8 < ${working_dir}/${file}
-      ;;
     ipsec|openvpn)
       open ${working_dir}/${file}
       ;;
@@ -154,12 +153,6 @@ if [[ $os_type == Darwin ]]; then
 elif [[ $os_type == Linux ]]; then
 
   case $vpn_type in
-    wireguard)
-      file=${TF_VAR_name}-${region}.conf
-      download_vpn_config $user $password \
-        https://${vpn_server_host}/static/~${user}/${file} \
-        ${working_dir}/${file}
-      ;;
 
     openvpn)
       file=openvpn-config.tunnelblick.zip
@@ -201,12 +194,6 @@ elif [[ $os_type == Linux ]]; then
   done
 
   case $vpn_type in
-    wireguard)
-      echo -e "\nImport the \"${file}\" tunnel file into your WireGuard client."
-      echo -e "Use the QR code below to configure mobile clients.\n"
-      qrencode -t ansiutf8 < ${working_dir}/${file}
-      echo
-      ;;
     openvpn)
       echo -e "\nImport it to your OpenVPN or Tunnelblick client and login using the credentials"
       echo -e "below:\n${NC}"

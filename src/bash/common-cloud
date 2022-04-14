@@ -133,6 +133,8 @@ function cloud::nodes() {
     local instance_version=$(cat $o | jq -r .cb_node_version.value)
     local version="${instance_version##*_}"
     [[ "$instance_version" != "$version" ]] || version=""
+    local root_user=$(cat $o | jq -r '.cb_managed_instances.value[0] | .root_user')
+    local root_passwd=$(cat $o | jq -r '.cb_managed_instances.value[0] | .root_passwd')
     
     local region_path=$(dirname $o)
     local region=$(basename $region_path)
@@ -144,7 +146,7 @@ function cloud::nodes() {
     >&2 echo -e -n "${BROWN_ORANGE}Retrieving details of instance \"${managed_instance_name}\"...                                                  ${NC}\r"
     local state=$(cloud::get_node_state "$cloud" "$region" "$managed_instance_id")
     
-    echo "${node_type}|${cloud}|${region}|${instance_address}|${state}|${version}|${managed_instance_id}"
+    echo "${node_type}|${cloud}|${region}|${instance_address}|${state}|${version}|${root_user}|${root_passwd}|${managed_instance_id}"
   done
 
   set -e

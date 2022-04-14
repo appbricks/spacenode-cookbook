@@ -44,21 +44,25 @@ cloud=$(echo "$node_detail" | awk -F '|' '{ print $2 }')
 region=$(echo "$node_detail" | awk -F '|' '{ print $3 }')
 node_name=$(echo "$node_detail" | awk -F '|' '{ print $4 }')
 node_status=$(echo "$node_detail" | awk -F '|' '{ print $5 }')
-node_id=$(echo "$node_detail" | awk -F '|' '{ print $7 }')
+root_user=$(echo "$node_detail" | awk -F '|' '{ print $7 }')
+root_passwd=$(echo "$node_detail" | awk -F '|' '{ print $8 }')
+node_id=$(echo "$node_detail" | awk -F '|' '{ print $9 }')
 
 echo -e "\n${GREEN}${BOLD}What do you want to do:${NORMAL}"
 echo -e "1) Update Node"
 if [[ $node_status == running ]]; then
   echo -e "2) Download VPN Config"
-  echo -e "3) Stop Node"
+  echo -e "3) SSH to Node"
+  echo -e "4) Stop Node"
 elif [[ $node_status == stopped ]]; then
   echo -e "${DIM}${DARK_GRAY}2) Download VPN Config${GREEN}${NORMAL}"
-  echo -e "3) Start Node"
+  echo -e "${DIM}${DARK_GRAY}3) SSH to Node${GREEN}${NORMAL}"
+  echo -e "4) Start Node"
 else
   echo -e "${DIM}${DARK_GRAY}2) Download VPN Config${GREEN}${NORMAL}"
   echo -e "${DIM}${DARK_GRAY}3) Stop Node${GREEN}${NORMAL}"
 fi
-echo -e "4) Delete Node"
+echo -e "5) Delete Node"
 
 printf "\nSelect action or (q)uit: ${NC}" && read option
 [[ -n $option && $option != q && $option != Q ]] || exit 0
@@ -87,6 +91,14 @@ case $option in
     fi
     ;;
   3)
+    if [[ $node_status == running ]]; then
+      echo -e "\n${CYAN}Sudo Password: ${root_passwd}${NC}\n"
+      /usr/bin/ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+        -i .workspace/${node_type}/${cloud}/${region}/bastion-ssh-key.pem \
+        mycs-admin@${node_name}
+    fi
+    ;;
+  4)
     case $node_status in
       running)
         echo -e "\n${GREEN}Stopping \"${node_name}\"...${NC}"
@@ -98,7 +110,7 @@ case $option in
         ;;
     esac
     ;;
-  4)
+  5)
     echo
     $scripts_dir/destroy-node \
       $workspace_root $template_dir \
