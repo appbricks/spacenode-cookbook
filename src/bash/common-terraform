@@ -195,6 +195,7 @@ function terraform::taint_bastion() {
 
   echo -e "${GREEN}Flagging node type \"${node_type}\" in region \"${region}\" of \"$cloud\" cloud to be rebuilt...${NC}"
 
+  pushd $template_dir 2>&1 > /dev/null
   case $cloud in
     aws)
       terraform taint module.bootstrap.aws_instance.bastion
@@ -206,6 +207,7 @@ function terraform::taint_bastion() {
       terraform taint module.bootstrap.google_compute_instance.bastion
       ;;
   esac
+  popd 2>&1 > /dev/null
 }
 
 function terraform::plan() {
