@@ -39,6 +39,21 @@ variable "attach_dns_zone" {
   default = false
 }
 
+# Whether to deploy an internal admin network
+# which can either bridge access to other or
+# cloud resources or be used for apps and
+# services.
+#
+# @order: 6
+# @tags: recipe
+# @accepted_values: false,true
+# @accepted_values_message: Please enter 'true' or 'false'.
+#
+variable "configure_admin_network" {
+  description = "If you want to configure an internal admin network where apps and services can be installed set this value to 'true'."
+  default = false
+}
+
 # Issue valid letsencrypt certificate to bastion
 #
 # @order: 10

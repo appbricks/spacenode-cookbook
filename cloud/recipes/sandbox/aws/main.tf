@@ -33,6 +33,9 @@ module "bootstrap" {
   vpc_dns_zone    = lower("${var.name}-${var.vpn_type}-${var.region}.${var.aws_dns_zone}")
   attach_dns_zone = local.configure_dns
 
+  # Optional internal admin network
+  configure_admin_network = var.configure_admin_network
+
   # Local DNS zone. This could also be the same as the public
   # which will enable setting up a split DNS of the public zone
   # for names to map to external and internal addresses.
@@ -59,9 +62,7 @@ module "bootstrap" {
   # Whether to allow SSH access to bastion server
   bastion_allow_public_ssh = true
 
-  bastion_host_name = "vpn"
-  bastion_use_fqdn  = local.configure_dns
-
+  bastion_host_name  = "vpn"
   bastion_admin_user = "mycs-admin"
 
   bastion_instance_type = var.bastion_instance_type
