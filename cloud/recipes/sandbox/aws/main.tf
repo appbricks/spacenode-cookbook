@@ -39,7 +39,7 @@ module "bootstrap" {
   # Local DNS zone. This could also be the same as the public
   # which will enable setting up a split DNS of the public zone
   # for names to map to external and internal addresses.
-  vpc_internal_dns_zones = ["local"]
+  vpc_internal_dns_zones = ["${var.name}-${var.region}.mycs", "local"]
 
   # VPN
   vpn_users = split(",", local.vpn_users)
