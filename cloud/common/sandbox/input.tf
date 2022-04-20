@@ -45,7 +45,7 @@ variable "attach_dns_zone" {
 # services.
 #
 # @order: 6
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @accepted_values: false,true
 # @accepted_values_message: Please enter 'true' or 'false'.
 #
@@ -82,7 +82,7 @@ variable "vpn_type" {
 # been connected to a node for some time
 #
 # @order: 16
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @accepted_values: shutdown,none
 # @accepted_values_message: Please provide one of 'shutdown' or 'none'.
 #
@@ -95,9 +95,10 @@ variable "idle_action" {
 # as no VPN clients connected during that time.
 #
 # @order: 17
-# @tags: recipe,target-undeployed,target-deployed
+# @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The time interval should be a value greater than 0.
+# @depends_on: idle_action=shutdown
 #
 variable "idle_shutdown_time" {
   description = "Time interval after last client disconnects from the space when the space node is shut down."
