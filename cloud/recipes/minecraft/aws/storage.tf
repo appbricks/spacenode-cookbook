@@ -4,8 +4,6 @@
 
 resource "aws_s3_bucket" "minecraft" {
   bucket_prefix = "${var.cb_vpc_name}-mc-"
-  
-  acl           = "private"
   force_destroy = true
 
   tags = {
@@ -19,6 +17,11 @@ resource "aws_s3_bucket_versioning" "minecraft" {
   versioning_configuration {
     status = "Enabled"
   }
+}
+
+resource "aws_s3_bucket_acl" "minecraft" {
+  bucket = aws_s3_bucket.minecraft.id
+  acl    = "private"
 }
 
 #
