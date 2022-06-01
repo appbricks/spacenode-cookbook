@@ -8,12 +8,16 @@ resource "aws_s3_bucket" "minecraft" {
   acl           = "private"
   force_destroy = true
 
-  versioning {
-    enabled = true
-  }
-
   tags = {
     Name = "${var.cb_vpc_name}: ${var.name} server storage"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "minecraft" {
+  bucket = aws_s3_bucket.minecraft.id
+
+  versioning_configuration {
+    status = "Disabled"
   }
 }
 
