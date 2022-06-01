@@ -19,7 +19,7 @@
 #
 variable "aws_dns_zone" {
   description = "The DNS Zone to use when naming VPN node's DNS name."
-  default = "local"
+  default = "mycs"
 }
 
 # The bastion VM's instance type

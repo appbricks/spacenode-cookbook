@@ -131,6 +131,7 @@ data "template_file" "minecraft-update-dns" {
 
   vars = {
     mc_dns_name    = "${var.name}.${var.cb_internal_domain}"
+    dns_zone       = var.cb_internal_domain
     pdns_url       = var.cb_internal_pdns_url
     pdns_api_key   = var.cb_internal_pdns_api_key
   }
