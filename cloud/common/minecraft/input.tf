@@ -30,7 +30,7 @@ variable "minecraft_server_description" {
 # Minecraft distribution type
 #
 # @order: 3
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @accepted_values: snapshot,release
 # @accepted_values_message: Please provide one of 'snapshot' or 'release'.
 #
@@ -43,7 +43,7 @@ variable "minecraft_type" {
 # Minecraft version
 #
 # @order: 4
-# @tags: recipe
+# @tags: recipe,target-undeployed
 #
 variable "minecraft_version" {
   description = "Which version of Minecraft server do you want to install."
@@ -54,7 +54,7 @@ variable "minecraft_version" {
 # Minecraft server port
 #
 # @order: 5
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
 #
@@ -67,7 +67,7 @@ variable "minecraft_port" {
 # Minecraft backup frequency
 #
 # @order: 6
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The backup frequency must be a positive value.
 #
@@ -80,7 +80,7 @@ variable "minecraft_backup_frequency" {
 # Minecraft JVM initial minimum heap size
 #
 # @order: 7
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^[0-9]+[kmgKMG]$
 # @value_inclusion_filter_message: The heap size must be a positive integer with a suffix (k/m/g) indicating the units.
 #
@@ -93,7 +93,7 @@ variable "java_ms_mem" {
 # Minecraft JVM maximum heap size
 #
 # @order: 8
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^[0-9]+[kmgKMG]$
 # @value_inclusion_filter_message: The heap size must be a positive integer with a suffix (k/m/g) indicating the units.
 #
