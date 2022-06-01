@@ -27,10 +27,10 @@ module "bootstrap" {
 
   # Name of VPC will be used to identify 
   # VPC specific cloud resources
-  vpc_name = lower("${var.name}-${var.region}")
+  vpc_name = local.space_domain
 
   # DNS Name for VPC
-  vpc_dns_zone    = lower("${var.name}-${var.region}.${var.aws_dns_zone}")
+  vpc_dns_zone    = lower("${local.space_domain}.${var.aws_dns_zone}")
   attach_dns_zone = local.configure_dns
 
   # Optional internal admin network
@@ -39,7 +39,7 @@ module "bootstrap" {
   # Local DNS zone. This could also be the same as the public
   # which will enable setting up a split DNS of the public zone
   # for names to map to external and internal addresses.
-  vpc_internal_dns_zones = ["${var.name}-${var.region}.mycs", "local"]
+  vpc_internal_dns_zones = [local.space_internal_domain, "internal"]
 
   # VPN
   vpn_users = split(",", local.vpn_users)

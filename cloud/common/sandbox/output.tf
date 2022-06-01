@@ -112,6 +112,10 @@ output "cb_dns_configured" {
   value = local.configure_dns
 }
 
+output "cb_internal_domain" {
+  value = local.space_internal_domain
+}
+
 output "cb_internal_pdns_url" {
   value = module.bootstrap.powerdns_url
 }
