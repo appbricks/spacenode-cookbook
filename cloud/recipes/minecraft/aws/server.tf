@@ -47,7 +47,7 @@ USERDATA
 #
 
 resource "aws_iam_role" "minecraft" {
-  name   = "${var.cb_vpc_name}-minecraft-server"
+  name   = "${var.cb_vpc_name}-${var.name}"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -66,7 +66,7 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "minecraft" {
-  name = "${var.cb_vpc_name}-minecraft-server"
+  name = "${var.cb_vpc_name}-${var.name}"
   role = aws_iam_role.minecraft.name
 }
 

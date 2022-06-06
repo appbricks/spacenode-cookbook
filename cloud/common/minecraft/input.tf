@@ -16,10 +16,24 @@ variable "name" {
   default     = "my-minecraft"
 }
 
-# Minecraft Server description
+# Minecraft distribution type
 #
 # @order: 2
 # @tags: recipe,target-undeployed
+# @accepted_values: vanilla,paper,witchcraft-and-wizardry
+# @accepted_values_message: Please provide one of 'vanilla', 'paper' or 'witchcraft-and-wizardry'.
+#
+variable "minecraft_type" {
+  description = "Type of Minecraft server distribution - i.e. 'vanilla' is the original untouched distribution."
+  type        = string
+  default     = "release"
+}
+
+# Minecraft Server description
+#
+# @order: 3
+# @tags: recipe,target-undeployed
+# @depends_on: minecraft_type=vanilla|paper
 #
 variable "minecraft_server_description" {
   description = "The description of Minecraft server which will be shown as the server's MOTD."
@@ -27,23 +41,11 @@ variable "minecraft_server_description" {
   default     = "My awesome minecraft worlds in the cloud."
 }
 
-# Minecraft distribution type
-#
-# @order: 3
-# @tags: recipe,target-undeployed
-# @accepted_values: snapshot,release
-# @accepted_values_message: Please provide one of 'snapshot' or 'release'.
-#
-variable "minecraft_type" {
-  description = "Type of Minecraft server distribution - snapshot or release."
-  type        = string
-  default     = "release"
-}
-
 # Minecraft version
 #
 # @order: 4
 # @tags: recipe,target-undeployed
+# @depends_on: minecraft_type=vanilla|paper
 #
 variable "minecraft_version" {
   description = "Which version of Minecraft server do you want to install."

@@ -42,7 +42,7 @@ resource "aws_s3_bucket_public_access_block" "this" {
 #
 
 resource "aws_iam_role_policy" "mc_allow_ec2_to_s3" {
-  name = "${var.cb_vpc_name}-minecraft-server-storage"
+  name = "${var.cb_vpc_name}-${var.name}-storage"
   role = aws_iam_role.minecraft.id
 
   policy = <<EOF
