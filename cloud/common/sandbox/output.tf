@@ -8,7 +8,7 @@
 
 locals {
   name_suffix = reverse(split("_", var.bastion_image_name))[0]
-  version = (local.name_suffix == "appbricks-bastion-inceptor" 
+  version = (local.name_suffix == "appbricks-bastion-inceptor" || local.name_suffix == "D.*"
     ? "dev" 
     : local.name_suffix)
 
