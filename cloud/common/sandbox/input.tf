@@ -131,7 +131,7 @@ variable "vpn_users" {
 # @depends_on: vpn_type=wg
 #
 variable "wireguard_service_port" {
-  description = "The port on which the WireGuard service will listen for connections.."
+  description = "The port on which the WireGuard service will listen for connections."
   default = "3399"
 }
 
@@ -204,6 +204,18 @@ variable "tunnel_vpn_port_start" {
 variable "tunnel_vpn_port_end" {
   description = "The end port over which an obfuscated VPN traffic will be tunnelled."
   default = "5596"
+}
+
+# MyCS DERP service STUN port
+#
+# @order: 116
+# @tags: recipe
+# @value_inclusion_filter: ^[0-9]+$
+# @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
+#
+variable "derp_stun_port" {
+  description = "The port on which MyCS Node will run the STUN service to discover endpoints of connected devices"
+  default = "3478"
 }
 
 #

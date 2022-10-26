@@ -59,6 +59,9 @@ module "bootstrap" {
   tunnel_vpn_port_start = local.tunnel_vpn_port_start
   tunnel_vpn_port_end   = local.tunnel_vpn_port_end
 
+  # MyCS Derp STUN service port
+  derp_stun_port = var.derp_stun_port
+
   # Whether to allow SSH access to bastion server
   bastion_allow_public_ssh = true
 
