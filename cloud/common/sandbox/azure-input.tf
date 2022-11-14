@@ -18,8 +18,21 @@
 # @depends_on: attach_dns_zone=true
 #
 variable "azure_dns_zone" {
-  description = "The DNS Zone to use when naming VPN node's DNS name."
+  description = "The DNS zone to use when naming VPN node's DNS name."
   default = "local"
+}
+
+# The dns zone's resource group
+#
+# @order: 7
+# @tags: recipe
+# @value_inclusion_filter: ^[-_.()0-9a-zA-Z]*[-_()0-9a-zA-Z]$
+# @value_inclusion_filter_message: Entered value does not appear to be a valid Azure resource group name.
+# @depends_on: attach_dns_zone=true
+#
+variable "azure_dns_zone_resource_group" {
+  description = "The resource group of the parent DNS zone."
+  default = ""
 }
 
 # The bastion VM's instance type
@@ -35,11 +48,26 @@ variable "bastion_instance_type" {
 }
 
 #
+# Bastion image
+#
+variable "bastion_image_name" {
+  default = "appbricks-bastion-inceptor_D.221109030723"
+}
+
+#
 # Microsoft Azure common local variables
 #
 
 locals {
   public_cloud_provider = "Microsoft Azure"
 
-  configure_dns = var.attach_dns_zone ? length(var.azure_dns_zone) > 0 : false
+  configure_dns = (var.attach_dns_zone 
+    ? length(var.azure_dns_zone) > 0 
+    : false
+  )
+
+  source_resource_group = (length(var.azure_dns_zone_resource_group) == 0 
+    ? "default" 
+    : var.azure_dns_zone_resource_group
+  )
 }

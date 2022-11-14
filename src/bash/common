@@ -43,13 +43,17 @@ function common::set_working_dir() {
     mkdir -p $working_dir/.workspace
   fi
 
-  template_dir=$root_dir/cloud/recipes
-  workspace_root=$working_dir/.workspace
+  workspace_root=$working_dir/.workspace/run  
+  template_dir=$working_dir/.workspace/templates
+  if [[ ! -e $template_dir ]]; then
+    mkdir -p $template_dir
+    ln -s $root_dir/cloud/recipes/* $template_dir
+  fi
 }
 
 function common::check_eula() {
 
-  if [[ ! -e $workspace_root/eula_accepted ]]; then
+  if [[ ! -e $template_dir/eula_accepted ]]; then
 
     echo -e "${GREEN}\nBefore you can deploy Cloud nodes you need to review and"
     echo -e "accept the AppBricks, Inc. Software End User Agreement."
@@ -63,7 +67,7 @@ function common::check_eula() {
     [[ $option == yes ]] || exit 1
     echo -e "${GREEN}\nThank you. You can proceed to launch, run and manage you nodes in the cloud now...\n${NC}"
 
-    touch $workspace_root/eula_accepted
+    touch $template_dir/eula_accepted
   fi
 }
 
@@ -114,18 +118,18 @@ function common::validate_environment() {
   fi
   set -e
 
-  if [[ ! -e $working_dir/cloud-credentials ]]; then
-    echo -e "${RED}\nERROR! Unable to find the Cloud Credentials file at \"./cloud-credentials\".${NC}"
+  if [[ ! -e $working_dir/cloud-creds.sh ]]; then
+    echo -e "${RED}\nERROR! Unable to find the Cloud Credentials file at \"./cloud-creds.sh\".${NC}"
     exit 1
   fi
-  if [[ ! -e $working_dir/deployment-vars ]]; then
-    echo -e "${RED}\nERROR! Unable to find the Deployment variables file at \"./deployment-vars\".${NC}"
+  if [[ ! -e $working_dir/build-vars.sh ]]; then
+    echo -e "${RED}\nERROR! Unable to find the Deployment variables file at \"./build-vars.sh\".${NC}"
     exit 1
   fi
 
   # Read the deployment context
-  source $working_dir/cloud-credentials
-  source $working_dir/deployment-vars
+  source $working_dir/cloud-creds.sh
+  source $working_dir/build-vars.sh
 }
 
 function common::validate_cloud_credentials() {
@@ -134,7 +138,7 @@ function common::validate_cloud_credentials() {
     aws)
       if [[ -z $AWS_ACCESS_KEY \
         || -z $AWS_SECRET_KEY ]]; then
-        echo -e "${RED}\nERROR! The environment variables \"AWS_ACCESS_KEY\" and \"AWS_SECRET_KEY\" must be set in the \"cloud-credentials\" file.${NC}"
+        echo -e "${RED}\nERROR! The environment variables \"AWS_ACCESS_KEY\" and \"AWS_SECRET_KEY\" must be set in the \"cloud-creds.sh\" file.${NC}"
         exit 1
       fi
       ;;
@@ -142,14 +146,14 @@ function common::validate_cloud_credentials() {
       if [[ -z $ARM_CLIENT_ID \
         || -z $ARM_CLIENT_SECRET \
         || -z $ARM_TENANT_ID ]]; then
-        echo -e "${RED}\nERROR! The environment variables \"ARM_CLIENT_ID\", \"ARM_CLIENT_SECRET\" and \"ARM_TENANT_ID\" must be set in the \"cloud-credentials\" file.${NC}"
+        echo -e "${RED}\nERROR! The environment variables \"ARM_CLIENT_ID\", \"ARM_CLIENT_SECRET\" and \"ARM_TENANT_ID\" must be set in the \"cloud-creds.sh\" file.${NC}"
         exit 1
       fi
       ;;
     google)
       if [[ -z $GOOGLE_CREDENTIALS \
         || -z $GOOGLE_PROJECT ]]; then
-        echo -e "${RED}\nERROR! The environment variables \"GOOGLE_CREDENTIALS\" and \"GOOGLE_PROJECT\" must be set in the \"cloud-credentials\" file.${NC}"
+        echo -e "${RED}\nERROR! The environment variables \"GOOGLE_CREDENTIALS\" and \"GOOGLE_PROJECT\" must be set in the \"cloud-creds.sh\" file.${NC}"
         exit 1
       fi
       ;;

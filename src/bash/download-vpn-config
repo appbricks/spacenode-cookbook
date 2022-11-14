@@ -124,7 +124,7 @@ if [[ $vpn_masking_available == yes ]]; then
   chmod +x ${workspace_dir}/${region}/client_tunnel
 fi
 
-working_dir=$(cd $workspace_dir/../../../ && pwd)/configs/${node_name}
+working_dir=$(cd $workspace_dir/../../../../ && pwd)/configs/${node_name}
 mkdir -p $working_dir
 
 os_type="$(uname -s)"
@@ -138,17 +138,16 @@ if [[ $os_type == Darwin ]]; then
     ipsec)
       file=${TF_VAR_name}-${region}-vpn.mobileconfig
       ;;
+    *)
+      echo -e "${RED}\nERROR! Unknown VPN type '$vpn_type'.${NC}"
+      exit 1
   esac
 
   download_vpn_config $user $password \
     https://${vpn_server_host}/static/~${user}/${file} \
     ${working_dir}/${file}
 
-  case $vpn_type in
-    ipsec|openvpn)
-      open ${working_dir}/${file}
-      ;;
-  esac
+  open ${working_dir}/${file}
 
 elif [[ $os_type == Linux ]]; then
 
@@ -181,6 +180,10 @@ elif [[ $os_type == Linux ]]; then
         https://${vpn_server_host}/static/~${user}/${file} \
         ${working_dir}/${file} 
       ;;
+
+    *)
+      echo -e "${RED}\nERROR! Unknown VPN type '$vpn_type'.${NC}"
+      exit 1
   esac
 
   echo -e "${GREEN}\nVPN client config files downloaded to folder \"configs/${node_name}/\":\n"

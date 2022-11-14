@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM alpine:latest
 
 COPY bin /usr/local/lib/vpn-server/bin
 COPY cloud/ /usr/local/lib/vpn-server/cloud

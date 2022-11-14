@@ -18,7 +18,7 @@ function terraform::set_cloud_region() {
       ;;
     azure)
       cloud::set_azure_credentials
-      regions=$(az account list-locations -o table | awk '$4 != "Name" && $0 !~ /^-.*/ { print substr($0, 48) }')
+      regions=$(az account list-locations | jq -r '.[].name')
       common::validate_value_from_list \
         "$regions" "$region" \
         "Unknown Azure Cloud region \"$region\"."
@@ -157,7 +157,7 @@ function terraform::apply() {
   # Apply Terraform template and filter out
   # any output values for security purposes.
   terraform -chdir=$template_dir apply -auto-approve 2>&1 \
-    | tee apply.log | awk '/Outputs:/ {l=999}; (l-- > 0) {next} 1'
+    | tee apply.log | awk '/^Outputs:/ {l=999}; (l-- > 0) {next} 1'
 
   # Save Terraform output in a JSON file for
   # later reference.

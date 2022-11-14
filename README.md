@@ -106,7 +106,7 @@ Before you can launch VPN nodes using the the CLI you need to initialize a works
 
   > Current only AWS is supported, although Azure and Google can be used using a private image of the appliance. Please contact AppBricks support if you need to install to either of those clouds.
 
-  Two control files were created when you initialized your workspace. The first control file should contain your public cloud account credentials and is named `cloud-credentials`. You will need to retrieve the credentials from you public cloud accounts and add them to the corresponding variable in the control file.
+  Two control files were created when you initialized your workspace. The first control file should contain your public cloud account credentials and is named `cloud-creds.sh`. You will need to retrieve the credentials from you public cloud accounts and add them to the corresponding variable in the control file.
 
   ```
   # AWS IaaS credentials for Terraform

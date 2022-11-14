@@ -97,7 +97,7 @@ case $option in
     if [[ $node_status == running ]]; then
       echo
       /usr/bin/ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
-        -i .workspace/${node_type}/${cloud}/${region}/bastion-ssh-key.pem \
+        -i ${workspace_root}/${node_type}/${cloud}/${region}/bastion-ssh-key.pem \
         mycs-admin@${node_name}
     fi
     ;;

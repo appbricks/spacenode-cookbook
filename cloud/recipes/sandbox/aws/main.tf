@@ -65,6 +65,11 @@ module "bootstrap" {
   # Whether to allow SSH access to bastion server
   bastion_allow_public_ssh = true
 
+  # AWS instances with external IP will have
+  # an auto-assigned DNS entry if one is not 
+  # explicitly configured
+  bastion_use_fqdn = true
+
   bastion_host_name  = "vpn"
   bastion_admin_user = "mycs-admin"
 

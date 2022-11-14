@@ -35,6 +35,13 @@ variable "bastion_instance_type" {
 }
 
 #
+# Bastion image
+#
+variable "bastion_image_name" {
+  default = "appbricks-bastion-inceptor_D.*"
+}
+
+#
 # Amazon Web Services common local variables
 #
 

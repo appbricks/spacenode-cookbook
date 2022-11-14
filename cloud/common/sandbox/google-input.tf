@@ -46,6 +46,13 @@ variable "bastion_instance_type" {
 }
 
 #
+# Bastion image
+#
+variable "bastion_image_name" {
+  default = "appbricks-bastion-inceptor-d-221109030723"
+}
+
+#
 # Google Cloud Platform common local variables
 #
 

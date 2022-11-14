@@ -121,7 +121,8 @@ output "cb_internal_pdns_url" {
 }
 
 output "cb_internal_pdns_api_key" {
-  value = module.bootstrap.powerdns_api_key
+  value     = module.bootstrap.powerdns_api_key
+  sensitive = true
 }
 
 output "cb_vpn_type" {

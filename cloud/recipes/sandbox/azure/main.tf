@@ -25,18 +25,23 @@ module "bootstrap" {
   #
   region = var.region
 
+  source_resource_group = local.source_resource_group
+
   # Name of VPC will be used to identify 
   # VPC specific cloud resources
-  vpc_name = lower("${var.name}-${var.region}")
+  vpc_name = local.space_domain
 
   # DNS Name for VPC
-  vpc_dns_zone    = lower("${var.name}-${var.vpn_type}-${var.region}.${var.azure_dns_zone}")
+  vpc_dns_zone    = lower("${local.space_domain}.${var.azure_dns_zone}")
   attach_dns_zone = local.configure_dns
+
+  # Optional internal admin network
+  configure_admin_network = var.configure_admin_network
 
   # Local DNS zone. This could also be the same as the public
   # which will enable setting up a split DNS of the public zone
   # for names to map to external and internal addresses.
-  vpc_internal_dns_zones = ["${var.name}-${var.region}.mycs", "local"]
+  vpc_internal_dns_zones = ["mycs", local.space_internal_domain]
 
   # VPN
   vpn_users = split(",", var.vpn_users)
@@ -56,14 +61,17 @@ module "bootstrap" {
   tunnel_vpn_port_start = local.tunnel_vpn_port_start
   tunnel_vpn_port_end   = local.tunnel_vpn_port_end
 
+  # MyCS Derp STUN service port
+  derp_stun_port = var.derp_stun_port
+
   # Whether to allow SSH access to bastion server
   bastion_allow_public_ssh = true
 
-  bastion_host_name = "vpn"
-  bastion_use_fqdn  = local.configure_dns
-
+  bastion_use_fqdn = local.configure_dns
+ 
+  bastion_host_name  = "vpn"
   bastion_admin_user = "mycs-admin"
-
+ 
   bastion_instance_type = var.bastion_instance_type
 
   bastion_use_managed_image = false
