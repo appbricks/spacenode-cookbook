@@ -1,1 +1,0 @@
-../../../common/minecraft/install.sh

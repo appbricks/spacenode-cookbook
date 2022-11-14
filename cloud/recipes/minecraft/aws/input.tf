@@ -1,1 +1,0 @@
-../../../common/minecraft/input.tf

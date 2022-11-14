@@ -1,1 +1,0 @@
-../../../common/minecraft/update_dns.sh
