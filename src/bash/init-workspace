@@ -43,7 +43,7 @@ export TF_VAR_attach_dns_zone=false
 #export TF_VAR_azure_dns_zone_resource_group=
 # - Google DNS configuration
 #export TF_VAR_google_dns_managed_zone_name=
-#export TF_VAR_google_dns_zone==
+#export TF_VAR_google_dns_zone=
 
 # Values to used for creating self-signed X509 certs
 export TF_VAR_company_name="appbricks"
