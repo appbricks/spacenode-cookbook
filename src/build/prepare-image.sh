@@ -40,7 +40,7 @@ ln -s ${CLOUDSDK_INSTALL_DIR}/google-cloud-sdk/bin/gsutil /usr/local/bin/gsutil
 # Install latest version of Terraform
 terraform_version=1.3.4
 curl -OL https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_${arch}.zip
-unzip terraform_${terraform_version}_linux_amd64.zip
+unzip terraform_${terraform_version}_linux_${arch}.zip
 mv terraform /usr/local/bin
 
 # Build latest version of JQ
@@ -74,9 +74,9 @@ kcp_tunnel_version=20221015
 
 cd /tmp
 curl -L https://github.com/xtaci/kcptun/releases/download/v${kcp_tunnel_version}/kcptun-linux-${arch}-${kcp_tunnel_version}.tar.gz \
-  -o kcptun-linux-amd64.tgz
-tar xvzf kcptun-linux-amd64.tgz
-mv client_linux_amd64 /usr/local/bin/kcptun-client
+  -o kcptun-linux-${arch}.tgz
+tar xvzf kcptun-linux-${arch}.tgz
+mv client_linux_${arch} /usr/local/bin/kcptun-client
 cd -
 
 mkdir /vpn
