@@ -1,1 +1,1 @@
-../../../common/output.tf
+../../../common/sandbox/output.tf

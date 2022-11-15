@@ -1,9 +1,14 @@
 #!/bin/bash
 
-workspace_dir=$1 && shift
+workspace_root=$1 && shift
 template_dir=$1 && shift
-vpn_type=${1:-<VPN_TYPE>} && shift
+node_type=${1:-<NODE_TYPE>} && shift
 cloud=${1:-<CLOUD>} && shift
+
+skip_ssl_validation=""
+if [[ -z $TF_VAR_certify_bastion || $TF_VAR_certify_bastion == false ]]; then
+  skip_ssl_validation="-k"
+fi
 
 source $(dirname $BASH_SOURCE)/common
 set -euo pipefail
@@ -16,11 +21,6 @@ function download_vpn_config() {
   local config_file_out=$4
 
   rm -fr $config_file_out
-
-  skip_ssl_validation=""
-  if [[ $TF_VAR_certify_bastion == false ]]; then
-    skip_ssl_validation="-k"
-  fi
 
   set +e
   curl -s -f $skip_ssl_validation \
@@ -91,25 +91,40 @@ if [[ ! -e ${workspace_dir}/${region} ]]; then
   exit 1
 fi
 
-bastion_fqdn=$(cat ${workspace_dir}/${region}/output.json | jq -r .bastion_fqdn.value)
-dns_configured=$(cat ${workspace_dir}/${region}/output.json | jq -r .dns_configured.value)
+output=$(cat ${workspace_dir}/${region}/output.json)
+
+vpn_type=$(echo "$output" | jq -r .cb_vpn_type.value)
+if [[ -z $vpn_type ]]; then
+  echo -e "${RED}\nERROR! Node does not provide a VPN service.${NC}"
+  exit 1
+fi
+if [[ $vpn_type == wireguard ]]; then
+  echo -e "${YELLOW}\nThe Space node is configured with a wireguard VPN which"
+  echo -e "can be configured only via the MyCS node service API.${NC}"
+  exit
+fi
+
+node_name=$(echo "$output" | jq -r .cb_vpc_name.value)
+vpn_masking_available=$(echo "$output" | jq -r .cb_vpn_masking_available.value)
+bastion_fqdn=$(echo "$output" | jq -r '.cb_managed_instances.value[0] | .fqdn')
+dns_configured=$(echo "$output" | jq -r .cb_dns_configured.value)
 if [[ $dns_configured == true ]]; then
   vpn_server_host=$bastion_fqdn
 else
-  vpn_server_host=$(cat ${workspace_dir}/${region}/output.json | jq -r .bastion_public_ip.value)
+  vpn_server_host=$(echo "$output" | jq -r '.cb_managed_instances.value[0] | .public_ip')
 fi
-echo -e "${GREEN}Downloading VPN configs from \"https://${vpn_server_host}/~${user}/\"...${NC}"
+echo -e "${GREEN}\nDownloading VPN configs from \"https://${vpn_server_host}/static/~${user}/\"...${NC}"
 
-if [[ $vpn_type == ovpn-x ]]; then
+if [[ $vpn_masking_available == yes ]]; then
   # Download tunnel script
   download_vpn_config $user $password \
-    https://${vpn_server_host}/~${user}/client_tunnel \
+    https://${vpn_server_host}/static/~${user}/client_tunnel \
     ${workspace_dir}/${region}/client_tunnel
 
   chmod +x ${workspace_dir}/${region}/client_tunnel
 fi
 
-working_dir=$(cd $workspace_dir/../../../ && pwd)/configs/${bastion_fqdn}
+working_dir=$(cd $workspace_dir/../../../../ && pwd)/configs/${node_name}
 mkdir -p $working_dir
 
 os_type="$(uname -s)"
@@ -117,86 +132,87 @@ os_type="$(uname -s)"
 if [[ $os_type == Darwin ]]; then
 
   case $vpn_type in
+    openvpn)
+      file=${TF_VAR_name}-${region}-vpn.ovpn
+      ;;
     ipsec)
-      file=${TF_VAR_name}-${vpn_type}-${region}-vpn.mobileconfig
+      file=${TF_VAR_name}-${region}-vpn.mobileconfig
       ;;
-    ovpn|ovpn-x)
-      file=openvpn-config.tunnelblick.zip
-      ;;
+    *)
+      echo -e "${RED}\nERROR! Unknown VPN type '$vpn_type'.${NC}"
+      exit 1
   esac
 
   download_vpn_config $user $password \
-    https://${vpn_server_host}/~${user}/${file} \
+    https://${vpn_server_host}/static/~${user}/${file} \
     ${working_dir}/${file}
 
-  case $vpn_type in
-    ipsec)
-      open ${working_dir}/${file}
-      ;;
-    ovpn|ovpn-x)
-      rm -fr ${working_dir}/*.tblk
-      unzip -q -o ${working_dir}/${file} -d $working_dir
-      rm ${working_dir}/${file}
-
-      tunnelblick_config=$(ls -l $working_dir | grep ".tblk" | awk '{ print $9 }')
-      open ${working_dir}/${tunnelblick_config}
-      ;;
-  esac
+  open ${working_dir}/${file}
 
 elif [[ $os_type == Linux ]]; then
 
-    if [[ $vpn_type == ipsec ]]; then
+  case $vpn_type in
 
-      file=${TF_VAR_name}-${vpn_type}-${region}-vpn.mobileconfig
-      download_vpn_config $user $password \
-        https://${vpn_server_host}/~${user}/${file} \
-        ${working_dir}/${file}    
-
-      file=${user}.p12
-      download_vpn_config $user $password \
-        https://${vpn_server_host}/~${user}/${file} \
-        ${working_dir}/${file} 
-    else
-
+    openvpn)
       file=openvpn-config.tunnelblick.zip
       download_vpn_config $user $password \
-        https://${vpn_server_host}/~${user}/${file} \
+        https://${vpn_server_host}/static/~${user}/${file} \
         ${working_dir}/${file}
 
       rm -fr ${working_dir}/*.tblk
       unzip -q -o ${working_dir}/${file} -d $working_dir
       rm ${working_dir}/${file}
       
-      file=${TF_VAR_name}-${vpn_type}-${region}-vpn.ovpn
+      file=${TF_VAR_name}-${region}.ovpn
       download_vpn_config $user $password \
-        https://${vpn_server_host}/~${user}/${file} \
+        https://${vpn_server_host}/static/~${user}/${file} \
+        ${working_dir}/${file}       
+      ;;
+
+    ipsec)      
+      file=${TF_VAR_name}-${region}.mobileconfig
+      download_vpn_config $user $password \
+        https://${vpn_server_host}/static/~${user}/${file} \
         ${working_dir}/${file}    
-    fi
 
-    echo -e "${GREEN}\nVPN client config files downloaded to folder \"configs/${bastion_fqdn}/\":\n"
-    first=y
-    for d in $(find ${working_dir} -maxdepth 1 -print); do
-      if [[ $first == n ]]; then
-        echo "- \"$(basename $d)\""
-      else
-        first=n
-      fi      
-    done
+      file=${user}.p12
+      download_vpn_config $user $password \
+        https://${vpn_server_host}/static/~${user}/${file} \
+        ${working_dir}/${file} 
+      ;;
 
-    if [[ $vpn_type == ovpn || $vpn_type == ovpn-x ]]; then
+    *)
+      echo -e "${RED}\nERROR! Unknown VPN type '$vpn_type'.${NC}"
+      exit 1
+  esac
+
+  echo -e "${GREEN}\nVPN client config files downloaded to folder \"configs/${node_name}/\":\n"
+  first=y
+  for d in $(find ${working_dir} -maxdepth 1 -print); do
+    if [[ $first == n ]]; then
+      echo "- \"$(basename $d)\""
+    else
+      first=n
+    fi      
+  done
+
+  case $vpn_type in
+    openvpn)
       echo -e "\nImport it to your OpenVPN or Tunnelblick client and login using the credentials"
       echo -e "below:\n${NC}"
       echo -e "  user: ${user}"
       echo -e "  password: ${password}\n"
-    else
-      echo -e "\nImport the \"*.mobileconfig\" profile if you are on an Apple device. For all"
-      echo -e "other systems you will need to configure your native IPsec client using the"
-      echo -e "provided PKCS key for the user."
-    fi
+      ;;
+    ipsec)
+      echo -e "\nImport the \"${file}\" profile if you are on an Apple device. For"
+      echo -e "all other systems you will need to configure your native client using the"
+      echo -e "provided PKCS key for the user.\n"
+      ;;
+  esac
 else
     echo -e "${RED}\nERROR: Unable to determine OS type for which the VPN configurations should be"
     echo -e "       downloaded. Please download manually from:\n${NC}"
-    echo -e "       url: https://${vpn_server_host}/~${user}"
+    echo -e "       url: https://${vpn_server_host}/static/~${user}"
     echo -e "       user: ${user}"
     echo -e "       password: ${password}\n"
     exit 1

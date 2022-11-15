@@ -6,7 +6,7 @@ root_dir=$(cd $scripts_dir/../.. && pwd)
 source ${scripts_dir}/common
 set -euo pipefail
 
-workspace_dir=$1 && shift
+workspace_root=$1 && shift
 template_dir=$1 && shift
 
 if [[ $# -gt 0 ]]; then
@@ -15,10 +15,10 @@ if [[ $# -gt 0 ]]; then
   exit 1
 fi
 
-echo -e "\n${GREEN}${BOLD}VPN Nodes deployed to the cloud${NORMAL}"
-echo -e "===============================${NC}\n"
+echo -e "\n${GREEN}${BOLD}Nodes deployed to the cloud${NORMAL}"
+echo -e "===========================${NC}\n"
 
-vpn_nodes=( $(cloud::nodes $workspace_dir) )
+vpn_nodes=( $(cloud::nodes $workspace_root) )
 if [[ ${#vpn_nodes[@]} -eq 0 ]]; then
   echo -e "${GREEN}No nodes have been deployed.${NC}"
   exit 0
@@ -38,31 +38,38 @@ if [[ ! $option =~ $re \
   exit 1
 fi
 
-node_detail=( $(echo "${vpn_nodes[$option]}" | sed "s/|/ /g") )
-vpn_type=${node_detail[0]}
-cloud=${node_detail[1]}
-region=${node_detail[2]}
-node_name=${node_detail[3]}
-node_status=${node_detail[4]}
-node_id=${node_detail[6]}
+node_detail=${vpn_nodes[$option]}
+node_type=$(echo "$node_detail" | awk -F '|' '{ print $1 }')
+cloud=$(echo "$node_detail" | awk -F '|' '{ print $2 }')
+region=$(echo "$node_detail" | awk -F '|' '{ print $3 }')
+node_name=$(echo "$node_detail" | awk -F '|' '{ print $4 }')
+node_status=$(echo "$node_detail" | awk -F '|' '{ print $5 }')
+root_user=$(echo "$node_detail" | awk -F '|' '{ print $7 }')
+root_passwd=$(echo "$node_detail" | awk -F '|' '{ print $8 }')
+node_id=$(echo "$node_detail" | awk -F '|' '{ print $9 }')
+
+[[ -z $root_user ]] ||
+  echo -e "\n${CYAN}Node Admin =>\n  User: ${root_user}\n  Password: ${root_passwd}${NC}"
 
 echo -e "\n${GREEN}${BOLD}What do you want to do:${NORMAL}"
 echo -e "1) Update Node"
 if [[ $node_status == running ]]; then
   echo -e "2) Download VPN Config"
-  echo -e "3) Stop Node"
+  echo -e "3) SSH to Node"
+  echo -e "4) Stop Node"
 elif [[ $node_status == stopped ]]; then
   echo -e "${DIM}${DARK_GRAY}2) Download VPN Config${GREEN}${NORMAL}"
-  echo -e "3) Start Node"
+  echo -e "${DIM}${DARK_GRAY}3) SSH to Node${GREEN}${NORMAL}"
+  echo -e "4) Start Node"
 else
   echo -e "${DIM}${DARK_GRAY}2) Download VPN Config${GREEN}${NORMAL}"
   echo -e "${DIM}${DARK_GRAY}3) Stop Node${GREEN}${NORMAL}"
 fi
-echo -e "4) Delete Node"
+echo -e "5) Delete Node"
 
 printf "\nSelect action or (q)uit: ${NC}" && read option
 [[ -n $option && $option != q && $option != Q ]] || exit 0
-if [[ ! $option =~ $re || $option -lt 1 || $option -gt 4 ]]; then
+if [[ ! $option =~ $re || $option -lt 1 || $option -gt 5 ]]; then
   echo -e "${RED}\nERROR! Invalid action selected.${NC}"
   exit 1
 fi
@@ -71,8 +78,8 @@ case $option in
   1)
     echo
     $scripts_dir/deploy-node \
-      $workspace_dir $template_dir \
-      $vpn_type $cloud -r $region -u
+      $workspace_root $template_dir \
+      $node_type $cloud -r $region -u
     ;;
   2)
     if [[ $node_status == running ]]; then
@@ -81,12 +88,20 @@ case $option in
 
       echo
       $scripts_dir/download-vpn-config \
-        $workspace_dir $template_dir \
-        $vpn_type $cloud -r $region \
+        $workspace_root $template_dir \
+        $node_type $cloud -r $region \
         -u $username -p $password
     fi
     ;;
   3)
+    if [[ $node_status == running ]]; then
+      echo
+      /usr/bin/ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+        -i ${workspace_root}/${node_type}/${cloud}/${region}/bastion-ssh-key.pem \
+        mycs-admin@${node_name}
+    fi
+    ;;
+  4)
     case $node_status in
       running)
         echo -e "\n${GREEN}Stopping \"${node_name}\"...${NC}"
@@ -98,10 +113,10 @@ case $option in
         ;;
     esac
     ;;
-  4)
+  5)
     echo
     $scripts_dir/destroy-node \
-      $workspace_dir $template_dir \
-      $vpn_type $cloud -r $region
+      $workspace_root $template_dir \
+      $node_type $cloud -r $region
     ;;
 esac

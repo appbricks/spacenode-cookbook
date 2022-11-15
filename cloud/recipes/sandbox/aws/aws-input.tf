@@ -1,1 +1,1 @@
-../../../common/aws-input.tf
+../../../common/sandbox/aws-input.tf

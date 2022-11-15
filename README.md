@@ -8,15 +8,13 @@ This repository contains scripts and templates that allow you to launch and mana
 
 ## Overview
 
-The VPN Node Builder utility scripts orchestrate the creation of VPN nodes and personal cloud spaces in the public cloud by means of the [Terraform](https://terraform.io) templates. Two main VPN server protocol types can be built.
+The VPN Node Builder utility scripts orchestrate the creation of VPN nodes and personal cloud spaces in the public cloud by means of the [Terraform](https://terraform.io) templates. The three main VPN server protocol types can be built.
 
-* [IPSEC/IKev2](https://www.strongswan.org/)
+* [WireGuard](https://www.wireguard.com/)
 * [OpenVPN](https://openvpn.net/)
+* [IPSEC/IKev2](https://www.strongswan.org/)
 
-Two flavors of the OpenVPN configuration is supported.
-
-* Regular OpenVPN over either UDP or TCP
-* Same as regular but tweaked to support connecting via a tunnel that obfuscates OpenVPN traffic to enable bypassing DPI at the service provider.
+Both WireGuard and OpenVPN traffic can be masked via a tunnel that obfuscates OpenVPN traffic to enable bypassing deep packet inspection at the service provider. This will, however, impact performance.
 
 The appliance can manage basic routing to internal Virtual Private Cloud (VPC) networks and can also peer nodes across regions. Additionally each appliance has built in automation to launch additional services within the VPC if instructed to do so. These are advance features of the appliance which are not enabled in the basic VPN appliance. The templates to launch the appliance in the various clouds are available as [Terraform modules](https://github.com/appbricks/cloud-inceptor) and are used by the scripts in this repository to manage the deployment of the VPN service to various cloud regions.
 
@@ -108,7 +106,7 @@ Before you can launch VPN nodes using the the CLI you need to initialize a works
 
   > Current only AWS is supported, although Azure and Google can be used using a private image of the appliance. Please contact AppBricks support if you need to install to either of those clouds.
 
-  Two control files were created when you initialized your workspace. The first control file should contain your public cloud account credentials and is named `cloud-credentials`. You will need to retrieve the credentials from you public cloud accounts and add them to the corresponding variable in the control file.
+  Two control files were created when you initialized your workspace. The first control file should contain your public cloud account credentials and is named `cloud-creds.sh`. You will need to retrieve the credentials from you public cloud accounts and add them to the corresponding variable in the control file.
 
   ```
   # AWS IaaS credentials for Terraform
@@ -156,8 +154,3 @@ Before you can launch VPN nodes using the the CLI you need to initialize a works
   > You do not need to set the domain name to be able to deploy and use the Cloud VPN nodes.
 
   You can use the `TF_VAR_vpn_users` variable to provide a list of users that VPN nodes will always be populated with. You can also create additional users on a node via the CLI, but they will not persist across to other nodes you have deployed.
-
-### Deploying a Cloud VPN Node
-
-
-### Managing a Cloud VPN Node

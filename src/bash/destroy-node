@@ -1,8 +1,8 @@
 #!/bin/bash
 
-workspace_dir=$1 && shift
+workspace_root=$1 && shift
 template_dir=$1 && shift
-vpn_type=${1:-<VPN_TYPE>} && shift
+node_type=${1:-<NODE_TYPE>} && shift
 cloud=${1:-<CLOUD>} && shift
 
 source $(dirname $BASH_SOURCE)/common
@@ -42,12 +42,12 @@ fi
 
 # This is usually set at deploy but required in 
 # order to reinitialize without prompting for input.
-export TF_VAR_vpn_idle_action=""
+[[ ! -e ${workspace_dir}/${region}/input-vars.sh ]] || source ${workspace_dir}/${region}/input-vars.sh
 
 if [[ -e ${workspace_dir}/${region} ]]; then
   pushd ${workspace_dir}/${region} >/dev/null 2>&1
-  terraform::set_cloud_region "$vpn_type" "$cloud" "$region"
-  terraform::destroy "$vpn_type" "$cloud" "$region" "$template_dir"
+  terraform::set_cloud_region "$node_type" "$cloud" "$region"
+  terraform::destroy "$node_type" "$cloud" "$region" "$template_dir"
   popd >/dev/null 2>&1
 else
   echo -e "${RED}\nERROR! Deployment workspace path does not exist. The region"

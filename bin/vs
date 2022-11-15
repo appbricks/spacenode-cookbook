@@ -13,7 +13,7 @@ case "$command" in
     ;;
   init)
     $root_dir/src/bash/init-workspace \
-      $workspace_dir ${@:2:99}
+      $workspace_root ${@:2:99}
     ;;
   show-regions)
     common::validate_environment
@@ -22,32 +22,35 @@ case "$command" in
   show-nodes)
     common::validate_environment
     $root_dir/src/bash/show-nodes \
-      $workspace_dir $template_dir ${@:2:99}
+      $workspace_root $template_dir ${@:2:99}
     ;;
   deploy-node)
     common::validate_environment
+    common::check_help_requested deploy_node "${@:2:2}"
     $root_dir/src/bash/deploy-node \
-      $workspace_dir $template_dir ${@:2:99}
+      $workspace_root $template_dir ${@:2:99}
     ;;
   destroy-node)
     common::validate_environment
+    common::check_help_requested destroy_node "${@:2:2}"
     $root_dir/src/bash/destroy-node \
-      $workspace_dir $template_dir ${@:2:99}
+      $workspace_root $template_dir ${@:2:99}
     ;;
   reinit-node)
     common::validate_environment
+    common::check_help_requested reinit_node "${@:2:2}"
     $root_dir/src/bash/reinit-node \
-      $workspace_dir $template_dir ${@:2:99}
+      $workspace_root $template_dir ${@:2:99}
     ;;
   download-vpn-config)
     common::validate_environment
     $root_dir/src/bash/download-vpn-config \
-      $workspace_dir $template_dir ${@:2:99}
+      $workspace_root $template_dir ${@:2:99}
     ;;
   start-tunnel)
     common::validate_environment
     $root_dir/src/bash/start-tunnel \
-      $workspace_dir $template_dir ${@:2:99}
+      $workspace_root $template_dir ${@:2:99}
     ;;
   *)
     echo -e "${RED}\nERROR! Unknown command \"$command\"."

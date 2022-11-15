@@ -1,1 +1,1 @@
-../../../common/google-input.tf
+../../../common/sandbox/google-input.tf

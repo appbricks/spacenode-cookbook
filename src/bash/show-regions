@@ -21,7 +21,7 @@ case $cloud in
 
     echo -e "${GREEN}\nAvailable Microsoft Azure Regions:${NC}\n" 
     cloud::set_azure_credentials
-    az account list-locations -o table | awk '$4 != "Name" && $0 !~ /^-.*/ { print substr($0, 48) }' | sort
+    az account list-locations | jq -r '.[].name' | sort
     echo -e "${GREEN}\nMore detail can be found at the following link:"
     echo -e "${BLUE}- https://azure.microsoft.com/en-us/global-infrastructure/locations/"
     ;;

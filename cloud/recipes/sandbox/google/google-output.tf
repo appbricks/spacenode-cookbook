@@ -1,0 +1,1 @@
+../../../common/sandbox/google-output.tf

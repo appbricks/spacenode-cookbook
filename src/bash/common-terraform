@@ -2,7 +2,7 @@
 
 function terraform::set_cloud_region() {
 
-  local vpn_type=$1
+  local node_type=$1
   local cloud=$2
   local region=$3
 
@@ -18,7 +18,7 @@ function terraform::set_cloud_region() {
       ;;
     azure)
       cloud::set_azure_credentials
-      regions=$(az account list-locations -o table | awk '$4 != "Name" && $0 !~ /^-.*/ { print substr($0, 48) }')
+      regions=$(az account list-locations | jq -r '.[].name')
       common::validate_value_from_list \
         "$regions" "$region" \
         "Unknown Azure Cloud region \"$region\"."
@@ -37,7 +37,7 @@ function terraform::set_cloud_region() {
 
 function terraform::init() {
 
-  local vpn_type=$1
+  local node_type=$1
   local cloud=$2
   local region=$3
   local template_dir=$4
@@ -59,10 +59,9 @@ function terraform::init() {
 
       # Initialize Terraform
       echo -e "${GREEN}Initializing terraform context...${NC}"
-      terraform init \
-        -backend-config="key=${vpn_type}" \
-        -backend-config="bucket=${bucket_name}" \
-        $template_dir
+      terraform -chdir=$template_dir init \
+        -backend-config="key=${node_type}" \
+        -backend-config="bucket=${bucket_name}"        
       echo
       ;;
 
@@ -115,12 +114,11 @@ function terraform::init() {
 
       # Initialize Terraform
       echo -e "${GREEN}Initializing terraform context...${NC}"
-      terraform init \
+      terraform -chdir=$template_dir init \
         -backend-config="resource_group_name=default" \
         -backend-config="container_name=${container_name}" \
         -backend-config="key=terraform.tfstate" \
-        -backend-config="storage_account_name=${storage_account}" \
-        $template_dir
+        -backend-config="storage_account_name=${storage_account}"
       echo
       ;;
       
@@ -138,65 +136,66 @@ function terraform::init() {
 
       # Initialize Terraform
       echo -e "${GREEN}Initializing terraform context...${NC}"
-      terraform init \
-        -backend-config="prefix=${vpn_type}" \
-        -backend-config="bucket=${bucket_name}" \
-        $template_dir
+      terraform -chdir=$template_dir init \
+        -backend-config="prefix=${node_type}" \
+        -backend-config="bucket=${bucket_name}"
       echo
       ;;
   esac
-
-  # Seems to be a bug in terraform where 'output' and 'taint' command are 
-  # unable to load the backend state when the working directory does not 
-  # have the backend resource template file.
-  local backend_type=$(cat .terraform/terraform.tfstate | jq -r .backend.type)
-  cat << ---EOF > backend.tf
-terraform {
-  backend "$backend_type" {}
-}
----EOF
 }
 
 function terraform::apply() {
 
-  local vpn_type=$1
+  local node_type=$1
   local cloud=$2
   local region=$3
   local template_dir=$4
   local start=`date +%s`
 
-  echo -e "${GREEN}Deploying VPN node type \"${vpn_type}\" to region \"${region}\" of \"$cloud\" cloud...${NC}"
+  echo -e "${GREEN}Deploying node type \"${node_type}\" to region \"${region}\" of \"$cloud\" cloud...${NC}"
 
   # Apply Terraform template and filter out
   # any output values for security purposes.
-  terraform apply -auto-approve $template_dir 2>&1 \
-    | tee apply.log | awk '/Outputs:/ {l=999}; (l-- > 0) {next} 1'
+  terraform -chdir=$template_dir apply -auto-approve 2>&1 \
+    | tee apply.log | awk '/^Outputs:/ {l=999}; (l-- > 0) {next} 1'
 
   # Save Terraform output in a JSON file for
   # later reference.
+  local working_dir=$(pwd)
+  pushd $template_dir 2>&1 > /dev/null
   terraform output -json \
-     -state=.terraform/terraform.tfstate > output.json
+     -state=.terraform/terraform.tfstate > ${working_dir}/output.json
+  popd 2>&1 > /dev/null
 
   local end=`date +%s`
   local time=$((end-start))
   local minutes=$((time/60))
   local seconds=$((time%60))
 
-  cat output.json | jq -r '.cb_managed_instances.value[0] | .ssh_key' > bastion-ssh-key.pem
-  chmod +0600 bastion-ssh-key.pem
+  o=$(cat output.json)
+  instance_name=$(echo "$o" | jq -r '.cb_managed_instances.value[0] | .name')
+  echo "$o" | jq -r '.cb_managed_instances.value[0] | .ssh_key' > ${instance_name}-ssh-key.pem
+  chmod 0600 ${instance_name}-ssh-key.pem
+
+  default_ssh_key=$(echo "$o" | jq -r '.cb_default_openssh_private_key.value')
+  if [[ -n "$default_ssh_key" && "$default_ssh_key" != "null" ]]; then
+    echo "$default_ssh_key" > default-ssh-key.pem
+    chmod 0600 default-ssh-key.pem
+  fi
 
   echo -e "${GREEN}Deploy operation completed in ${minutes}m and ${seconds}s."
 }
 
 function terraform::taint_bastion() {
 
-  local vpn_type=$1
+  local node_type=$1
   local cloud=$2
   local region=$3
   local template_dir=$4
 
-  echo -e "${GREEN}Flagging VPN node type \"${vpn_type}\" in region \"${region}\" of \"$cloud\" cloud to be rebuilt...${NC}"
+  echo -e "${GREEN}Flagging node type \"${node_type}\" in region \"${region}\" of \"$cloud\" cloud to be rebuilt...${NC}"
 
+  pushd $template_dir 2>&1 > /dev/null
   case $cloud in
     aws)
       terraform taint module.bootstrap.aws_instance.bastion
@@ -208,35 +207,35 @@ function terraform::taint_bastion() {
       terraform taint module.bootstrap.google_compute_instance.bastion
       ;;
   esac
+  popd 2>&1 > /dev/null
 }
 
 function terraform::plan() {
 
-  local vpn_type=$1
+  local node_type=$1
   local cloud=$2
   local region=$3
   local template_dir=$4
 
-  echo -e "${GREEN}Showing deployment plan for VPN node type \"${vpn_type}\" in region \"${region}\" of \"$cloud\" cloud...${NC}"
+  echo -e "${GREEN}Showing deployment plan for node type \"${node_type}\" in region \"${region}\" of \"$cloud\" cloud...${NC}"
 
   # Output Terraform plan
-  terraform plan $template_dir
+  terraform -chdir=$template_dir plan
 }
 
 function terraform::destroy() {
 
-  local vpn_type=$1
+  local node_type=$1
   local cloud=$2
   local region=$3
   local template_dir=$4
 
-  echo -e "${GREEN}Destroying VPN node type \"${vpn_type}\" deployed to region \"${region}\" of \"$cloud\" cloud...${NC}"
+  echo -e "${GREEN}Destroying node type \"${node_type}\" deployed to region \"${region}\" of \"$cloud\" cloud...${NC}"
 
   # Apply Terraform template and filter out
   # any output values for security purposes.
-  terraform destroy -auto-approve \
-    -state=.terraform/terraform.tfstate \
-    $template_dir 2>&1 | tee apply.log
+  terraform -chdir=$template_dir destroy -auto-approve \
+    -state=.terraform/terraform.tfstate 2>&1 | tee apply.log
 
   rm -fr output.json
 }

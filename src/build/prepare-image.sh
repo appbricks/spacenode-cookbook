@@ -1,78 +1,84 @@
-#!/bin/bash
+#!/bin/sh
+
+case `uname -m` in
+  x86_64)
+    arch=amd64
+    ;;
+  aarch64_be|aarch64)
+    arch=arm64
+    ;;
+  *)
+    echo "Unsupported system architecture."
+    ;;
+esac
 
 set -xeuo pipefail
 
-# Install APT packages
-apt-get update && apt-get install -y \
-  ca-certificates apt-transport-https iptables lsb-release gnupg \
-  build-essential python3 python3-dev git curl zip
+# Install packages
+apk update && apk upgrade
+apk --no-cache add \
+  build-base autoconf automake openssl-dev libffi-dev libtool \
+  bison flex iptables bash curl zip git libqrencode openssh sshpass \
+  python3 python3-dev py3-pip
 
-# Setup APT repo for Azure CLI
-curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | \
-  tee /etc/apt/trusted.gpg.d/microsoft.asc.gpg > /dev/null
-
-echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | \
-  tee /etc/apt/sources.list.d/azure-cli.list
-
-# Setup APT repo for Google SDK
-curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
-  apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-
-echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | \
-  tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-
-# Install Azure and Google CLIs
-export CLOUDSDK_PYTHON=python3
-export CLOUDSDK_GSUTIL_PYTHON=python3
-export CLOUDSDK_BQ_PYTHON=python3
-
-apt-get update && apt-get install -y \
-  azure-cli google-cloud-sdk
-
-# Install pip
-rm -f /usr/bin/python
 ln -s /usr/bin/python3 /usr/bin/python
-curl -L https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-python get-pip.py
-rm get-pip.py
 
 # Install AWS CLI
-pip3 install awscli --upgrade
+pip install awscli
 
-# Install latest version of JQ
-curl -L https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 -o /usr/local/bin/jq
-chmod +x /usr/local/bin/jq
+# Install Azure CLI
+pip install azure-cli
+
+# Install Google CLI
+export CLOUDSDK_CORE_DISABLE_PROMPTS=1
+export CLOUDSDK_INSTALL_DIR=/usr/local/lib
+curl -sSL https://sdk.cloud.google.com | bash
+echo "export PATH=$PATH:${CLOUDSDK_INSTALL_DIR}/google-cloud-sdk/bin" > /etc/profile.d/google-sdk.sh
+ln -s ${CLOUDSDK_INSTALL_DIR}/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud
+ln -s ${CLOUDSDK_INSTALL_DIR}/google-cloud-sdk/bin/gsutil /usr/local/bin/gsutil
 
 # Install latest version of Terraform
-terraform_version=0.12.13
-curl -OL https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_amd64.zip
+terraform_version=1.3.4
+curl -OL https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_${arch}.zip
 unzip terraform_${terraform_version}_linux_amd64.zip
 mv terraform /usr/local/bin
 
+# Build latest version of JQ
+git clone --branch jq-1.6 https://github.com/stedolan/jq /tmp/jq
+cd /tmp/jq
+git submodule update --init
+autoreconf -fi
+./configure --with-oniguruma=builtin
+make -j8
+make check
+mv ./jq /usr/local/bin
+cd -
+
 # Compile UDP Tunnel binaries (EXPERIMENTAL)
 git clone https://github.com/wangyu-/UDPspeeder.git /tmp/udp-speeder
-pushd /tmp/udp-speeder
+cd /tmp/udp-speeder
 git checkout branch_libev
 make
 mv /tmp/udp-speeder/speederv2 /usr/local/bin/udp-speeder
-popd
+cd -
 
 git clone https://github.com/wangyu-/udp2raw-tunnel.git /tmp/udp2raw-tunnel
-pushd /tmp/udp2raw-tunnel
+cd /tmp/udp2raw-tunnel
 git checkout master
 make
 mv /tmp/udp2raw-tunnel/udp2raw /usr/local/bin/udp2raw
-popd
+cd -
 
 # Download KCP tunnel server (EXPERIMENTAL)
-kcp_tunnel_version=20190924
+kcp_tunnel_version=20221015
 
-pushd /tmp
-curl -L https://github.com/xtaci/kcptun/releases/download/v${kcp_tunnel_version}/kcptun-linux-amd64-${kcp_tunnel_version}.tar.gz \
+cd /tmp
+curl -L https://github.com/xtaci/kcptun/releases/download/v${kcp_tunnel_version}/kcptun-linux-${arch}-${kcp_tunnel_version}.tar.gz \
   -o kcptun-linux-amd64.tgz
 tar xvzf kcptun-linux-amd64.tgz
 mv client_linux_amd64 /usr/local/bin/kcptun-client
-popd
+cd -
 
 mkdir /vpn
 rm -fr /tmp/*
+rm -rf /var/cache/apk/*

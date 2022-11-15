@@ -5,19 +5,6 @@
 # @resource_instance_data_list: module.bootstrap.aws_ebs_volume.bastion-data
 #
 
-# Indicates action when no VPN clients have 
-# been connected to a node for some time
-#
-# @order: 20
-# @tags: recipe
-# @accepted_values: shutdown,none
-# @accepted_values_message: Please provide one of 'shutdown' or 'none'.
-#
-variable "vpn_idle_action" {
-  description = "Action to take when no VPN clients have been connected to the node for some time."
-  default = "shutdown"
-}
-
 #
 # AWS specific inputs
 #
@@ -32,19 +19,26 @@ variable "vpn_idle_action" {
 #
 variable "aws_dns_zone" {
   description = "The DNS Zone to use when naming VPN node's DNS name."
-  default = "local"
+  default = "mycs"
 }
 
 # The bastion VM's instance type
 #
 # @order: 101
 # @tags: recipe,target-undeployed,target-deployed
-# @accepted_values: t3.nano,t3.micro,t3.small,t3.medium,t3.large,t3.xlarge
-# @accepted_values_message: Not a valid AWS general purpose instance type
+# @accepted_values: t4g.nano,t4g.micro,t4g.small,t4g.medium,t4g.large,t4g.xlarge,t4g.2xlarge
+# @accepted_values_message: Not a valid AWS general purpose ARM t4g.* instance type
 #
 variable "bastion_instance_type" {
   description = "The AWS EC2 instance type of the VPN node."
-  default = "t3.nano"
+  default = "t4g.micro"
+}
+
+#
+# Bastion image
+#
+variable "bastion_image_name" {
+  default = "appbricks-bastion-inceptor_D.*"
 }
 
 #
