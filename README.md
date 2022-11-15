@@ -10,13 +10,14 @@ This repository contains scripts and templates that allow you to launch and mana
 
 The VPN Node Builder utility scripts orchestrate the creation of VPN nodes and personal cloud spaces in the public cloud by means of the [Terraform](https://terraform.io) templates. The three main VPN server protocol types can be built.
 
-* [WireGuard](https://www.wireguard.com/)
 * [OpenVPN](https://openvpn.net/)
 * [IPSEC/IKev2](https://www.strongswan.org/)
 
-Both WireGuard and OpenVPN traffic can be masked via a tunnel that obfuscates OpenVPN traffic to enable bypassing deep packet inspection at the service provider. This will, however, impact performance.
+OpenVPN traffic can be masked via a tunnel that obfuscates OpenVPN traffic to enable bypassing deep packet inspection at the service provider. This will, however, impact performance.
 
 The appliance can manage basic routing to internal Virtual Private Cloud (VPC) networks and can also peer nodes across regions. Additionally each appliance has built in automation to launch additional services within the VPC if instructed to do so. These are advance features of the appliance which are not enabled in the basic VPN appliance. The templates to launch the appliance in the various clouds are available as [Terraform modules](https://github.com/appbricks/cloud-inceptor) and are used by the scripts in this repository to manage the deployment of the VPN service to various cloud regions.
+
+> These templates may also be configured to setup a [WireGuard](https://www.wireguard.com/) VPN. This feature is only available via the [Cloud-Builder](https://github.com/appbricks/cloud-builder-cli) CLI.
 
 ## Installation
 
@@ -131,9 +132,17 @@ Before you can launch VPN nodes using the the CLI you need to initialize a works
   export TF_VAR_name=
 
   # DNS Zone for all deployments
-  export TF_VAR_aws_dns_zone=
-  export TF_VAR_azure_dns_zone=
-  export TF_VAR_google_dns_zone=
+  export TF_VAR_attach_dns_zone=false
+
+  # Uncomment only if attaching to a DNS zone 
+  # - AWS DNS configuration
+  #export TF_VAR_aws_dns_zone=
+  # - Azure DNS configuration
+  #export TF_VAR_azure_dns_zone=
+  #export TF_VAR_azure_dns_zone_resource_group=
+  # - Google DNS configuration
+  #export TF_VAR_google_dns_managed_zone_name=
+  #export TF_VAR_google_dns_zone=
 
   # Values to used for creating self-signed X509 certs
   export TF_VAR_company_name="appbricks"
