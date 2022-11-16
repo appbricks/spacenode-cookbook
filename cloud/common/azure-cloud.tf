@@ -2,6 +2,7 @@
 # Azure Provider
 #
 provider "azurerm" {
+  use_msi = true
   features {}
 }
 
