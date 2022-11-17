@@ -41,6 +41,7 @@ function terraform::init() {
   local cloud=$2
   local region=$3
   local template_dir=$4
+  local run_dir=$(pwd)
 
   bucket_name=${TF_VAR_name}-vs-tfstate-${region}
 
@@ -59,9 +60,9 @@ function terraform::init() {
 
       # Initialize Terraform
       echo -e "${GREEN}Initializing terraform context...${NC}"
-      terraform -chdir=$template_dir init \
+      TF_DATA_DIR=$run_dir terraform -chdir=$template_dir init \
         -backend-config="key=${node_type}" \
-        -backend-config="bucket=${bucket_name}"        
+        -backend-config="bucket=${bucket_name}"
       echo
       ;;
 
@@ -114,7 +115,7 @@ function terraform::init() {
 
       # Initialize Terraform
       echo -e "${GREEN}Initializing terraform context...${NC}"
-      terraform -chdir=$template_dir init \
+      TF_DATA_DIR=$run_dir terraform -chdir=$template_dir init \
         -backend-config="resource_group_name=default" \
         -backend-config="container_name=${container_name}" \
         -backend-config="key=terraform.tfstate" \
@@ -136,7 +137,7 @@ function terraform::init() {
 
       # Initialize Terraform
       echo -e "${GREEN}Initializing terraform context...${NC}"
-      terraform -chdir=$template_dir init \
+      TF_DATA_DIR=$run_dir terraform -chdir=$template_dir init \
         -backend-config="prefix=${node_type}" \
         -backend-config="bucket=${bucket_name}"
       echo
@@ -151,21 +152,19 @@ function terraform::apply() {
   local region=$3
   local template_dir=$4
   local start=`date +%s`
+  local run_dir=$(pwd)
 
   echo -e "${GREEN}Deploying node type \"${node_type}\" to region \"${region}\" of \"$cloud\" cloud...${NC}"
 
   # Apply Terraform template and filter out
   # any output values for security purposes.
-  terraform -chdir=$template_dir apply -auto-approve 2>&1 \
+  TF_DATA_DIR=$run_dir terraform -chdir=$template_dir apply \
+    -auto-approve 2>&1 \
     | tee apply.log | awk '/^Outputs:/ {l=999}; (l-- > 0) {next} 1'
 
   # Save Terraform output in a JSON file for
   # later reference.
-  local working_dir=$(pwd)
-  pushd $template_dir 2>&1 > /dev/null
-  terraform output -json \
-     -state=.terraform/terraform.tfstate > ${working_dir}/output.json
-  popd 2>&1 > /dev/null
+  TF_DATA_DIR=$run_dir terraform -chdir=$template_dir output -json > ${run_dir}/output.json
 
   local end=`date +%s`
   local time=$((end-start))
@@ -192,22 +191,24 @@ function terraform::taint_bastion() {
   local cloud=$2
   local region=$3
   local template_dir=$4
+  local run_dir=$(pwd)
 
   echo -e "${GREEN}Flagging node type \"${node_type}\" in region \"${region}\" of \"$cloud\" cloud to be rebuilt...${NC}"
 
-  pushd $template_dir 2>&1 > /dev/null
   case $cloud in
     aws)
-      terraform taint module.bootstrap.aws_instance.bastion
+      TF_DATA_DIR=$run_dir terraform -chdir=$template_dir taint \
+        module.bootstrap.aws_instance.bastion
       ;;
     azure)
-      terraform taint module.bootstrap.azurerm_virtual_machine.bastion
+      TF_DATA_DIR=$run_dir terraform -chdir=$template_dir taint \
+        module.bootstrap.azurerm_virtual_machine.bastion
       ;;
     google)
-      terraform taint module.bootstrap.google_compute_instance.bastion
+      TF_DATA_DIR=$run_dir terraform -chdir=$template_dir taint \
+        module.bootstrap.google_compute_instance.bastion
       ;;
   esac
-  popd 2>&1 > /dev/null
 }
 
 function terraform::plan() {
@@ -216,11 +217,12 @@ function terraform::plan() {
   local cloud=$2
   local region=$3
   local template_dir=$4
+  local run_dir=$(pwd)
 
   echo -e "${GREEN}Showing deployment plan for node type \"${node_type}\" in region \"${region}\" of \"$cloud\" cloud...${NC}"
 
   # Output Terraform plan
-  terraform -chdir=$template_dir plan
+  TF_DATA_DIR=$run_dir terraform -chdir=$template_dir plan
 }
 
 function terraform::destroy() {
@@ -229,13 +231,13 @@ function terraform::destroy() {
   local cloud=$2
   local region=$3
   local template_dir=$4
+  local run_dir=$(pwd)
 
   echo -e "${GREEN}Destroying node type \"${node_type}\" deployed to region \"${region}\" of \"$cloud\" cloud...${NC}"
 
   # Apply Terraform template and filter out
   # any output values for security purposes.
-  terraform -chdir=$template_dir destroy -auto-approve \
-    -state=.terraform/terraform.tfstate 2>&1 | tee apply.log
+  TF_DATA_DIR=$run_dir terraform -chdir=$template_dir destroy -auto-approve 2>&1 | tee apply.log
 
   rm -fr output.json
 }
