@@ -67,7 +67,7 @@ module "bootstrap" {
   # Whether to allow SSH access to bastion server
   bastion_allow_public_ssh = true
 
-  bastion_use_fqdn = local.configure_dns
+  bastion_use_fqdn = true
  
   bastion_host_name  = "vpn"
   bastion_admin_user = "mycs-admin"

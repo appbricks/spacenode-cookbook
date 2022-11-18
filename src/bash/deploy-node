@@ -93,7 +93,7 @@ terraform::set_cloud_region "$node_type" "$cloud" "$region"
 if [[ $clean == yes ]]; then
   # (Re)Initialize terraform context if
   # requested or if doing fresh deployment
-  rm -fr ${template_dir}/.terraform*
+  rm -fr $(pwd)/.terraform*
   terraform::init "$node_type" "$cloud" "$region" "$template_dir"
 elif [[ $init == yes || ! -e ${template_dir}/.terraform ]]; then
   terraform::init "$node_type" "$cloud" "$region" "$template_dir"
