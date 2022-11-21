@@ -253,7 +253,7 @@ variable "mycs_node_id_key" {
 # Bastion image
 #
 variable "bastion_image_name" {
-  default = "appbricks-bastion-inceptor_D.221118154819"
+  default = "appbricks-bastion-inceptor_D.221121175418"
 }
 
 #
