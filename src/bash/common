@@ -53,7 +53,7 @@ function common::set_working_dir() {
 
 function common::check_eula() {
 
-  if [[ ! -e $template_dir/eula_accepted ]]; then
+  if [[ ! -e $workspace_root/eula_accepted ]]; then
 
     echo -e "${GREEN}\nBefore you can deploy Cloud nodes you need to review and"
     echo -e "accept the AppBricks, Inc. Software End User Agreement."
@@ -67,7 +67,7 @@ function common::check_eula() {
     [[ $option == yes ]] || exit 1
     echo -e "${GREEN}\nThank you. You can proceed to launch, run and manage you nodes in the cloud now...\n${NC}"
 
-    touch $template_dir/eula_accepted
+    touch $workspace_root/eula_accepted
   fi
 }
 
@@ -177,48 +177,58 @@ function common::validate_workspace() {
   local command=$1
   local first
 
-  if [[ ! -e ${template_dir}/$node_type ]]; then
-    eval "usage::${command}"
-    echo -e "${RED}\nERROR! Unknown node type.\n"
-    echo -e "${GREEN}Available node types for deployment are:\n"
-    first=y
-    for d in $(find ${template_dir} -maxdepth 1 -type d -print); do
-      if [[ $first == n ]]; then
-        echo "- \"$(basename $d)\""
-      else
-        first=n
-      fi
-    done
-    echo -e "${NC}"
-    exit 1
-  fi
-  if [[ ! -e ${template_dir}/$node_type/$cloud ]]; then
-    eval "usage::${command}"
-    echo -e "${RED}\nERROR! Unknown cloud target for node of type \"$node_type\".\n"
-    echo -e "${GREEN}Cloud targets available for deployment are:\n"
-    first=y
-    for d in $(find ${template_dir}/$node_type -maxdepth 1 -type d -print); do
-      if [[ $first == n ]]; then
-        echo "- \"$(basename $d)\""
-      else
-        first=n
-      fi
-    done
-    echo -e "${NC}"
-    exit 1
+  if [[ $node_type =~ (/.*)+ ]]; then
+    template_dir=/usr/local/lib/dev-cookbook/cloud/recipes$node_type/$cloud
+    if [[ ! -d $template_dir ]]; then
+      echo -e "${RED}\nERROR! Invalid template path '$template_dir'.\n"
+      exit 1
+    fi
+    node_type=DEV-$(basename $node_type)
+  else
+
+    if [[ ! -e ${template_dir}/$node_type ]]; then
+      eval "usage::${command}"
+      echo -e "${RED}\nERROR! Unknown node type.\n"
+      echo -e "${GREEN}Available node types for deployment are:\n"
+      first=y
+      for d in $(find -L ${template_dir} -maxdepth 1 -type d -print); do
+        if [[ $first == n ]]; then
+          echo "- \"$(basename $d)\""
+        else
+          first=n
+        fi
+      done
+      echo -e "${NC}"
+      exit 1
+    fi
+    if [[ ! -e ${template_dir}/$node_type/$cloud ]]; then
+      eval "usage::${command}"
+      echo -e "${RED}\nERROR! Unknown cloud target for node of type \"$node_type\".\n"
+      echo -e "${GREEN}Cloud targets available for deployment are:\n"
+      first=y
+      for d in $(find -L ${template_dir}/$node_type -maxdepth 1 -type d -print); do
+        if [[ $first == n ]]; then
+          echo "- \"$(basename $d)\""
+        else
+          first=n
+        fi
+      done
+      echo -e "${NC}"
+      exit 1
+    fi
+
+    if [[ ! $cloud =~ $clouds_enabled ]]; then
+      echo -e "${RED}\nERROR! Cloud target \"$cloud\" is not supported for public"
+      echo -e "deployments yet. Support for that cloud will be available"
+      echo -e "in a future release. If you would still like to deploy to the"
+      echo -e "cloud specified please contact AppBricks support.\n${NC}"
+      exit 1
+    fi
+
+    template_dir=${template_dir}/${node_type}/${cloud}
   fi
 
-  if [[ ! $cloud =~ $clouds_enabled ]]; then
-    echo -e "${RED}\nERROR! Cloud target \"$cloud\" is not supported for public"
-    echo -e "deployments yet. Support for that cloud will be available"
-    echo -e "in a future release. If you would still like to deploy to the"
-    echo -e "cloud specified please contact AppBricks support.\n${NC}"
-    exit 1
-  fi
-
-  common::validate_cloud_credentials $cloud
-
-  template_dir=${template_dir}/${node_type}/${cloud}
+  common::validate_cloud_credentials $cloud  
   workspace_dir=${workspace_root}/${node_type}/${cloud}
   mkdir -p $workspace_dir
 }

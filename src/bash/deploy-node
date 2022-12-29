@@ -79,13 +79,20 @@ else
   export TF_VAR_idle_action=""
 fi
 
-if [[ -n $input_node ]]; then  
+if [[ -n $input_node ]]; then
   echo "# inputs from node '$input_node'" > ${workspace_dir}/${region}/input-vars.sh
 
   o=$(cat ${workspace_root}/${input_node}/${cloud}/${region}/output.json)
   for name in $(echo "$o" | jq -r 'keys[]'); do 
     echo "export TF_VAR_$name='$(echo $o | jq -r .${name}.value)'" >> ${workspace_dir}/${region}/input-vars.sh
   done
+
+  # remove name input which is usually the 
+  # name for the space node and may clash 
+  # with an expected app name variable
+  unset TF_VAR_name 
+  
+  # source all outputs from dependent node
   source ${workspace_dir}/${region}/input-vars.sh
 fi
 
@@ -95,7 +102,7 @@ if [[ $clean == yes ]]; then
   # requested or if doing fresh deployment
   rm -fr $(pwd)/.terraform*
   terraform::init "$node_type" "$cloud" "$region" "$template_dir"
-elif [[ $init == yes || ! -e ${template_dir}/.terraform ]]; then
+elif [[ $init == yes || ! -e $(pwd)/.terraform ]]; then
   terraform::init "$node_type" "$cloud" "$region" "$template_dir"
 fi
 if [[ $upgrade == yes ]]; then

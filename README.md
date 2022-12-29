@@ -1,6 +1,6 @@
 # Private VPN Node Builder
 
-[![Build Status](https://travis-ci.org/appbricks/vpn-server.svg?branch=master)](https://travis-ci.org/appbricks/vpn-server)
+[![Build Status](https://github.com/appbricks/vpn-server/actions/workflows/build-dev-release.yml/badge.svg)](https://github.com/appbricks/vpn-server/actions/workflows/build-dev-release.yml)
 
 This repository contains scripts and templates that allow you to launch and manage VPN nodes in your personal public cloud account. The nodes are built using a cloud appliance which can configure itself to run OpenVPN or IPSec/IKEv2 VPN services. The `bin\vs` CLI can be used to launch the service in any one of Amazon Web Services, Microsoft Azure or Google Cloud Platform public cloud environments.
 
@@ -163,3 +163,11 @@ Before you can launch VPN nodes using the the CLI you need to initialize a works
   > You do not need to set the domain name to be able to deploy and use the Cloud VPN nodes.
 
   You can use the `TF_VAR_vpn_users` variable to provide a list of users that VPN nodes will always be populated with. You can also create additional users on a node via the CLI, but they will not persist across to other nodes you have deployed.
+
+### Developing Cookbook Recipes
+
+You can use this CLI to develop and test you own recipes to deploy apps and service to a space node's cloud environment.
+
+```
+DEV_COOKBOOK=<PATH TO COOKBOOK REPO> vsdev deploy-node /<RECIPE NAME> aws -r us-east-1 -x <ASSOCIATED SPACE NODE NAME>
+```

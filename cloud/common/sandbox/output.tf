@@ -98,7 +98,7 @@ output "cb_deployment_security_group" {
   value = module.bootstrap.admin_security_group
 }
 
-output "cb_default_openssh_private_key" {
+output "cb_default_ssh_private_key" {
   sensitive = true
   value = module.bootstrap.default_openssh_private_key
 }
