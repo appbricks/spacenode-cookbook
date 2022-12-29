@@ -21,7 +21,8 @@ apk --no-cache add \
   bison flex iptables bash curl zip git libqrencode openssh sshpass \
   python3 python3-dev py3-pip
 
-ln -s /usr/bin/python3 /usr/bin/python
+rm -f /usr/bin/python && \
+  ln -s /usr/bin/python3 /usr/bin/python
 
 # Install AWS CLI
 pip install awscli
