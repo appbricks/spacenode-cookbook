@@ -67,6 +67,8 @@ jobs:
     
     - name: Checkout
       uses: actions/checkout@v2
+      with:
+        ref: ${{ needs.create-release-version.outputs.version }}
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
