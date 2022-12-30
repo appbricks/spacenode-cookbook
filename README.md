@@ -166,8 +166,35 @@ Before you can launch VPN nodes using the the CLI you need to initialize a works
 
 ### Developing Cookbook Recipes
 
-You can use this CLI to develop and test you own recipes to deploy apps and service to a space node's cloud environment.
+You can use this CLI to develop and test you own recipes to deploy apps and services to a space node's cloud environment. In order to use the container to develop and test an application cookbook set the following environment variable.
 
 ```
-DEV_COOKBOOK=<PATH TO COOKBOOK REPO> vsdev deploy-node /<RECIPE NAME> aws -r us-east-1 -x <ASSOCIATED SPACE NODE NAME>
+export DEV_COOKBOOK_REPO=<PATH TO cookbook REPO being developed/tested>
 ```
+
+You can also debug changes to the CLI scripts by exporting the following environment variable.
+
+```
+export DEV_VPN_SERVER_REPO=<PATH TO https://github.com/appbricks/vpn-server REPO>
+```
+
+You can then mount the local folders in the docker vpn-server image when running CLI commands via docker by using the following script.
+
+```
+#!/bin/bash
+
+volumes=( "-v" "$(pwd)/:/vpn" )
+[[ -z DEV_VPN_SERVER_REPO ]] || \
+  volumes+=( "-v" "${DEV_VPN_SERVER_REPO}:/usr/local/lib/vpn-server" )
+[[ -z DEV_COOKBOOK_REPO ]] || \
+  volumes+=( "-v" "${DEV_COOKBOOK_REPO}:/usr/local/lib/dev-cookbook" )
+
+docker run --privileged --rm \
+  -p 4495:4495 -p 4495:4495/udp \
+  ${volumes[@]} \
+  -it vpn-server $@
+```
+
+> Only one cookbook repo can be developed and tested at a time.
+
+Save this script to you system path and make it executable so you can run CLI commands via this script.

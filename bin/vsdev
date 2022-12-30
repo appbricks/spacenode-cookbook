@@ -1,15 +1,12 @@
 #!/bin/bash
 
-if [[ -n $DEV_COOKBOOK ]]; then 
-  docker run --privileged --rm \
-    -p 4495:4495 -p 4495:4495/udp \
-    -v $(pwd)/:/vpn \
-    -v /Users/mevan/Work/appbricks/cloud/vpn-server:/usr/local/lib/vpn-server \
-    -v $DEV_COOKBOOK:/usr/local/lib/dev-cookbook \
-    -it vpn-server $@
-else
-  docker run --privileged --rm \
-    -p 4495:4495 -p 4495:4495/udp \
-    -v $(pwd)/:/vpn -v /Users/mevan/Work/appbricks/cloud/vpn-server:/usr/local/lib/vpn-server \
-    -it vpn-server $@
-fi
+volumes=( "-v" "$(pwd)/:/vpn" )
+[[ -z DEV_VPN_SERVER_REPO ]] || \
+  volumes+=( "-v" "${DEV_VPN_SERVER_REPO}:/usr/local/lib/vpn-server" )
+[[ -z DEV_COOKBOOK_REPO ]] || \
+  volumes+=( "-v" "${DEV_COOKBOOK_REPO}:/usr/local/lib/dev-cookbook" )
+
+docker run --privileged --rm \
+  -p 4495:4495 -p 4495:4495/udp \
+  ${volumes[@]} \
+  -it vpn-server $@
