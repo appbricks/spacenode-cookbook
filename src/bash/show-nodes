@@ -49,8 +49,6 @@ root_passwd=$(echo "$node_detail" | awk -F '|' '{ print $8 }')
 node_id=$(echo "$node_detail" | awk -F '|' '{ print $9 }')
 vpn_type=$(echo "$node_detail" | awk -F '|' '{ print $10 }')
 
-echo $vpn_type
-
 [[ -z $root_user ]] ||
   echo -e "\n${CYAN}Node Admin =>\n  User: ${root_user}\n  Password: ${root_passwd}${NC}"
 
@@ -84,9 +82,22 @@ fi
 case $option in
   1)
     echo
-    $scripts_dir/deploy-node \
-      $workspace_root $template_dir \
-      $node_type $cloud -r $region -u
+    if [[ $vpn_type =~ ovpn|ipsec ]]; then
+      $scripts_dir/deploy-node \
+        $workspace_root $template_dir \
+        $node_type $cloud -r $region -u
+    else
+      for ((i=0; i<${#vpn_nodes[@]}; i++)); do
+        if [[ $(echo "${vpn_nodes[$i]}" | awk -F '|' '{ print $10 }') =~ ovpn|ipsec ]]; then
+          echo $scripts_dir/deploy-node \
+            $workspace_root $template_dir \
+            $node_type $cloud -r $region \
+            -x $(echo "${vpn_nodes[$i]}" | awk -F '|' '{ print $1 }') -u
+          break
+        fi
+      done
+    fi
+
     ;;
   2)
     if [[ $node_status == running && $vpn_type =~ ovpn|ipsec ]]; then

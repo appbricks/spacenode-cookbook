@@ -184,6 +184,8 @@ function common::validate_workspace() {
       exit 1
     fi
     node_type=DEV-$(basename $node_type)
+  elif [[ $node_type == DEV-* ]]; then
+    template_dir=/usr/local/lib/dev-cookbook/cloud/recipes/${node_type#*-}/$cloud
   else
 
     if [[ ! -e ${template_dir}/$node_type ]]; then
