@@ -45,7 +45,7 @@ Steps to run the scripts directly.
 
 ### Running the scripts via a pre-built container
 
-The scripts in this repository are also distributed as a [Docker](https://www.docker.com/) container. The install scripts provided on the [releases page](https://github.com/appbricks/vpn-server/releases), installs an alias to run the CLI via this container. This approach will allow you to run these scripts from within environments that do not have the `bash` shell installed such as Micrsoft Windows. To run the the CLI via the container add the following alias to your system if you are unable to use the scripts in the release page.
+The scripts in this repository are also distributed as a [Docker](https://www.docker.com/) image. The install scripts provided on the [releases page](https://github.com/appbricks/vpn-server/releases), installs an alias to run the CLI via this container. This approach will allow you to run these scripts from within environments that do not have the `bash` shell installed such as Micrsoft Windows. To run the the CLI via the container add the following alias to your system if you are unable to use the scripts in the release page.
 
 For this approach Docker is the only pre-requisite and it can be installed from [Docker Hub](https://www.docker.com/products/docker-desktop).
 
