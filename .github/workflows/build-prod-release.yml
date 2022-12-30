@@ -1,0 +1,93 @@
+name: MyCS appbricks/vpn-server:latest CLI image
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+    - 'bin/**'
+    - 'cloud/**'
+    - 'src/**'
+    - 'Dockerfile'
+
+jobs:
+  create-release-version:
+    runs-on: ubuntu-latest
+    outputs: 
+      version: ${{steps.release-tag.outputs.version}}
+
+    defaults:
+      run:
+        shell: bash
+    
+    env:
+      VERSION: '0.0'
+    
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Create and tag release
+    - name: Create release tag
+      id: release-tag
+      run: |
+        git config user.email "$(git log -1 --pretty=format:'%an')"
+        git config user.name "$(git log -1 --pretty=format:'%ae')"
+        git fetch --tags origin
+
+        set +e
+        last_tag=$(git for-each-ref \
+          --sort=-creatordate \
+          --format '%(refname)' refs/tags \
+          | grep "refs/tags/${VERSION}" \
+          | head -1)
+        set -e
+
+        build_number=$(basename "$last_tag" | cut -d '.' -f3)
+        [[ -n $build_number ]] || build_number=-1
+        release_tag=${VERSION}.$((build_number+1))
+        last_commit_msg=$(git log -1 --pretty=%B)
+
+        echo "Creating release tag ${release_tag}..."
+        git tag -a ${release_tag} -m "$last_commit_msg"
+        git push --follow-tags
+
+        echo "::set-output name=version::${release_tag}"
+
+  build-and-publish-release:
+    needs: create-release-version
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Download release version
+      uses: actions/download-artifact@v2
+      with:
+        name: release
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+    - name: Build and push
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        platforms: linux/amd64,linux/arm64
+        tags: appbricks/vpn-server:latest,appbricks/vpn-server:${{ needs.create-release-version.outputs.version }}

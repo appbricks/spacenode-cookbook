@@ -1,6 +1,8 @@
 # Private VPN Node Builder
 
 [![Build Status](https://github.com/appbricks/vpn-server/actions/workflows/build-dev-release.yml/badge.svg)](https://github.com/appbricks/vpn-server/actions/workflows/build-dev-release.yml)
+[![Build Status](https://github.com/appbricks/vpn-server/actions/workflows/build-prod-release.yml/badge.svg)](https://github.com/appbricks/vpn-server/actions/workflows/build-prod-release.yml)
+
 
 This repository contains scripts and templates that allow you to launch and manage VPN nodes in your personal public cloud account. The nodes are built using a cloud appliance which can configure itself to run OpenVPN or IPSec/IKEv2 VPN services. The `bin\vs` CLI can be used to launch the service in any one of Amazon Web Services, Microsoft Azure or Google Cloud Platform public cloud environments.
 
