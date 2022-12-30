@@ -9,4 +9,4 @@ volumes=( "-v" "$(pwd)/:/vpn" )
 docker run --privileged --rm \
   -p 4495:4495 -p 4495:4495/udp \
   ${volumes[@]} \
-  -it vpn-server $@
+  -it vpn-server:latest $@
