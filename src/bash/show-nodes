@@ -89,7 +89,7 @@ case $option in
     else
       for ((i=0; i<${#vpn_nodes[@]}; i++)); do
         if [[ $(echo "${vpn_nodes[$i]}" | awk -F '|' '{ print $10 }') =~ ovpn|ipsec ]]; then
-          echo $scripts_dir/deploy-node \
+          $scripts_dir/deploy-node \
             $workspace_root $template_dir \
             $node_type $cloud -r $region \
             -x $(echo "${vpn_nodes[$i]}" | awk -F '|' '{ print $1 }') -u
