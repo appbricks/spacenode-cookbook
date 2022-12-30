@@ -1,7 +1,7 @@
 #
 # Azure specific resource names
 #
-# @resource_instance_list: module.bootstrap.azurerm_virtual_machine.bastion
+# @resource_instance_list: module.bootstrap.azurerm_linux_virtual_machine.bastion
 # @resource_instance_data_list: module.bootstrap.azurerm_managed_disk.bastion-data
 #
 
@@ -45,13 +45,6 @@ variable "azure_dns_zone_resource_group" {
 variable "bastion_instance_type" {
   description = "The Azure instance type of the VPN node."
   default = "Standard_B1s"
-}
-
-#
-# Bastion image
-#
-variable "bastion_image_name" {
-  default = "appbricks-bastion-inceptor_D.221109030723"
 }
 
 #

@@ -13,7 +13,7 @@ case "$command" in
     ;;
   init)
     $root_dir/src/bash/init-workspace \
-      $workspace_root ${@:2:99}
+      $working_dir ${@:2:99}
     ;;
   show-regions)
     common::validate_environment

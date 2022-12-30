@@ -1,0 +1,12 @@
+#!/bin/bash
+
+volumes=( "-v" "$(pwd)/:/vpn" )
+[[ -z DEV_VPN_SERVER_REPO ]] || \
+  volumes+=( "-v" "${DEV_VPN_SERVER_REPO}:/usr/local/lib/vpn-server" )
+[[ -z DEV_COOKBOOK_REPO ]] || \
+  volumes+=( "-v" "${DEV_COOKBOOK_REPO}:/usr/local/lib/dev-cookbook" )
+
+docker run --privileged --rm \
+  -p 4495:4495 -p 4495:4495/udp \
+  ${volumes[@]} \
+  -it vpn-server $@

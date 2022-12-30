@@ -1,6 +1,8 @@
 # Private VPN Node Builder
 
-[![Build Status](https://travis-ci.org/appbricks/vpn-server.svg?branch=master)](https://travis-ci.org/appbricks/vpn-server)
+[![Build Status](https://github.com/appbricks/vpn-server/actions/workflows/build-dev-release.yml/badge.svg)](https://github.com/appbricks/vpn-server/actions/workflows/build-dev-release.yml)
+[![Build Status](https://github.com/appbricks/vpn-server/actions/workflows/build-prod-release.yml/badge.svg)](https://github.com/appbricks/vpn-server/actions/workflows/build-prod-release.yml)
+
 
 This repository contains scripts and templates that allow you to launch and manage VPN nodes in your personal public cloud account. The nodes are built using a cloud appliance which can configure itself to run OpenVPN or IPSec/IKEv2 VPN services. The `bin\vs` CLI can be used to launch the service in any one of Amazon Web Services, Microsoft Azure or Google Cloud Platform public cloud environments.
 
@@ -10,13 +12,14 @@ This repository contains scripts and templates that allow you to launch and mana
 
 The VPN Node Builder utility scripts orchestrate the creation of VPN nodes and personal cloud spaces in the public cloud by means of the [Terraform](https://terraform.io) templates. The three main VPN server protocol types can be built.
 
-* [WireGuard](https://www.wireguard.com/)
 * [OpenVPN](https://openvpn.net/)
 * [IPSEC/IKev2](https://www.strongswan.org/)
 
-Both WireGuard and OpenVPN traffic can be masked via a tunnel that obfuscates OpenVPN traffic to enable bypassing deep packet inspection at the service provider. This will, however, impact performance.
+OpenVPN traffic can be masked via a tunnel that obfuscates OpenVPN traffic to enable bypassing deep packet inspection at the service provider. This will, however, impact performance.
 
 The appliance can manage basic routing to internal Virtual Private Cloud (VPC) networks and can also peer nodes across regions. Additionally each appliance has built in automation to launch additional services within the VPC if instructed to do so. These are advance features of the appliance which are not enabled in the basic VPN appliance. The templates to launch the appliance in the various clouds are available as [Terraform modules](https://github.com/appbricks/cloud-inceptor) and are used by the scripts in this repository to manage the deployment of the VPN service to various cloud regions.
+
+> These templates may also be configured to setup a [WireGuard](https://www.wireguard.com/) VPN. This feature is only available via the [Cloud-Builder](https://github.com/appbricks/cloud-builder-cli) CLI.
 
 ## Installation
 
@@ -131,9 +134,17 @@ Before you can launch VPN nodes using the the CLI you need to initialize a works
   export TF_VAR_name=
 
   # DNS Zone for all deployments
-  export TF_VAR_aws_dns_zone=
-  export TF_VAR_azure_dns_zone=
-  export TF_VAR_google_dns_zone=
+  export TF_VAR_attach_dns_zone=false
+
+  # Uncomment only if attaching to a DNS zone 
+  # - AWS DNS configuration
+  #export TF_VAR_aws_dns_zone=
+  # - Azure DNS configuration
+  #export TF_VAR_azure_dns_zone=
+  #export TF_VAR_azure_dns_zone_resource_group=
+  # - Google DNS configuration
+  #export TF_VAR_google_dns_managed_zone_name=
+  #export TF_VAR_google_dns_zone=
 
   # Values to used for creating self-signed X509 certs
   export TF_VAR_company_name="appbricks"
@@ -154,3 +165,38 @@ Before you can launch VPN nodes using the the CLI you need to initialize a works
   > You do not need to set the domain name to be able to deploy and use the Cloud VPN nodes.
 
   You can use the `TF_VAR_vpn_users` variable to provide a list of users that VPN nodes will always be populated with. You can also create additional users on a node via the CLI, but they will not persist across to other nodes you have deployed.
+
+### Developing Cookbook Recipes
+
+You can use this CLI to develop and test you own recipes to deploy apps and services to a space node's cloud environment. In order to use the container to develop and test an application cookbook set the following environment variable.
+
+```
+export DEV_COOKBOOK_REPO=<PATH TO cookbook REPO being developed/tested>
+```
+
+You can also debug changes to the CLI scripts by exporting the following environment variable.
+
+```
+export DEV_VPN_SERVER_REPO=<PATH TO https://github.com/appbricks/vpn-server REPO>
+```
+
+You can then mount the local folders in the docker vpn-server image when running CLI commands via docker by using the following script.
+
+```
+#!/bin/bash
+
+volumes=( "-v" "$(pwd)/:/vpn" )
+[[ -z DEV_VPN_SERVER_REPO ]] || \
+  volumes+=( "-v" "${DEV_VPN_SERVER_REPO}:/usr/local/lib/vpn-server" )
+[[ -z DEV_COOKBOOK_REPO ]] || \
+  volumes+=( "-v" "${DEV_COOKBOOK_REPO}:/usr/local/lib/dev-cookbook" )
+
+docker run --privileged --rm \
+  -p 4495:4495 -p 4495:4495/udp \
+  ${volumes[@]} \
+  -it vpn-server $@
+```
+
+> Only one cookbook repo can be developed and tested at a time.
+
+Save this script to you system path and make it executable so you can run CLI commands via this script.

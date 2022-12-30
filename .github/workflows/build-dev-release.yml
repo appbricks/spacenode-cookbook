@@ -1,4 +1,4 @@
-name: Build dev MyCS VPN-Server CLI Docker container
+name: MyCS appbricks/vpn-server:dev CLI image
 
 on:
   workflow_dispatch:
@@ -11,7 +11,7 @@ on:
     - 'Dockerfile'
 
 jobs:
-  build:
+  build-and-publish:
     runs-on: ubuntu-latest
 
     defaults:
@@ -19,7 +19,9 @@ jobs:
         shell: bash
 
     steps:
-    - uses: actions/checkout@v2
+
+    - name: Checkout
+      uses: actions/checkout@v2
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2

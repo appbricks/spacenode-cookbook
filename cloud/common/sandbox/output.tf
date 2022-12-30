@@ -7,11 +7,8 @@
 #
 
 locals {
-  name_suffix = reverse(split("_", var.bastion_image_name))[0]
-  version = (local.name_suffix == "appbricks-bastion-inceptor" || local.name_suffix == "D.*"
-    ? "dev" 
-    : local.name_suffix)
-
+  version = reverse(split("_", var.bastion_image_name))[0]
+  
   endpoint = local.configure_dns ? module.bootstrap.bastion_fqdn : module.bootstrap.bastion_public_ip
   users    = (length(local.vpn_users) > 0 ? [for u in split(",", local.vpn_users) : 
     "* URL: https://${local.endpoint}/static/~${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}" 
@@ -51,6 +48,8 @@ output "cb_managed_instances" {
       "fqdn": module.bootstrap.bastion_fqdn
       "public_ip": module.bootstrap.bastion_public_ip
       "private_ip": module.bootstrap.bastion_admin_ip
+      "health_check_port": module.bootstrap.bastion_admin_api_port
+      "health_check_type": "tcp"
       "api_port": module.bootstrap.bastion_admin_api_port
       "ssh_port": module.bootstrap.bastion_admin_ssh_port
       "ssh_user": module.bootstrap.bastion_admin_user 
@@ -99,7 +98,7 @@ output "cb_deployment_security_group" {
   value = module.bootstrap.admin_security_group
 }
 
-output "cb_default_openssh_private_key" {
+output "cb_default_ssh_private_key" {
   sensitive = true
   value = module.bootstrap.default_openssh_private_key
 }
