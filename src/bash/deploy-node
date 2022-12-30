@@ -82,10 +82,17 @@ fi
 if [[ -n $input_node ]]; then
   echo "# inputs from node '$input_node'" > ${workspace_dir}/${region}/input-vars.sh
 
+  [[ $node_type == DEV-* ]] && \
+    echo -e "${GREEN}${BOLD}\nDeploying recipe with inputs from node '$input_node'...${NORMAL}${NC}\n"
+
   o=$(cat ${workspace_root}/${input_node}/${cloud}/${region}/output.json)
   for name in $(echo "$o" | jq -r 'keys[]'); do 
-    echo "export TF_VAR_$name='$(echo $o | jq -r .${name}.value)'" >> ${workspace_dir}/${region}/input-vars.sh
+    val=$(echo $o | jq -r .${name}.value)
+    echo "export TF_VAR_$name='${val}'" >> ${workspace_dir}/${region}/input-vars.sh
+    [[ $node_type == DEV-* ]] && \
+      echo -e "${LIGHT_GRAY}  ${BOLD}$name${NORMAL} = \"${val}\".${NORMAL}${NC}"
   done
+  [[ $node_type == DEV-* ]] && echo
 
   # remove name input which is usually the 
   # name for the space node and may clash 
