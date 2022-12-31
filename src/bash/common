@@ -177,15 +177,24 @@ function common::validate_workspace() {
   local command=$1
   local first
 
-  if [[ $node_type =~ (/.*)+ ]]; then
-    template_dir=/usr/local/lib/dev-cookbook/cloud/recipes$node_type/$cloud
-    if [[ ! -d $template_dir ]]; then
-      echo -e "${RED}\nERROR! Invalid template path '$template_dir'.\n"
+  input_node=""
+
+  if [[ $node_type =~ ^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$ ]]; then
+    input_node=$(echo $node_type | cut -d ':' -f1)
+    cookbook_name=$(echo $node_type | cut -d ':' -f2)
+    recipe_name=$(echo $node_type | cut -d ':' -f3)
+
+    if [[ ! -d ${workspace_root}/${input_node}/${cloud}/${region} ]]; then
+      echo -e "${RED}\nERROR! Invalid input node '${input_node}'.\n"
       exit 1
     fi
-    node_type=DEV-$(basename $node_type)
-  elif [[ $node_type == DEV-* ]]; then
-    template_dir=/usr/local/lib/dev-cookbook/cloud/recipes/${node_type#*-}/$cloud
+
+    template_dir=/usr/local/lib/${cookbook_name}/cloud/recipes/${recipe_name}/${cloud}
+    if [[ ! -d $template_dir ]]; then
+      echo -e "${RED}\nERROR! Invalid recipe template path '../${cookbook_name}/cloud/recipes/${recipe_name}/${cloud}'.\n"
+      exit 1
+    fi
+
   else
 
     if [[ ! -e ${template_dir}/$node_type ]]; then
@@ -254,24 +263,24 @@ function ui::print_nodes_table() {
 
   local nodes=("$@")
 
-  printf "     +------------+----------+----------------------+----------------------------------------------------+--------------+----------+\n"
-  printf "     | ${BOLD}%-10s${NORMAL} | ${BOLD}%-8s${NORMAL} | ${BOLD}%-20s${NORMAL} | ${BOLD}%-50s${NORMAL} | ${BOLD}%-12s${NORMAL} | ${BOLD}%-8s${NORMAL} |\n" \
+  printf "     +--------------------------------+----------+------------+------------------------------------------+--------------+----------+\n"
+  printf "     | ${BOLD}%-30s${NORMAL} | ${BOLD}%-8s${NORMAL} | ${BOLD}%-10s${NORMAL} | ${BOLD}%-40s${NORMAL} | ${BOLD}%-12s${NORMAL} | ${BOLD}%-8s${NORMAL} |\n" \
     'Node' 'Cloud' 'Region' 'Address' 'Status' 'Version'
-  printf "+----+------------+----------+----------------------+----------------------------------------------------+--------------+----------+\n"
+  printf "+----+--------------------------------+----------+------------+------------------------------------------+--------------+----------+\n"
 
   for ((i=0; i<${#nodes[@]}; i++)); do
     node_detail=${nodes[$i]}
-    printf "| %2d | %-10s | %-8s | %-20s | %-50s | %-12s | %-8s |\n" \
+    printf "| %2d | %-30s | %-8s | %-10s | %-40s | %-12s | %-8s |\n" \
       $i \
-      "$(echo "$node_detail" | awk -F '|' '{ print $1 }')" \
+      "$(echo "$node_detail" | awk -F '|' '{ print substr($1,1,30) }')" \
       "$(echo "$node_detail" | awk -F '|' '{ print $2 }')" \
-      "$(echo "$node_detail" | awk -F '|' '{ print $3 }')" \
-      "$(echo "$node_detail" | awk -F '|' '{ print $4 }')" \
+      "$(echo "$node_detail" | awk -F '|' '{ print substr($3,1,10) }')" \
+      "$(echo "$node_detail" | awk -F '|' '{ print substr($4,1,40) }')" \
       "$(echo "$node_detail" | awk -F '|' '{ print $5 }')" \
       "$(echo "$node_detail" | awk -F '|' '{ print $6 }')"
   done
 
-  echo -e "+----+------------+----------+----------------------+----------------------------------------------------+--------------+----------+"
+  echo -e "+----+--------------------------------+----------+------------+------------------------------------------+--------------+----------+"
 }
 
 scripts_dir=$(dirname $BASH_SOURCE)

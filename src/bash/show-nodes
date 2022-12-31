@@ -82,22 +82,9 @@ fi
 case $option in
   1)
     echo
-    if [[ $vpn_type =~ ovpn|ipsec ]]; then
-      $scripts_dir/deploy-node \
-        $workspace_root $template_dir \
-        $node_type $cloud -r $region -u
-    else
-      for ((i=0; i<${#vpn_nodes[@]}; i++)); do
-        if [[ $(echo "${vpn_nodes[$i]}" | awk -F '|' '{ print $10 }') =~ ovpn|ipsec ]]; then
-          $scripts_dir/deploy-node \
-            $workspace_root $template_dir \
-            $node_type $cloud -r $region \
-            -x $(echo "${vpn_nodes[$i]}" | awk -F '|' '{ print $1 }') -u
-          break
-        fi
-      done
-    fi
-
+    $scripts_dir/deploy-node \
+      $workspace_root $template_dir \
+      $node_type $cloud -r $region -u
     ;;
   2)
     if [[ $node_status == running && $vpn_type =~ ovpn|ipsec ]]; then

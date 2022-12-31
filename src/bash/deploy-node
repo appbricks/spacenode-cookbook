@@ -9,22 +9,18 @@ source $(dirname $BASH_SOURCE)/common
 set -euo pipefail
 
 region=""
-input_node=""
 clean=no
 init=no
 upgrade=no
 idle_shutdown=yes
 plan=no
+dev=no
 
 common::validate_workspace deploy_node
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -r|--region)
       region=$2
-      shift
-      ;;
-    -x|--in)
-      input_node=$2
       shift
       ;;
     -c|--clean)
@@ -44,6 +40,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     -d|--debug)
       set -x
+      ;;
+    --dev)
+      dev=yes
       ;;
     -h|--help)
       usage::deploy_node
@@ -82,22 +81,17 @@ fi
 if [[ -n $input_node ]]; then
   echo "# inputs from node '$input_node'" > ${workspace_dir}/${region}/input-vars.sh
 
-  [[ $node_type == DEV-* ]] && \
+  [[ $dev == yes ]] && \
     echo -e "${GREEN}${BOLD}\nDeploying recipe with inputs from node '$input_node'...${NORMAL}${NC}\n"
 
   o=$(cat ${workspace_root}/${input_node}/${cloud}/${region}/output.json)
   for name in $(echo "$o" | jq -r 'keys[]'); do 
     val=$(echo $o | jq -r .${name}.value)
     echo "export TF_VAR_$name='${val}'" >> ${workspace_dir}/${region}/input-vars.sh
-    [[ $node_type == DEV-* ]] && \
+    [[ $dev == yes ]] && \
       echo -e "${LIGHT_GRAY}  ${BOLD}$name${NORMAL} = \"${val}\".${NORMAL}${NC}"
   done
-  [[ $node_type == DEV-* ]] && echo
-
-  # remove name input which is usually the 
-  # name for the space node and may clash 
-  # with an expected app name variable
-  unset TF_VAR_name 
+  [[ $dev == yes ]] && echo
   
   # source all outputs from dependent node
   source ${workspace_dir}/${region}/input-vars.sh
@@ -115,6 +109,12 @@ fi
 if [[ $upgrade == yes ]]; then
   terraform::taint_bastion "$node_type" "$cloud" "$region" "$template_dir"
 fi
+
+# remove name input which is usually the 
+# name for the space node and may clash 
+# with an expected app name variable
+[[ -z $input_node ]] || unset TF_VAR_name 
+
 if [[ $plan == yes ]]; then
   terraform::plan "$node_type" "$cloud" "$region" "$template_dir"
 else
