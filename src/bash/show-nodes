@@ -47,6 +47,7 @@ node_status=$(echo "$node_detail" | awk -F '|' '{ print $5 }')
 root_user=$(echo "$node_detail" | awk -F '|' '{ print $7 }')
 root_passwd=$(echo "$node_detail" | awk -F '|' '{ print $8 }')
 node_id=$(echo "$node_detail" | awk -F '|' '{ print $9 }')
+vpn_type=$(echo "$node_detail" | awk -F '|' '{ print $10 }')
 
 [[ -z $root_user ]] ||
   echo -e "\n${CYAN}Node Admin =>\n  User: ${root_user}\n  Password: ${root_passwd}${NC}"
@@ -54,7 +55,11 @@ node_id=$(echo "$node_detail" | awk -F '|' '{ print $9 }')
 echo -e "\n${GREEN}${BOLD}What do you want to do:${NORMAL}"
 echo -e "1) Update Node"
 if [[ $node_status == running ]]; then
-  echo -e "2) Download VPN Config"
+  if [[ $vpn_type =~ ovpn|ipsec ]]; then
+    echo -e "2) Download VPN Config"
+  else
+    echo -e "${DIM}${DARK_GRAY}2) Download VPN Config${GREEN}${NORMAL}"
+  fi
   echo -e "3) SSH to Node"
   echo -e "4) Stop Node"
 elif [[ $node_status == stopped ]]; then
@@ -82,7 +87,7 @@ case $option in
       $node_type $cloud -r $region -u
     ;;
   2)
-    if [[ $node_status == running ]]; then
+    if [[ $node_status == running && $vpn_type =~ ovpn|ipsec ]]; then
       echo -e -n "\n${GREEN}Please enter the VPN username: ${NC}" && read username
       echo -e -n "${GREEN}Please enter the VPN password: ${NC}" && read -s password
 
@@ -91,14 +96,20 @@ case $option in
         $workspace_root $template_dir \
         $node_type $cloud -r $region \
         -u $username -p $password
+    else
+      echo -e "${RED}\nERROR! Cannot download VPN config from selected node.${NC}"
+      exit 1
     fi
     ;;
   3)
     if [[ $node_status == running ]]; then
       echo
+      o=$(cat ${workspace_root}/${node_type}/${cloud}/${region}/output.json)
+      ssh_user=$(echo "$o" | jq -r '.cb_managed_instances.value[0] | .ssh_user')
+      ssh_key_file="$(echo "$o" | jq -r '.cb_managed_instances.value[0] | .name')-ssh-key.pem"
       /usr/bin/ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
-        -i ${workspace_root}/${node_type}/${cloud}/${region}/bastion-ssh-key.pem \
-        mycs-admin@${node_name}
+        -i ${workspace_root}/${node_type}/${cloud}/${region}/${ssh_key_file} \
+        ${ssh_user}@${node_name}
     fi
     ;;
   4)
@@ -110,6 +121,10 @@ case $option in
       stopped)
         echo -e "\n${GREEN}Starting \"${node_name}\"...${NC}"
         response=$(cloud::start_node "$cloud" "$region" "$node_id")
+
+        $scripts_dir/deploy-node \
+          $workspace_root $template_dir \
+          $node_type $cloud -r $region
         ;;
     esac
     ;;

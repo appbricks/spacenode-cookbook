@@ -29,10 +29,9 @@ function usage::deploy_node() {
   local n=${node_type:-<NODE_TYPE>}
   local c=${cloud:-<CLOUD>}
 
-  echo -e "\nUSAGE: vs deploy-node $n $c [-r|--region <REGION>] [-x|--in] [-c|--clean] [-i|--init] [-u|--upgrade] [-a|--no-idle-shutdown] [-s|--show] [-d|--debug]\n${LIGHT_BLUE}"
+  echo -e "\nUSAGE: vs deploy-node $n $c [-r|--region <REGION>] [-c|--clean] [-i|--init] [-u|--upgrade] [-a|--no-idle-shutdown] [-s|--show] [-d|--debug]\n${LIGHT_BLUE}"
   echo -e "${LIGHT_BLUE}  This CLI command creates a node in the given region.\n${LIGHT_GREEN}"
   echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>   The region to create the server in"
-  echo -e "  ${DIM}-x|--in${NORMAL} <NODE_TYPE>    A node to reference as input to this node's recipe"
   echo -e "  ${DIM}-c|--clean${NORMAL}             Clean the terraform workspace context before deploying"
   echo -e "  ${DIM}-i|--init${NORMAL}              Re-initialize terraform workspace context before deploying"
   echo -e "  ${DIM}-u|--upgrade${NORMAL}           Re-builds/upgrades the node using the most recent version"
