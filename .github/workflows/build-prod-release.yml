@@ -11,7 +11,7 @@ on:
     - 'Dockerfile'
 
 jobs:
-  create-release-version:
+  create-release-tag:
     runs-on: ubuntu-latest
     outputs: 
       version: ${{steps.release-tag.outputs.version}}
@@ -55,8 +55,8 @@ jobs:
 
         echo "::set-output name=version::${release_tag}"
 
-  build-and-publish-release:
-    needs: create-release-version
+  build-and-publish-image:
+    needs: create-release-tag
     runs-on: ubuntu-latest
 
     defaults:
@@ -68,7 +68,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
       with:
-        ref: ${{ needs.create-release-version.outputs.version }}
+        ref: ${{ needs.create-release-tag.outputs.version }}
 
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
@@ -87,4 +87,45 @@ jobs:
       with:
         push: true
         platforms: linux/amd64,linux/arm64
-        tags: appbricks/vpn-server:latest,appbricks/vpn-server:${{ needs.create-release-version.outputs.version }}
+        tags: appbricks/vpn-server:latest,appbricks/vpn-server:${{ needs.create-release-tag.outputs.version }}
+
+  publish-release-tag:
+    needs: 
+    - build-and-publish-image
+    - create-release-tag
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+    
+    env:
+      VERSION: ${{ needs.create-release-tag.outputs.version }}
+
+    steps:
+    
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ needs.create-release-tag.outputs.version }}
+
+    - name: Create release files
+      id: release-tag
+      run: |
+        sed -i "s|<VERSION>|${VERSION}|g" doc/release-notes.md
+        sed -i "s|<VERSION>|${VERSION}|g" src/install/install.sh
+        sed -i "s|<VERSION>|${VERSION}|g" src/install/install.ps1
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ needs.create-release-tag.outputs.version }}
+        prerelease: false
+        body_path: doc/release-notes.md
+        files: |
+          src/install/install.sh
+          src/install/install.ps1
+          LICENSE
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_REPOSITORY: appbricks/vpn-server

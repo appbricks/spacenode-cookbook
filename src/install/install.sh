@@ -54,9 +54,8 @@ case $SHELL in
     profile_file=$HOME/.zshrc
     ;;
   *)
-    echo -e "${RED}\nERROR! Unable to determine shell profile to add VS CLI alias to.\n" 
-    echo -e "${GREEN}Please add the following to you shell startup script: \n"
-    echo -e "- ${BLUE}${docker_alias}${NC}" 
+    echo -e "${BROWN_ORANGE}\nUnable to determine shell profile file."
+    echo -e "Some install steps may be skipped.\n${NC}"
     exit 1
     ;;
 esac
@@ -67,10 +66,9 @@ else
   sed_option=""
 fi
 
-grep "alias vs=" $profile_file 2>&1 >/dev/null \
-  && sed -i${sed_option} "s|^alias vs=.*$|${docker_alias}|" $profile_file \
-  || echo -e "\n${docker_alias}" >> $profile_file
+curl -s \
+  -L https://raw.githubusercontent.com/appbricks/vpn-server/<VERSION>/bin/vs \
+  -o /usr/local/bin/vs
+chmod +x /usr/local/bin/vs
 
-echo -e "${GREEN}\nVS CLI has been added to you shell startup profile. Run"
-echo -e "'exec \$SHELL' to restart the shell and then 'vs --help'"
-echo -e "to download the CLI container image and validate.${NC}"
+echo -e "${GREEN}\nVS CLI has been added to you system path \"/usr/local/bin/vs\".${NC}"
