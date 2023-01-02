@@ -114,7 +114,7 @@ jobs:
       run: |
         sed -i "s|<VERSION>|${VERSION}|g" doc/release-notes.md
         sed -i "s|<VERSION>|${VERSION}|g" src/install/install.sh
-        sed -i "s|<VERSION>|${VERSION}|g" src/install/install.ps1
+        #sed -i "s|<VERSION>|${VERSION}|g" src/install/install.ps1
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
