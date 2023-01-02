@@ -67,7 +67,7 @@ else
 fi
 
 curl -s \
-  -L https://raw.githubusercontent.com/appbricks/vpn-server/<VERSION>/bin/vs \
+  -L https://raw.githubusercontent.com/appbricks/vpn-server/<VERSION>/bin/vsd \
   -o /usr/local/bin/vs
 chmod +x /usr/local/bin/vs
 
