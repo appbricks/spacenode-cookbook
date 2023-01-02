@@ -69,6 +69,7 @@ fi
 curl -s \
   -L https://raw.githubusercontent.com/appbricks/vpn-server/<VERSION>/bin/vsd \
   -o /usr/local/bin/vs
-chmod +x /usr/local/bin/vs
+chmod +x "s|appbricks/vpn-server:latest|appbricks/vpn-server:<VERSION>|" /usr/local/bin/vs
+sed -i 
 
 echo -e "${GREEN}\nVS CLI has been added to you system path \"/usr/local/bin/vs\".${NC}"
