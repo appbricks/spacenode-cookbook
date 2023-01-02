@@ -164,20 +164,70 @@ Before you can launch VPN nodes using the the CLI you need to initialize a works
 
   You can use the `TF_VAR_vpn_users` variable to provide a list of users that VPN nodes will always be populated with. You can also create additional users on a node via the CLI, but they will not persist across to other nodes you have deployed.
 
-### Developing Cookbook Recipes
+### Deploying Externally Sourced Recipes
 
-You can use this CLI to develop and test your own recipes to deploy apps and services to a space node's cloud environment. In order to use the container to develop and test an application cookbook set the following environment variable.
+By default this cookook will only deploy recipes within this repo. The recipes available within this repo's cookbook can be found at `vpn-server/cloud/recipes/` folder. This recipe can be used to deploy a sandbox network to one of the three major public clouds AWS, Azure or Google. Once deployed additional recipes can be deployed to the sandbox cloud environment. To include recipes from an external repo export the following environment variable.
 
 ```
-export COOKBOOK_REPO=<PATH TO cookbook REPO being developed/tested>
+export COOKBOOK_REPO=<local PATH TO cookbook REPO>
+```
+
+### Developing Cookbook Recipes
+
+You can also use this CLI to develop and test your own recipes to deploy apps and services to a space node's cloud environment. In order to use the container to develop and test an application cookbook set the following environment variable.
+
+```
+export COOKBOOK_REPO=<local PATH TO cookbook REPO being developed/tested>
 ```
 
 > Only one cookbook repo can be developed and tested at a time.
 
+To be able to deploy an externally sourced recipe, the recipe must exist in a repo folder with the templates in the path `<COOKBOOK_REPO>/cloud/recipes/`. The terraform templates within that folder can source outputs from the *sandbox* deployment via the following input variables.
+
+> Retrieving remote state from the sandbox is not supported directly due to security concerns outlined in the documentation of the [remote-state-data](https://developer.hashicorp.com/terraform/language/state/remote-state-data) data source.
+
+| Input Variable | Type | Description |
+|:-------------- |:---- |:----------- |
+|cb_managed_instances|list(object)|
+|cb_node_description|string|
+|cb_node_version|string|
+|cb_root_ca_cert|string|
+|cb_vpc_id|string|
+|cb_vpc_name|string|
+|cb_deployment_networks|list(string)|
+|cb_deployment_security_group|string|
+|cb_default_ssh_private_key|string|
+|cb_default_ssh_key_pair|string|
+|cb_dns_configured|boolean|
+|cb_internal_domain|string|
+|cb_internal_pdns_url|string|
+|cb_internal_pdns_api_key|string|
+|cb_vpn_type|string|
+|cb_vpn_masking_available|boolean|
+|cb_idle_action|string|
+
+**cb_managed_instances** object properties
+
+| Name | Type | Description |
+|:---- |:---- |:----------- |
+|order|string|
+|id|string|
+|name|string|
+|description|string|
+|fqdn|string|
+|public_ip|string|
+|private_ip|string|
+|health_check_port|string|
+|health_check_type|string|
+|api_port|string|
+|ssh_port|string|
+|ssh_user|string|
+|ssh_key|string|
+
 You can also debug changes to the CLI scripts by exporting the following environment variable.
 
 ```
-export VPN_SERVER_REPO=<PATH TO https://github.com/appbricks/vpn-server REPO>
+export VPN_SERVER_REPO=<local PATH TO https://github.com/appbricks/vpn-server REPO>
 ```
 
 These environment variables mount the local repo folders within the container allowing you to test changes to the scripts and templates without rebuilding the image.
