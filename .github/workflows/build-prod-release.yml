@@ -114,7 +114,6 @@ jobs:
       run: |
         sed -i "s|<VERSION>|${VERSION}|g" doc/release-notes.md
         sed -i "s|<VERSION>|${VERSION}|g" src/install/install.sh
-        #sed -i "s|<VERSION>|${VERSION}|g" src/install/install.ps1
 
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -124,7 +123,6 @@ jobs:
         body_path: doc/release-notes.md
         files: |
           src/install/install.sh
-          src/install/install.ps1
           LICENSE
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
