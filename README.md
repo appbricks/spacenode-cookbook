@@ -188,7 +188,6 @@ To be able to deploy an externally sourced recipe, the recipe must exist in a re
 
 | Input Variable | Type | Description |
 |:-------------- |:---- |:----------- |
-|cb_managed_instances|list(object)|
 |cb_node_description|string|
 |cb_node_version|string|
 |cb_root_ca_cert|string|
@@ -205,24 +204,6 @@ To be able to deploy an externally sourced recipe, the recipe must exist in a re
 |cb_vpn_type|string|
 |cb_vpn_masking_available|boolean|
 |cb_idle_action|string|
-
-**cb_managed_instances** object properties
-
-| Name | Type | Description |
-|:---- |:---- |:----------- |
-|order|string|
-|id|string|
-|name|string|
-|description|string|
-|fqdn|string|
-|public_ip|string|
-|private_ip|string|
-|health_check_port|string|
-|health_check_type|string|
-|api_port|string|
-|ssh_port|string|
-|ssh_user|string|
-|ssh_key|string|
 
 You can also debug changes to the CLI scripts by exporting the following environment variable.
 

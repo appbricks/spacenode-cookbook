@@ -53,7 +53,7 @@ jobs:
         git tag -a ${release_tag} -m "$last_commit_msg"
         git push --follow-tags
 
-        echo "::set-output name=version::${release_tag}"
+        echo "version=${release_tag}" >> $GITHUB_OUTPUT
 
   build-and-publish-image:
     needs: create-release-tag
