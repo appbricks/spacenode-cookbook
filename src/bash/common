@@ -22,6 +22,8 @@ BOLD='\033[1m'
 NORMAL='\033[22m'
 DIM='\033[2m'
 
+ext_cookbook_path=${EXT_COOKBOOK_PATH:-/usr/local/lib}
+
 awz_cli_credentials_validated=no
 azure_cli_credentials_validated=no
 google_cli_credentials_validated=no
@@ -178,20 +180,27 @@ function common::validate_workspace() {
   local first
 
   input_node=""
+  input_node_cloud=""
 
-  if [[ $node_type =~ ^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$ ]]; then
+  if [[ $node_type =~ ^[a-zA-Z0-9_]+(@[a-zA-Z0-9_]+)?:[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$ ]]; then
     input_node=$(echo $node_type | cut -d ':' -f1)
     cookbook_name=$(echo $node_type | cut -d ':' -f2)
     recipe_name=$(echo $node_type | cut -d ':' -f3)
 
-    if [[ ! -d ${workspace_root}/${input_node}/${cloud}/${region} ]]; then
+    if [[ $input_node =~ ^[a-zA-Z0-9_]+@[a-zA-Z0-9_]+$ ]]; then
+      input_node_cloud=$(echo $input_node | cut -d '@' -f2)
+      input_node=$(echo $input_node | cut -d '@' -f1)
+    else
+      input_node_cloud=$cloud
+    fi
+    if [[ ! -d ${workspace_root}/${input_node}/${input_node_cloud}/${region} ]]; then
       echo -e "${RED}\nERROR! Invalid input node '${input_node}'.\n"
       exit 1
     fi
 
-    template_dir=/usr/local/lib/${cookbook_name}/cloud/recipes/${recipe_name}/${cloud}
+    template_dir=${ext_cookbook_path}/${cookbook_name}/cloud/recipes/${recipe_name}/${cloud}
     if [[ ! -d $template_dir ]]; then
-      echo -e "${RED}\nERROR! Invalid recipe template path '../${cookbook_name}/cloud/recipes/${recipe_name}/${cloud}'.\n"
+      echo -e "${RED}\nERROR! Invalid recipe template path '${template_dir}'.\n"
       exit 1
     fi
 
@@ -242,6 +251,8 @@ function common::validate_workspace() {
   common::validate_cloud_credentials $cloud  
   workspace_dir=${workspace_root}/${node_type}/${cloud}
   mkdir -p $workspace_dir
+
+  backend=$(cat $template_dir/cloud.tf | awk '/backend ".*"/{ print $2 }' | tr -d '"')
 }
 
 function common::validate_value_from_list() {
