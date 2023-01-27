@@ -133,10 +133,10 @@ if [[ $os_type == Darwin ]]; then
 
   case $vpn_type in
     openvpn)
-      file=${TF_VAR_name}-${region}-vpn.ovpn
+      file=${TF_VAR_name}-${region}.ovpn
       ;;
     ipsec)
-      file=${TF_VAR_name}-${region}-vpn.mobileconfig
+      file=${TF_VAR_name}-${region}.mobileconfig
       ;;
     *)
       echo -e "${RED}\nERROR! Unknown VPN type '$vpn_type'.${NC}"

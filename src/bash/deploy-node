@@ -84,20 +84,23 @@ if [[ -n $input_node ]]; then
   [[ $dev == yes ]] && \
     echo -e "${GREEN}${BOLD}\nDeploying recipe with inputs from node '$input_node'...${NORMAL}${NC}\n"
 
-  o=$(cat ${workspace_root}/${input_node}/${cloud}/${region}/output.json)
-  for name in $(echo "$o" | jq -r 'keys[]'); do 
-    val=$(echo $o | jq -r .${name}.value)
-    echo "export TF_VAR_$name='${val}'" >> ${workspace_dir}/${region}/input-vars.sh
-    [[ $dev == yes ]] && \
-      echo -e "${LIGHT_GRAY}  ${BOLD}$name${NORMAL} = \"${val}\".${NORMAL}${NC}"
-  done
-  [[ $dev == yes ]] && echo
+  input_node_output_file=${workspace_root}/${input_node}/${input_node_cloud}/${region}/output.json
+  if [[ -e $input_node_output_file ]]; then
+    o=$(cat $input_node_output_file)
+    for name in $(echo "$o" | jq -r 'keys[]'); do 
+      val=$(echo $o | jq -r .${name}.value)
+      echo "export TF_VAR_$name='${val}'" >> ${workspace_dir}/${region}/input-vars.sh
+      [[ $dev == yes ]] && \
+        echo -e "${LIGHT_GRAY}  ${BOLD}$name${NORMAL} = \"${val}\".${NORMAL}${NC}"
+    done
+    [[ $dev == yes ]] && echo
+  fi
   
   # source all outputs from dependent node
   source ${workspace_dir}/${region}/input-vars.sh
 fi
 
-terraform::set_cloud_region "$node_type" "$cloud" "$region"
+terraform::set_cloud_region "$node_type" "$cloud" "$backend" "$region"
 if [[ $clean == yes ]]; then
   # (Re)Initialize terraform context if
   # requested or if doing fresh deployment

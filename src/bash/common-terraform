@@ -4,7 +4,8 @@ function terraform::set_cloud_region() {
 
   local node_type=$1
   local cloud=$2
-  local region=$3
+  local backend=$3
+  local region=$4
 
   case $cloud in
     aws)
@@ -32,6 +33,18 @@ function terraform::set_cloud_region() {
       ;;
   esac
 
+  case $backend in
+    s3)
+      cloud::set_aws_credentials
+      ;;
+    azurerm)
+      cloud::set_azure_credentials
+      ;;
+    gcs)
+      cloud::set_google_credentials >/dev/null
+      ;;
+  esac
+
   export TF_VAR_region=$region
 }
 
@@ -43,10 +56,11 @@ function terraform::init() {
   local template_dir=$4
   local tf_data_dir=$(pwd)/.terraform
 
-  bucket_name=${TF_VAR_name}-vs-tfstate-${region}
+  local bucket_name=${TF_VAR_name}-vs-tfstate-${region}
+  local backend_config=()
 
-  case $cloud in
-    aws)
+  case $backend in
+    s3)
       # Check/Create Terraform state bucket
       set +e
       aws s3 ls | grep "${bucket_name}" >/dev/null 2>&1
@@ -58,15 +72,13 @@ function terraform::init() {
         set -e
       fi
 
-      # Initialize Terraform
-      echo -e "${GREEN}Initializing terraform context...${NC}"
-      TF_DATA_DIR=$tf_data_dir terraform -chdir=$template_dir init \
-        -backend-config="key=${node_type}" \
+      backend_config=(
+        -backend-config="key=${node_type}"
         -backend-config="bucket=${bucket_name}"
-      echo
+      )
       ;;
 
-    azure)
+    azurerm)
       set +e
       az group list \
         | jq -r '.[].name' | grep default >/dev/null 2>&1
@@ -113,17 +125,15 @@ function terraform::init() {
         set -e
       fi
 
-      # Initialize Terraform
-      echo -e "${GREEN}Initializing terraform context...${NC}"
-      TF_DATA_DIR=$tf_data_dir terraform -chdir=$template_dir init \
-        -backend-config="resource_group_name=default" \
-        -backend-config="container_name=${container_name}" \
-        -backend-config="key=terraform.tfstate" \
+      backend_config=(
+        -backend-config="resource_group_name=default"
+        -backend-config="container_name=${container_name}"
+        -backend-config="key=terraform.tfstate"
         -backend-config="storage_account_name=${storage_account}"
-      echo
+      )
       ;;
       
-    google)
+    gcs)
       # Check/Create Terraform state bucket
       set +e
       gsutil ls | awk -F'/' '{ print $3 }' | grep "${bucket_name}" >/dev/null 2>&1
@@ -135,14 +145,24 @@ function terraform::init() {
         set -e
       fi
 
-      # Initialize Terraform
-      echo -e "${GREEN}Initializing terraform context...${NC}"
-      TF_DATA_DIR=$tf_data_dir terraform -chdir=$template_dir init \
-        -backend-config="prefix=${node_type}" \
+      backend_config=(
+        -backend-config="prefix=${node_type}"
         -backend-config="bucket=${bucket_name}"
-      echo
+      )
       ;;
+
+    local)
+      backend_config=(
+        -backend-config="path=.terraform/terraform.tfstate"
+      )
+      ;;
+
   esac
+
+  # Initialize Terraform
+  echo -e "${GREEN}Initializing terraform context...${NC}"
+  TF_DATA_DIR=$tf_data_dir terraform -chdir=$template_dir init ${backend_config[@]}
+  echo
 }
 
 function terraform::apply() {

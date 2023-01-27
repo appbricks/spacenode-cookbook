@@ -1,5 +1,7 @@
 #!/bin/bash
 
+VPN_SERVER_IMAGE=${VPN_SERVER_IMAGE:-appbricks/vpn-server:latest}
+
 args=( "-v" "$(pwd)/:/vpn" )
 [[ -z VPN_SERVER_REPO ]] || \
   args+=( "-v" "${VPN_SERVER_REPO}:/usr/local/lib/vpn-server" )
@@ -9,4 +11,4 @@ args=( "-v" "$(pwd)/:/vpn" )
 docker run --privileged --rm \
   -p 4495:4495 -p 4495:4495/udp \
   ${args[@]} \
-  -it appbricks/vpn-server:latest $@
+  -it $VPN_SERVER_IMAGE $@

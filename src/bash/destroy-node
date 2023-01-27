@@ -46,7 +46,7 @@ fi
 
 if [[ -e ${workspace_dir}/${region} ]]; then
   pushd ${workspace_dir}/${region} >/dev/null 2>&1
-  terraform::set_cloud_region "$node_type" "$cloud" "$region"
+  terraform::set_cloud_region "$node_type" "$cloud" "$backend" "$region"
   terraform::destroy "$node_type" "$cloud" "$region" "$template_dir"
   popd >/dev/null 2>&1
 else
