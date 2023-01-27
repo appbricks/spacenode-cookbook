@@ -80,6 +80,14 @@ tar xvzf kcptun-linux-${arch}.tgz
 mv client_linux_${arch} /usr/local/bin/kcptun-client
 cd -
 
+# Create lock files for all embedded recipes
+for rd in $(echo /usr/local/lib/vpn-server/cloud/recipes/*/*/ | tr ' ' '\n'); do
+  cd $rd
+  terraform init -backend=false -input=false
+  rm -fr .terraform
+  cd
+done
+
 mkdir /vpn
 rm -fr /tmp/*
 rm -rf /var/cache/apk/*
