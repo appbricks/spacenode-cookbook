@@ -3,9 +3,9 @@
 VPN_SERVER_IMAGE=${VPN_SERVER_IMAGE:-appbricks/vpn-server:latest}
 
 args=( "-v" "$(pwd)/:/vpn" )
-[[ -z VPN_SERVER_REPO ]] || \
+[[ -z $VPN_SERVER_REPO ]] || \
   args+=( "-v" "${VPN_SERVER_REPO}:/usr/local/lib/vpn-server" )
-[[ -z COOKBOOK_REPO ]] || \
+[[ -z $COOKBOOK_REPO ]] || \
   args+=( "-v" "${COOKBOOK_REPO}:/usr/local/lib/$(basename ${COOKBOOK_REPO})" )
 
 docker run --privileged --rm \
