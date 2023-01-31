@@ -1,4 +1,5 @@
 name: MyCS appbricks/vpn-server:dev CLI image
+concurrency: dev
 
 on:
   workflow_dispatch:
