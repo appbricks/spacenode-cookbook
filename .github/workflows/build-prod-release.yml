@@ -140,3 +140,12 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_REPOSITORY: appbricks/vpn-server
+
+    - name: Trigger Cloud-Builder CLI build
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        repo: appbricks/cloud-builder-cli
+        ref: dev
+        workflow: Build prod Cloud Builder CLI release
+        inputs: '{ "cookbook_version": "${{ needs.create-release-tag.outputs.version }}" }'
+        token: ${{ secrets.GH_TOKEN }}
