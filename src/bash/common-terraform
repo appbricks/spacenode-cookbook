@@ -153,16 +153,22 @@ function terraform::init() {
 
     local)
       backend_config=(
-        -backend-config="path=.terraform/terraform.tfstate"
+        -backend-config="path=${tf_data_dir}/local.tfstate"
       )
       ;;
 
   esac
 
   # Initialize Terraform
-  echo -e "${GREEN}Initializing terraform context...${NC}"
-  TF_DATA_DIR=$tf_data_dir terraform -chdir=$template_dir init ${backend_config[@]}
-  echo
+  if [[ ${#backend_config[@]} > 0 ]]; then
+    echo -e "${GREEN}Initializing terraform context...${NC}"
+    TF_DATA_DIR=$tf_data_dir terraform -chdir=$template_dir init ${backend_config[@]}
+    echo
+  else
+    echo -e "${GREEN}Initializing terraform context...${NC}"
+    TF_DATA_DIR=$tf_data_dir terraform -chdir=$template_dir init
+    echo
+  fi
 }
 
 function terraform::apply() {
