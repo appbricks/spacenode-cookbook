@@ -260,7 +260,7 @@ variable "bastion_image_name" {
 # Common local variables
 #
 locals {
-  space_domain = lower("${var.name}-${var.region}")
+  space_domain = lower("${var.name}")
   space_internal_domain = "${local.space_domain}.mycs"
 
   vpn_type = (
