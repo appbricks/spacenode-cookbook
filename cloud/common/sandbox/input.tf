@@ -4,27 +4,26 @@
 # @is_bastion: true
 #
 
-# Cloud region to deploy to
-#
-# @order: 1
-# @accepted_values: +iaas_regions
-# @accepted_values_message: Error! not a valid region
-# @target_key: true
-#
-variable "region" {
-  description = "The cloud region or location in which to deploy the VPN node."
-  type = string
-}
-
 # Deployment Name
 #
-# @order: 2
+# @order: 1
 # @tags: recipe,target-undeployed
 # @target_key: true
 #
 variable "name" {
   description = "Name that uniquely identies your VPN node and resources created for it."
   default = "MyCS"
+}
+
+# Cloud region to deploy to
+#
+# @order: 2
+# @accepted_values: +iaas_regions
+# @accepted_values_message: Error! not a valid region
+#
+variable "region" {
+  description = "The cloud region or location in which to deploy the VPN node."
+  type = string
 }
 
 # Whether a DNS zone should be attached
