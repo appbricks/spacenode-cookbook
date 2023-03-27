@@ -9,7 +9,7 @@
 locals {
   version = reverse(split("_", var.bastion_image_name))[0]
   
-  endpoint = local.configure_dns ? module.bootstrap.bastion_fqdn : module.bootstrap.bastion_public_ip
+  endpoint = local.configure_dns ? module.bootstrap.bastion_fqdn : lookup(module.bootstrap, "bastion_public_ip", "<UNKNOWN>")
   users    = (length(local.vpn_users) > 0 ? [for u in split(",", local.vpn_users) : 
     "* URL: https://${local.endpoint}/static/~${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}" 
   ]: [])
