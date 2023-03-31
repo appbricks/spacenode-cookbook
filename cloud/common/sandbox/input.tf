@@ -8,6 +8,8 @@
 #
 # @order: 1
 # @tags: recipe,target-undeployed
+# @value_inclusion_filter: ^[a-zA-Z0-9][-a-zA-Z0-9]*$
+# @value_inclusion_filter_message: The time interval should be a value greater than 0.
 # @target_key: true
 #
 variable "name" {
