@@ -133,10 +133,10 @@ if [[ $os_type == Darwin ]]; then
 
   case $vpn_type in
     openvpn)
-      file=${TF_VAR_name}-${region}.ovpn
+      file=${TF_VAR_name}.ovpn
       ;;
     ipsec)
-      file=${TF_VAR_name}-${region}.mobileconfig
+      file=${TF_VAR_name}.mobileconfig
       ;;
     *)
       echo -e "${RED}\nERROR! Unknown VPN type '$vpn_type'.${NC}"
@@ -163,14 +163,14 @@ elif [[ $os_type == Linux ]]; then
       unzip -q -o ${working_dir}/${file} -d $working_dir
       rm ${working_dir}/${file}
       
-      file=${TF_VAR_name}-${region}.ovpn
+      file=${TF_VAR_name}.ovpn
       download_vpn_config $user $password \
         https://${vpn_server_host}/static/~${user}/${file} \
         ${working_dir}/${file}       
       ;;
 
     ipsec)      
-      file=${TF_VAR_name}-${region}.mobileconfig
+      file=${TF_VAR_name}.mobileconfig
       download_vpn_config $user $password \
         https://${vpn_server_host}/static/~${user}/${file} \
         ${working_dir}/${file}    
