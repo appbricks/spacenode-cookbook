@@ -4,8 +4,7 @@ function terraform::set_cloud_region() {
 
   local node_type=$1
   local cloud=$2
-  local backend=$3
-  local region=$4
+  local region=$3
 
   case $cloud in
     aws)
@@ -153,7 +152,7 @@ function terraform::init() {
 
     local)
       backend_config=(
-        -backend-config="path=${tf_data_dir}/local.tfstate"
+        -backend-config="path=${TF_VAR_cb_local_state_path}/terraform/local.tfstate"
       )
       ;;
 

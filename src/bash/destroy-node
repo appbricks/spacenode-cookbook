@@ -33,20 +33,28 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-if [[ -z $region ]]; then
-  usage::destroy_node
-  echo -e "${RED}\nERROR! Please provide a cloud region from the following list.${NC}"
-  $(dirname $BASH_SOURCE)/show-regions $cloud
-  exit 1
+if [[ $cloud =~ $clouds_with_regions ]]; then
+  if [[ -z $region ]]; then
+    usage::deploy_node
+    echo -e "${RED}\nERROR! Please provide a cloud region from the following list.${NC}"
+    $(dirname $BASH_SOURCE)/show-regions $cloud
+    exit 1
+  fi
+
+  run_dir=${workspace_dir}/${region}
+else
+  run_dir=${workspace_dir}
 fi
+
+export TF_VAR_cb_local_state_path=${run_dir}/state
 
 # This is usually set at deploy but required in 
 # order to reinitialize without prompting for input.
-[[ ! -e ${workspace_dir}/${region}/input-vars.sh ]] || source ${workspace_dir}/${region}/input-vars.sh
+[[ ! -e ${run_dir}/input-vars.sh ]] || source ${run_dir}/input-vars.sh
 
-if [[ -e ${workspace_dir}/${region} ]]; then
-  pushd ${workspace_dir}/${region} >/dev/null 2>&1
-  terraform::set_cloud_region "$node_type" "$cloud" "$backend" "$region"
+if [[ -e ${run_dir} ]]; then
+  pushd ${run_dir} >/dev/null 2>&1
+  terraform::set_cloud_region "$node_type" "$cloud" "$region"
   terraform::destroy "$node_type" "$cloud" "$region" "$template_dir"
   popd >/dev/null 2>&1
 else

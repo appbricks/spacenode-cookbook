@@ -31,7 +31,7 @@ function usage::deploy_node() {
 
   echo -e "\nUSAGE: vs deploy-node $n $c [-r|--region <REGION>] [-c|--clean] [-i|--init] [-u|--upgrade] [-a|--no-idle-shutdown] [-s|--show] [-d|--debug]\n${LIGHT_BLUE}"
   echo -e "${LIGHT_BLUE}  This CLI command creates a node in the given region.\n${LIGHT_GREEN}"
-  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>   The region to create the server in"
+  echo -e "  ${DIM}-r|--region${NORMAL} <REGION>   The region to create the server in"
   echo -e "  ${DIM}-c|--clean${NORMAL}             Clean the terraform workspace context before deploying"
   echo -e "  ${DIM}-i|--init${NORMAL}              Re-initialize terraform workspace context before deploying"
   echo -e "  ${DIM}-u|--upgrade${NORMAL}           Re-builds/upgrades the node using the most recent version"
@@ -44,14 +44,14 @@ function usage::reinit_node() {
   echo -e "${NC}\nUSAGE: vs reinit-node $node_type $cloud [-r|--region <REGION>] [-d|--debug]\n${LIGHT_BLUE}"
   echo -e "  This CLI command reinitializes the remote state of a node in the given"
   echo -e "  region.\n${LIGHT_GREEN}"
-  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region where the node is deployed"
+  echo -e "  ${DIM}-r|--region${NORMAL} <REGION>  The region where the node is deployed"
   echo -e "  ${DIM}-d|--debug${NORMAL}            Enable trace output${NC}"
 }
 
 function usage::destroy_node() {
   echo -e "${NC}\nUSAGE: vs destroy-node $node_type $cloud [-r|--region <REGION>] [-d|--debug]\n${LIGHT_BLUE}"
   echo -e "${LIGHT_BLUE}  This CLI command destroys a node that has been deployed to the given region.\n${LIGHT_GREEN}"
-  echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>  The region where the node to be destroyed is deployed"
+  echo -e "  ${DIM}-r|--region${NORMAL} <REGION>  The region where the node to be destroyed is deployed"
   echo -e "  ${DIM}-d|--debug${NORMAL}            Enable trace output${NC}"
 }
 

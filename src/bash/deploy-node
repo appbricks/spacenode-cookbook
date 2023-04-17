@@ -57,19 +57,27 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-if [[ -z $region ]]; then
-  usage::deploy_node
-  echo -e "${RED}\nERROR! Please provide a cloud region from the following list.${NC}"
-  $(dirname $BASH_SOURCE)/show-regions $cloud
-  exit 1
+if [[ $cloud =~ $clouds_with_regions ]]; then
+  if [[ -z $region ]]; then
+    usage::deploy_node
+    echo -e "${RED}\nERROR! Please provide a cloud region from the following list.${NC}"
+    $(dirname $BASH_SOURCE)/show-regions $cloud
+    exit 1
+  fi
+
+  run_dir=${workspace_dir}/${region}
+else
+  run_dir=${workspace_dir}
 fi
 
-mkdir -p ${workspace_dir}/${region}
-pushd ${workspace_dir}/${region} >/dev/null 2>&1
+mkdir -p $run_dir
+pushd $run_dir >/dev/null 2>&1
+
+export TF_VAR_cb_local_state_path=${run_dir}/state
 
 if [[ $idle_shutdown == yes ]]; then
-  if [[ -e ${workspace_dir}/${region}/output.json ]]; then
-    idle_action=$(cat ${workspace_dir}/${region}/output.json | jq -r .cb_idle_action.value)
+  if [[ -e ${run_dir}/output.json ]]; then
+    idle_action=$(cat ${run_dir}/output.json | jq -r .cb_idle_action.value)
     export TF_VAR_idle_action="$idle_action"
   else
     export TF_VAR_idle_action="shutdown"
@@ -79,7 +87,7 @@ else
 fi
 
 if [[ -n $input_node ]]; then
-  echo "# inputs from node '$input_node'" > ${workspace_dir}/${region}/input-vars.sh
+  echo "# inputs from node '$input_node'" > ${run_dir}/input-vars.sh
 
   [[ $dev == yes ]] && \
     echo -e "${GREEN}${BOLD}\nDeploying recipe with inputs from node '$input_node'...${NORMAL}${NC}\n"
@@ -89,7 +97,7 @@ if [[ -n $input_node ]]; then
     o=$(cat $input_node_output_file)
     for name in $(echo "$o" | jq -r 'keys[]'); do 
       val=$(echo $o | jq -r .${name}.value)
-      echo "export TF_VAR_$name='${val}'" >> ${workspace_dir}/${region}/input-vars.sh
+      echo "export TF_VAR_$name='${val}'" >> ${run_dir}/input-vars.sh
       [[ $dev == yes ]] && \
         echo -e "${LIGHT_GRAY}  ${BOLD}$name${NORMAL} = \"${val}\".${NORMAL}${NC}"
     done
@@ -97,10 +105,10 @@ if [[ -n $input_node ]]; then
   fi
   
   # source all outputs from dependent node
-  source ${workspace_dir}/${region}/input-vars.sh
+  source ${run_dir}/input-vars.sh
 fi
 
-terraform::set_cloud_region "$node_type" "$cloud" "$backend" "$region"
+terraform::set_cloud_region "$node_type" "$cloud" "$region"
 if [[ $clean == yes ]]; then
   # (Re)Initialize terraform context if
   # requested or if doing fresh deployment
