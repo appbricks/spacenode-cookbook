@@ -245,9 +245,20 @@ variable "country" {
 variable "mycs_node_private_key" {
   default = ""
 }
-# The id key identifies this node with MyCS account services
+# The id key that identifies this node with MyCS account services
 variable "mycs_node_id_key" {
   default = ""
+}
+# The unique id of this node 
+variable "mycs_node_id" {
+  default = ""
+}
+
+#
+# Local environment
+#
+variable "cb_local_state_path" {
+  type = string
 }
 
 #
