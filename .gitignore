@@ -11,3 +11,7 @@ deployment-vars
 
 # .tfvars files
 *.tfvars
+
+# go packages
+vendor/
+pkg/
