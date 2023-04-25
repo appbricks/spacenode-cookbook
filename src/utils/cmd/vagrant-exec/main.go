@@ -19,7 +19,12 @@ import (
 )
 
 type output struct {
+	Version        string `json:"version"`
+	BuildTimestamp string `json:"buildTimestamp"`
+
 	VMInfo string `json:"vminfo"`
+
+	Msgs []string `json:"msgs"`
 }
 
 var options struct {
@@ -42,7 +47,10 @@ func main() {
 	flag.IntVar(&options.timeout, "timeout", 0, "Timeout in seconds to wait for the result file to be available.")
 	flag.Parse()
 
-	output := output{}
+	output := output{
+		Version: Version,
+		BuildTimestamp: BuildTimestamp,
+	}
 	defer func() {
 		if jsonOutput, err = json.Marshal(output); err != nil {
 			log.Fatalf("Unable to generate JSON output for vagrant-exec: %s", err.Error())
@@ -76,6 +84,8 @@ func main() {
 			}
 		}
 	}
+
+	output.Msgs = strings.Split(strings.TrimSuffix(outputBuffer.String(), "\n"), "\n")
 }
 
 func readVMInfo() (string, error) {
