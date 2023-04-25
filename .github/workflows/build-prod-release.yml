@@ -1,4 +1,4 @@
-name: MyCS appbricks/vpn-server:latest CLI image
+name: MyCS Cookbook and SDK (appbricks/vpn-server:latest) CLI
 concurrency: prod
 
 on:
@@ -56,8 +56,66 @@ jobs:
 
         echo "version=${release_tag}" >> $GITHUB_OUTPUT
 
-  build-and-publish-image:
+  build-cookbook-utils:
+    strategy:
+      matrix:
+        os: [ linux, darwin, windows ]
+        arch: [ amd64, arm64 ]
+        exclude:
+          - os: windows
+            arch: arm64
+
     needs: create-release-tag
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: us-east-1
+      VERSION: ${{ needs.create-release-tag.outputs.version }}
+      ENV: prod
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ needs.create-release-tag.outputs.version }}
+
+    - name: Setup Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: '^1.20'
+
+    - name: Run build
+      run: |
+        src/build/build-utils.sh :release:clean-all: ${{ matrix.os }} ${{ matrix.arch }}
+
+    - name: Publish release archives to s3
+      run: |
+        mkdir releases
+        cp -r .build/releases/*.zip releases/
+        for f in $(ls releases/); do
+          aws s3 cp \
+            releases/$f \
+            "s3://mycs${ENV}-deploy-artifacts/releases/${f%%_*}-${VERSION}_${f#*_}.zip" \
+            --acl public-read
+        done
+
+    - name: Upload built binaries for publishing
+      uses: actions/upload-artifact@master
+      with:
+        name: cookbook-utils-artifacts-${{ matrix.os }}-${{ matrix.arch }}
+        path: ${{ github.workspace }}/go/src/github.com/appbricks/cloud-builder-cli/.build/releases/*.zip
+
+  build-and-publish-image:
+    needs: 
+    - create-release-tag
+    - build-cookbook-utils
     runs-on: ubuntu-latest
 
     defaults:
@@ -97,7 +155,9 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         build-args: |
-          AB_CLOUD_IMAGE=${{ steps.get_cloud_image.outputs.name }}
+          env=prod
+          version=${{ needs.create-release-tag.outputs.version }}
+          ab_cloud_image=${{ steps.get_cloud_image.outputs.name }}
         push: true
         platforms: linux/amd64,linux/arm64
         tags: appbricks/vpn-server:latest,appbricks/vpn-server:${{ needs.create-release-tag.outputs.version }}
@@ -122,6 +182,33 @@ jobs:
       with:
         ref: ${{ needs.create-release-tag.outputs.version }}
 
+    # Retrieve build results from previous job
+    - name: Download built binaries for release linux/amd64
+      uses: actions/download-artifact@master
+      with:
+        name: cookbook-utils-artifacts-linux-amd64
+        path: .build/releases
+    - name: Download built binaries for release linux/arm64
+      uses: actions/download-artifact@master
+      with:
+        name: cookbook-utils-artifacts-linux-arm64
+        path: .build/releases
+    - name: Download built binaries for release darwin/amd64
+      uses: actions/download-artifact@master
+      with:
+        name: cookbook-utils-artifacts-darwin-amd64
+        path: .build/releases
+    - name: Download built binaries for release darwin/arm64
+      uses: actions/download-artifact@master
+      with:
+        name: cookbook-utils-artifacts-darwin-arm64
+        path: .build/releases
+    - name: Download built binaries for release windows/amd64
+      uses: actions/download-artifact@master
+      with:
+        name: cookbook-utils-artifacts-windows-amd64
+        path: .build/releases
+
     - name: Create release files
       id: release-tag
       run: |
@@ -135,6 +222,11 @@ jobs:
         prerelease: false
         body_path: doc/release-notes.md
         files: |
+          .build/releases/mycs-cookbook-utils_linux_amd64.zip
+          .build/releases/mycs-cookbook-utils_linux_arm64.zip
+          .build/releases/mycs-cookbook-utils_darwin_amd64.zip
+          .build/releases/mycs-cookbook-utils_darwin_arm64.zip
+          .build/releases/mycs-cookbook-utils_windows_amd64.zip
           src/install/install.sh
           LICENSE
       env:

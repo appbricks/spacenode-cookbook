@@ -1,7 +1,9 @@
 FROM alpine:latest
 
 ARG env
+ARG version
 ARG ab_cloud_image
+
 ENV TF_VAR_bastion_image_name=$ab_cloud_image
 
 COPY bin /usr/local/lib/vpn-server/bin
