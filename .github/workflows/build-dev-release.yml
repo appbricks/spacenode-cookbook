@@ -1,4 +1,4 @@
-name: MyCS appbricks/vpn-server:dev CLI image
+name: MyCS Cookbook and SDK (appbricks/vpn-server:dev) CLI
 concurrency: dev
 
 on:
@@ -31,6 +31,7 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: us-east-1
+      ENV: dev
 
     steps:
 
@@ -49,10 +50,11 @@ jobs:
     - name:  Upload dev binaries to S3
       run: |
         mkdir releases
-        cp -r ${CLI_SRC_PATH}/.build/releases/*.zip releases/
-        aws s3 sync releases s3://mycs${ENV}-deploy-artifacts/releases
+        cp -r .build/releases/*.zip releases/
+        aws s3 sync releases s3://mycs${ENV}-deploy-artifacts/releases --acl public-read
 
-  build-and-publish:
+  build-and-publish-image:
+    needs: build-cookbook-utils
     runs-on: ubuntu-latest
 
     defaults:
