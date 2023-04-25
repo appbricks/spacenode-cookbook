@@ -138,7 +138,7 @@ case $option in
   5)
     echo
     $scripts_dir/destroy-node \
-      $workspace_root $template_dir \
-      $node_type $cloud -r $region
+      "$workspace_root" "$template_dir" \
+      "$node_type" "$cloud" -r "$region"
     ;;
 esac
