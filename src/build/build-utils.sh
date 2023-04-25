@@ -9,6 +9,8 @@ set -xeuo pipefail
 root_dir=$(cd $(dirname $BASH_SOURCE)/../.. && pwd)
 
 build_dir=${root_dir}/.build
+rm -fr ${build_dir}/bin
+
 if [[ $action == *:clean-all:* ]]; then
   # remove all build artifacts
   # and do a full build
