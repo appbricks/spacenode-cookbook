@@ -97,7 +97,7 @@ else
 fi
 mkdir -p /usr/local/lib/vpn-server/.build/bin
 cd /usr/local/lib/vpn-server/.build/bin
-unzip /tmp/mycs-cookbook-utils.zip .
+unzip /tmp/mycs-cookbook-utils.zip
 cd -
 
 mkdir /vpn
