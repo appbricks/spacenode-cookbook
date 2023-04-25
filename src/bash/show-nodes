@@ -48,6 +48,7 @@ root_user=$(echo "$node_detail" | awk -F '|' '{ print $7 }')
 root_passwd=$(echo "$node_detail" | awk -F '|' '{ print $8 }')
 node_id=$(echo "$node_detail" | awk -F '|' '{ print $9 }')
 vpn_type=$(echo "$node_detail" | awk -F '|' '{ print $10 }')
+instance_ip=$(echo "$node_detail" | awk -F '|' '{ print $11 }')
 
 [[ -z $root_user ]] ||
   echo -e "\n${CYAN}Node Admin =>\n  User: ${root_user}\n  Password: ${root_passwd}${NC}"
@@ -83,8 +84,8 @@ case $option in
   1)
     echo
     $scripts_dir/deploy-node \
-      $workspace_root $template_dir \
-      $node_type $cloud -r $region -u
+      "$workspace_root" "$template_dir" \
+      "$node_type" "$cloud" -r "$region" -u
     ;;
   2)
     if [[ $node_status == running && $vpn_type =~ ovpn|ipsec ]]; then
@@ -93,9 +94,9 @@ case $option in
 
       echo
       $scripts_dir/download-vpn-config \
-        $workspace_root $template_dir \
-        $node_type $cloud -r $region \
-        -u $username -p $password
+        "$workspace_root" "$template_dir" \
+        "$node_type" "$cloud" -r "$region" \
+        -u "$username" -p "$password"
     else
       echo -e "${RED}\nERROR! Cannot download VPN config from selected node.${NC}"
       exit 1
@@ -107,9 +108,15 @@ case $option in
       o=$(cat ${workspace_root}/${node_type}/${cloud}/${region}/output.json)
       ssh_user=$(echo "$o" | jq -r '.cb_managed_instances.value[0] | .ssh_user')
       ssh_key_file="$(echo "$o" | jq -r '.cb_managed_instances.value[0] | .name')-ssh-key.pem"
-      /usr/bin/ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
-        -i ${workspace_root}/${node_type}/${cloud}/${region}/${ssh_key_file} \
-        ${ssh_user}@${node_name}
+      if [[ $node_name == *.mycs.appbricks.org ]]; then
+        /usr/bin/ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+          -i "${workspace_root}/${node_type}/${cloud}/${region}/${ssh_key_file}" \
+          "${ssh_user}@${instance_ip}"
+      else
+        /usr/bin/ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no \
+          -i "${workspace_root}/${node_type}/${cloud}/${region}/${ssh_key_file}" \
+          "${ssh_user}@${node_name}"
+      fi
     fi
     ;;
   4)
@@ -123,8 +130,8 @@ case $option in
         response=$(cloud::start_node "$cloud" "$region" "$node_id")
 
         $scripts_dir/deploy-node \
-          $workspace_root $template_dir \
-          $node_type $cloud -r $region
+          "$workspace_root" "$template_dir" \
+          "$node_type" "$cloud" -r "$region"
         ;;
     esac
     ;;

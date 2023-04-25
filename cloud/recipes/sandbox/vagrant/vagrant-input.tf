@@ -1,0 +1,1 @@
+../../../common/sandbox/vagrant-input.tf

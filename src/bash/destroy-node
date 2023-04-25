@@ -45,6 +45,11 @@ if [[ $cloud =~ $clouds_with_regions ]]; then
 else
   run_dir=${workspace_dir}
 fi
+if [[ ! -e ${run_dir} ]]; then
+  echo -e "${RED}\nERROR! Deployment workspace path does not exist. The"
+  echo -e "       server may not have been deployed.${NC}"
+  exit 1
+fi
 
 export TF_VAR_cb_local_state_path=${run_dir}/state
 

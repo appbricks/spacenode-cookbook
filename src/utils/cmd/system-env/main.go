@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"net/netip"
 	"regexp"
 	"runtime"
@@ -44,6 +46,7 @@ type network struct {
 	DefaultNetwork netip.Prefix `json:"defaultNetwork"`
 	GatewayIP      netip.Addr   `json:"gatewayIP"`
 	Nameservers    []netip.Addr `json:"nameservers"`
+	PublicIP       netip.Addr   `json:"publicIP"`
 }
 
 type vbox struct {
@@ -55,6 +58,9 @@ func main() {
 	var (
 		err error
 		ok  bool
+
+		resp *http.Response
+		body []byte	
 
 		vboxmanage   run.CLI
 		outputBuffer bytes.Buffer
@@ -103,6 +109,18 @@ func main() {
 	if output.Network.Nameservers, err = GetSystemNameservers(output.Network.DefaultItf); err != nil {
 		output.Error = fmt.Sprintf("Unable to read network nameservers: %s", err.Error())
 		return
+	}
+
+	if resp, err = http.Get("http://ifconfig.me"); err != nil {
+		output.Error = fmt.Sprintf("Unable lookup external facing public IP of this network: %s", err.Error())
+	} else {
+		if body, err = io.ReadAll(resp.Body); err != nil {
+			output.Error = fmt.Sprintf("Unable read response from http://ifconfig.me: %s", err.Error())
+		} else {
+			if output.Network.PublicIP, err = netip.ParseAddr(string(body)); err != nil {
+				output.Error = fmt.Sprintf("Error parsing public IP '%s': %s", string(body), err.Error())
+			}
+		}	
 	}
 	
 	if _, err = GetSystemCLI("vagrant", &outputBuffer, &outputBuffer); err != nil {

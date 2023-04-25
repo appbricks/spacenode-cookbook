@@ -113,6 +113,14 @@ function cloud::get_node_state() {
         esac
       fi
       ;;
+
+    vagrant)
+      state=$(vboxmanage showvminfo $managed_instance_id 2>/dev/null | awk '/State: /{ print $2 }')
+      if [[ $state == powered || $state == saved ]]; then
+        state="stopped"
+      fi
+      ;;
+
   esac
   [[ -n $state ]] || state="unknown"
   echo $state
@@ -137,10 +145,18 @@ function cloud::nodes() {
     local root_passwd=$(cat $o | jq -r '.cb_managed_instances.value[0] | .root_passwd')
     local vpn_type=$(cat $o | jq -r .cb_vpn_type.value)
     [[ "$vpn_type" != "null" ]] || vpn_type=""
+    local instance_ip=$(cat $o | jq -r '.cb_managed_instances.value[0] | .public_ip')
+    [[ -n $instance_ip ]] || instance_ip="$(cat $o | jq -r '.cb_managed_instances.value[0] | .private_ip')"
     
     local region_path=$(dirname $o)
     local region=$(basename $region_path)
-    local cloud_path=$(dirname $region_path)
+    local cloud_path=""
+    if [[ $region =~ $clouds_without_regions ]]; then
+      cloud_path=$region_path
+      region=""
+    else
+      cloud_path=$(dirname $region_path)
+    fi
     local cloud=$(basename $cloud_path)
     local node_type_path=$(dirname $cloud_path)
     local node_type=$(basename $node_type_path)
@@ -148,7 +164,7 @@ function cloud::nodes() {
     >&2 echo -e -n "${BROWN_ORANGE}Retrieving details of instance \"${managed_instance_name}\"...                                                  ${NC}\r"
     local state=$(cloud::get_node_state "$cloud" "$region" "$managed_instance_id")
     
-    echo "${node_type}|${cloud}|${region}|${instance_address}|${state}|${version}|${root_user}|${root_passwd}|${managed_instance_id}|${vpn_type}"
+    echo "${node_type}|${cloud}|${region}|${instance_address}|${state}|${version}|${root_user}|${root_passwd}|${managed_instance_id}|${vpn_type}|${instance_ip}"
   done
 
   set -e
@@ -176,6 +192,9 @@ function cloud::start_node() {
           '[ .[] | select(.region | match($region)) | .name ] | sort | .[0]')
       gcloud compute instances start "$node_id" --zone="$gcp_zone"
       ;;
+    vagrant)
+      vboxmanage startvm $3 --type headless
+      ;;
   esac
 }
 
@@ -202,5 +221,7 @@ function cloud::stop_node() {
           '[ .[] | select(.region | match($region)) | .name ] | sort | .[0]')
       gcloud compute instances stop "$node_id" --zone="$gcp_zone"
       ;;
+    vagrant)
+      vboxmanage controlvm $3 poweroff
   esac
 }

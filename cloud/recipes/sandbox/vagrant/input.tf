@@ -1,0 +1,1 @@
+../../../common/sandbox/input.tf

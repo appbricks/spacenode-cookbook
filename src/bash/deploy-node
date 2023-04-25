@@ -132,4 +132,10 @@ else
   terraform::apply "$node_type" "$cloud" "$region" "$template_dir"
 fi
 
+output=$(cat ${workspace_dir}/${region}/output.json)
+node_description=$(echo "$output" | jq -r .cb_node_description.value)
+bastion_description=$(echo "$output" | jq -r '.cb_managed_instances.value[0] | .description')
+
+echo -e "\n${node_description}\n\n${bastion_description}"
+
 popd >/dev/null 2>&1

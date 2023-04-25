@@ -73,25 +73,32 @@ while [[ $# -gt 0 ]]; do
   shift
 done
 
-if [[ -z $region ]]; then
-  usage::download_vpn_config
-  echo -e "${RED}\nERROR! A region must be specified to identify the"
-  echo -e "       VPN server to retrieve the configuration from.${NC}"
+if [[ $cloud =~ $clouds_with_regions ]]; then
+  if [[ -z $region ]]; then
+    usage::deploy_node
+    echo -e "${RED}\nERROR! Please provide a cloud region from the following list.${NC}"
+    $(dirname $BASH_SOURCE)/show-regions $cloud
+    exit 1
+  fi
+
+  run_dir=${workspace_dir}/${region}
+else
+  run_dir=${workspace_dir}
+fi
+if [[ ! -e ${run_dir} ]]; then
+  echo -e "${RED}\nERROR! Deployment workspace path does not exist. The"
+  echo -e "       server may not have been deployed.${NC}"
   exit 1
 fi
+
 if [[ -z "$user" || -z "$password" ]]; then
   usage::download_vpn_config
   echo -e "${RED}\nERROR! The user name and password of the VPN user whose"
   echo -e "       configuration should be download cannot be empty.${NC}"
   exit 1
 fi
-if [[ ! -e ${workspace_dir}/${region} ]]; then
-  echo -e "${RED}\nERROR! Deployment workspace path does not exist. The region"
-  echo -e "       provided may be invalid or the server may not have been deployed.${NC}"
-  exit 1
-fi
 
-output=$(cat ${workspace_dir}/${region}/output.json)
+output=$(cat ${run_dir}/output.json)
 
 vpn_type=$(echo "$output" | jq -r .cb_vpn_type.value)
 if [[ -z $vpn_type ]]; then
@@ -107,11 +114,15 @@ fi
 node_name=$(echo "$output" | jq -r .cb_vpc_name.value)
 vpn_masking_available=$(echo "$output" | jq -r .cb_vpn_masking_available.value)
 bastion_fqdn=$(echo "$output" | jq -r '.cb_managed_instances.value[0] | .fqdn')
+bastion_port=$(echo "$output" | jq -r '.cb_managed_instances.value[0] | .api_port')
 dns_configured=$(echo "$output" | jq -r .cb_dns_configured.value)
 if [[ $dns_configured == true ]]; then
   vpn_server_host=$bastion_fqdn
 else
   vpn_server_host=$(echo "$output" | jq -r '.cb_managed_instances.value[0] | .public_ip')
+fi
+if [[ -n $bastion_port && $bastion_port != 443 ]]; then
+  vpn_server_host="${vpn_server_host}:${bastion_port}"
 fi
 echo -e "${GREEN}\nDownloading VPN configs from \"https://${vpn_server_host}/static/~${user}/\"...${NC}"
 
@@ -119,9 +130,9 @@ if [[ $vpn_masking_available == yes ]]; then
   # Download tunnel script
   download_vpn_config $user $password \
     https://${vpn_server_host}/static/~${user}/client_tunnel \
-    ${workspace_dir}/${region}/client_tunnel
+    ${run_dir}/client_tunnel
 
-  chmod +x ${workspace_dir}/${region}/client_tunnel
+  chmod +x ${run_dir}/client_tunnel
 fi
 
 working_dir=$(cd $workspace_dir/../../../../ && pwd)/configs/${node_name}
