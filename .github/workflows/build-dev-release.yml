@@ -46,6 +46,12 @@ jobs:
       run: |
         src/build/build-utils.sh :release:clean-all: ${{ matrix.os }} ${{ matrix.arch }}
 
+    - name:  Upload dev binaries to S3
+      run: |
+        mkdir releases
+        cp -r ${CLI_SRC_PATH}/.build/releases/*.zip releases/
+        aws s3 sync releases s3://mycs${ENV}-deploy-artifacts/releases
+
   build-and-publish:
     runs-on: ubuntu-latest
 
