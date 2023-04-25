@@ -93,6 +93,7 @@ jobs:
       with:
         build-args: |
           env=dev
+          version=dev
           ab_cloud_image=${{ steps.get_cloud_image.outputs.name }}
         push: true
         platforms: linux/amd64,linux/arm64
