@@ -18,6 +18,7 @@ release_dir=${build_dir}/releases
 mkdir -p ${release_dir}
 
 build_os=$(go env GOOS)
+build_arch=$(go env GOARCH)
 
 function build() {
 
@@ -62,7 +63,7 @@ if [[ $action == *:dev:* ]]; then
   build_timestamp=$(date +'%B %d, %Y at %H:%M %Z')
 
   os=$build_os
-  arch=$(go env GOARCH)
+  arch=$build_arch
   for srcpath in $(find ${root_dir}/src/utils/cmd/* -type d -print); do 
     build "$os" "$arch" \
       "${srcpath}" \
@@ -89,3 +90,5 @@ else
     exit 1
   fi
 fi
+
+ln -s ${release_dir}/${build_os}_${build_arch} ${build_dir}/bin
