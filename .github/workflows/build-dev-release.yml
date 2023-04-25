@@ -92,7 +92,8 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         build-args: |
-          AB_CLOUD_IMAGE=${{ steps.get_cloud_image.outputs.name }}
+          env=dev
+          ab_cloud_image=${{ steps.get_cloud_image.outputs.name }}
         push: true
         platforms: linux/amd64,linux/arm64
         tags: appbricks/vpn-server:dev

@@ -1,7 +1,8 @@
 FROM alpine:latest
 
-ARG AB_CLOUD_IMAGE
-ENV TF_VAR_bastion_image_name=$AB_CLOUD_IMAGE
+ARG env
+ARG ab_cloud_image
+ENV TF_VAR_bastion_image_name=$ab_cloud_image
 
 COPY bin /usr/local/lib/vpn-server/bin
 COPY cloud/ /usr/local/lib/vpn-server/cloud
