@@ -53,6 +53,14 @@ jobs:
         cp -r .build/releases/*.zip releases/
         aws s3 sync releases s3://mycs${ENV}-deploy-artifacts/releases --acl public-read
 
+    - name: Trigger Cloud-Builder CLI build
+      uses: benc-uk/workflow-dispatch@v1
+      with:
+        repo: appbricks/cloud-builder-cli
+        ref: dev
+        workflow: Build dev Cloud Builder CLI release
+        token: ${{ secrets.GH_TOKEN }}
+
   build-and-publish-image:
     needs: build-cookbook-utils
     runs-on: ubuntu-latest
