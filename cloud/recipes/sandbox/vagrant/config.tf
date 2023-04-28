@@ -103,7 +103,7 @@ locals {
   # are protected by the DNS sink hole vs ips that are 
   # in open can only be done for the wireguard vpn type.
   vpn_restricted_network = (
-    var.vpn_type == "wireguard" 
+    local.vpn_type == "wireguard" 
       ? cidrsubnet(
           local.vpn_network, 
           local.vpn_protected_sub_range, 
