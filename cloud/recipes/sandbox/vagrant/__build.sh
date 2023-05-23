@@ -23,8 +23,18 @@ cd ${download_dir}
 unzip ./mycs-cookbook-utils.zip
 cd -
 
+# remove any downloaded binaries from 
+# a previous build and refresh repo
+rm -f *.exe
+git checkout .
+
 for f in $(find $recipe_dir -maxdepth 1 -type l -ls | awk '/\/..\/.build\/bin\//{ print $11 }'); do
   fname=$(basename $f)
+
+  if [[ $target_os == windows ]]; then
+    fname="${fname}.exe"
+    rm -f $f
+  fi
   mv ${download_dir}/${fname} ${recipe_dir}/${fname}
 done
 
