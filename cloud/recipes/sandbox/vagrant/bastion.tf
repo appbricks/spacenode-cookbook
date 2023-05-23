@@ -27,8 +27,8 @@ locals {
 
 resource "shell_script" "vagrant-bastion" {
   lifecycle_commands {
-    create = "${vagrant_exec_cli} -info=${var.cb_local_state_path}/bastion/host_network.json -timeout=30 up"
-    delete = "${vagrant_exec_cli} destroy -f"
+    create = "${local.vagrant_exec_cli} -info=${var.cb_local_state_path}/bastion/host_network.json -timeout=30 up"
+    delete = "${local.vagrant_exec_cli} destroy -f"
   }
   lifecycle {
     precondition {
