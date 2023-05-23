@@ -31,6 +31,10 @@ function build() {
   local build_version=$5
   local build_timestamp=$6
 
+  if [[ $os == windows ]]; then
+    outfile="${outfile}.exe"
+  fi
+
   # build and package release binary
   mkdir -p ${release_dir}/${os}_${arch}
   pushd ${release_dir}/${os}_${arch}
