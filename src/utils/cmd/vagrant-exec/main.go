@@ -29,7 +29,7 @@ type output struct {
 
 var options struct {
 	infofile string
-	timeout int
+	timeout  int
 }
 
 func main() {
@@ -48,7 +48,7 @@ func main() {
 	flag.Parse()
 
 	output := output{
-		Version: Version,
+		Version:        Version,
 		BuildTimestamp: BuildTimestamp,
 	}
 	defer func() {
@@ -61,26 +61,26 @@ func main() {
 	if len(options.infofile) > 0 {
 		_ = os.Remove(options.infofile)
 	}
-	
-	if vagrant, err = GetSystemCLI("vagrant", &outputBuffer, &outputBuffer); err != nil {
+
+	if vagrant, err = CreateCLI("vagrant", &outputBuffer, &outputBuffer); err != nil {
 		log.Fatalf("Unable to create CLI for 'vagrant': %s", err.Error())
-		
+
 	} else {
 		args := flag.Args()
 		if err = vagrant.RunWithEnv(args, os.Environ()); err != nil {
 			log.Fatalf(
-				"Error running '%s': %s\n\n%s", 
-				strings.Join(append([]string{"vagrant"}, args...), " "), 
+				"Error running '%s': %s\n\n%s",
+				strings.Join(append([]string{"vagrant"}, args...), " "),
 				err.Error(),
 				outputBuffer.String(),
 			)
-			
+
 		} else {
 			_ = os.WriteFile("vagrant.out", outputBuffer.Bytes(), 0644)
 			if len(options.infofile) > 0 {
 				if output.VMInfo, err = readVMInfo(); err != nil {
 					log.Fatalf("Error reading VM info file': %s", err.Error())
-				}	
+				}
 			}
 		}
 	}
@@ -95,7 +95,7 @@ func readVMInfo() (string, error) {
 
 		data []byte
 	)
-	
+
 	// trap interrupt
 	quit := make(chan os.Signal, 1)
 	signal.Reset(os.Interrupt, syscall.SIGTERM)
@@ -103,8 +103,8 @@ func readVMInfo() (string, error) {
 	signal.Ignore(syscall.SIGPIPE)
 
 	ctx, cancel := context.WithDeadline(
-		context.Background(), 
-		time.Now().Add(time.Duration(options.timeout) * time.Second),
+		context.Background(),
+		time.Now().Add(time.Duration(options.timeout)*time.Second),
 	)
 	defer cancel()
 
@@ -115,17 +115,17 @@ func readVMInfo() (string, error) {
 				if os.IsNotExist(err1) {
 					select {
 					case <-quit:
-						result<- fmt.Errorf("Interrupt received while waiting for VM info file %s to exist.", options.infofile)
+						result <- fmt.Errorf("Interrupt received while waiting for VM info file %s to exist.", options.infofile)
 					case <-ctx.Done():
-						result<- fmt.Errorf("Timedout waiting for VM info file %s to exist.", options.infofile)
+						result <- fmt.Errorf("Timedout waiting for VM info file %s to exist.", options.infofile)
 					case <-time.After(time.Millisecond * 500):
 						// continue check if file exists every 500ms
 					}
 				} else {
-					result<- err1
+					result <- err1
 				}
 			} else {
-				result<- nil
+				result <- nil
 			}
 		}
 	}()

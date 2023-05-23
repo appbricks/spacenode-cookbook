@@ -23,9 +23,9 @@ import (
 type output struct {
 	Version        string `json:"version"`
 	BuildTimestamp string `json:"buildTimestamp"`
-	
-	OS      string `json:"os"`
-	Arch    string `json:"arch"`
+
+	OS   string `json:"os"`
+	Arch string `json:"arch"`
 
 	Network  network `json:"network"`
 	Tools    tools   `json:"tools"`
@@ -53,6 +53,12 @@ type vbox struct {
 	DefaultBridge string `json:"defaultBridge"`
 }
 
+// returns the corresponding bridge
+// itf name vbox will recognize
+var vboxItfName = func(itfName string) string {
+	return ""
+}
+
 func main() {
 
 	var (
@@ -60,7 +66,7 @@ func main() {
 		ok  bool
 
 		resp *http.Response
-		body []byte	
+		body []byte
 
 		vboxmanage   run.CLI
 		outputBuffer bytes.Buffer
@@ -70,26 +76,26 @@ func main() {
 	)
 
 	logger.Initialize()
-	
+
 	output := output{
-		Version: Version,
+		Version:        Version,
 		BuildTimestamp: BuildTimestamp,
-		OS: runtime.GOOS,
-		Arch: runtime.GOARCH,
-		Msgs: []string{},
+		OS:             runtime.GOOS,
+		Arch:           runtime.GOARCH,
+		Msgs:           []string{},
 	}
 	defer func() {
 		if jsonOutput, err = json.Marshal(output); err != nil {
 			output.Error = fmt.Sprintf("Unable to generate JSON output for system-env: %s", err.Error())
 		}
-		fmt.Print(string(jsonOutput))	
+		fmt.Print(string(jsonOutput))
 	}()
 
 	if output.Network.DefaultItf, err = interfaces.DefaultRouteInterface(); err != nil {
 		output.Error = fmt.Sprintf("Unable to read default interface: %s", err.Error())
 		return
 	}
-	if output.Network.GatewayIP, output.Network.DefaultIP, ok = interfaces.LikelyHomeRouterIP(); !ok {
+	if output.Network.GatewayIP, _, ok = interfaces.LikelyHomeRouterIP(); !ok {
 		output.Error = "Unable to read default host ip and gateway."
 		return
 	}
@@ -97,6 +103,7 @@ func main() {
 		if itf.Name == output.Network.DefaultItf {
 			for _, pfx := range pfxs {
 				if pfx.Addr().Is4() {
+					output.Network.DefaultIP = pfx.Addr()
 					output.Network.DefaultNetwork = pfx.Masked()
 					break
 				}
@@ -120,39 +127,42 @@ func main() {
 			if output.Network.PublicIP, err = netip.ParseAddr(string(body)); err != nil {
 				output.Error = fmt.Sprintf("Error parsing public IP '%s': %s", string(body), err.Error())
 			}
-		}	
+		}
 	}
-	
-	if _, err = GetSystemCLI("vagrant", &outputBuffer, &outputBuffer); err != nil {
-		output.Msgs = append(output.Msgs, 
-			fmt.Sprintf("Unable to create CLI for 'vboxmanage': %s", err.Error()),
+
+	if _, err = CreateCLI("vagrant", &outputBuffer, &outputBuffer); err != nil {
+		output.Msgs = append(output.Msgs,
+			fmt.Sprintf("Unable to create CLI for 'vagrant': %s", err.Error()),
 		)
 		output.Tools.VagrantInstalled = "false"
 	} else {
 		output.Tools.VagrantInstalled = "true"
 	}
 
-	if vboxmanage, err = GetSystemCLI("vboxmanage", &outputBuffer, &outputBuffer); err != nil {
-		output.Msgs = append(output.Msgs, 
+	if vboxmanage, err = CreateCLI("vboxmanage", &outputBuffer, &outputBuffer); err != nil {
+		output.Msgs = append(output.Msgs,
 			fmt.Sprintf("Unable to create CLI for 'vboxmanage': %s", err.Error()),
 		)
 		output.Tools.VBoxInstalled = "false"
 	} else {
 		output.Tools.VBoxInstalled = "true"
 
-		if err = vboxmanage.Run([]string{"list", "bridgedifs"}); err != nil {
-			output.Error = fmt.Sprintf(
-				"Error retrieving Virtual Box bridge interfaces: %s", 
-				strings.TrimSuffix(outputBuffer.String(), "\n"),
-			)
-			return
+		output.VBoxInfo.DefaultBridge = vboxItfName(output.Network.DefaultItf)
+		if len(output.VBoxInfo.DefaultBridge) == 0 {
+			if err = vboxmanage.Run([]string{"list", "bridgedifs"}); err != nil {
+				output.Error = fmt.Sprintf(
+					"Error retrieving Virtual Box bridge interfaces: %s",
+					strings.TrimSuffix(outputBuffer.String(), "\n"),
+				)
+				return
+			}
+			results = utils.ExtractMatches(outputBuffer.Bytes(), map[string]*regexp.Regexp{
+				"defBridge": regexp.MustCompile(fmt.Sprintf("^Name:\\s+(%s:.*)$", output.Network.DefaultItf)),
+			})
+			if b := results["defBridge"]; len(b) > 0 && len(b[0]) == 2 {
+				output.VBoxInfo.DefaultBridge = b[0][1]
+			}
+			outputBuffer.Reset()
 		}
-		results = utils.ExtractMatches(outputBuffer.Bytes(), map[string]*regexp.Regexp{
-			"defBridge": regexp.MustCompile(fmt.Sprintf("^Name:\\s+(%s:.*)$", output.Network.DefaultItf)),
-		})	
-		if b := results["defBridge"]; len(b) > 0 && len(b[0]) == 2 {
-			output.VBoxInfo.DefaultBridge = b[0][1]
-		}
-		outputBuffer.Reset()	
 	}
 }
