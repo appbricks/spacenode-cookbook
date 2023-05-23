@@ -29,7 +29,7 @@ func GetSystemNameservers(defItf string) ([]netip.Addr, error) {
 		matches [][]string
 	)
 
-	if scutil, err = GetSystemCLI("scutil", &outputBuffer, &outputBuffer); err != nil {
+	if scutil, err = CreateCLI("scutil", &outputBuffer, &outputBuffer); err != nil {
 		return nil, err
 	}
 	if err = scutil.Run([]string{"--dns"}); err != nil {
