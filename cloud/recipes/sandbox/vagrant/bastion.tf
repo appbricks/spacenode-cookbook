@@ -27,8 +27,8 @@ locals {
 
 resource "shell_script" "vagrant-bastion" {
   lifecycle_commands {
-    create = "${abspath(path.module)}/vagrant-exec -info=${var.cb_local_state_path}/bastion/host_network.json -timeout=30 up"
-    delete = "${abspath(path.module)}/vagrant-exec destroy -f"
+    create = "${vagrant_exec_cli} -info=${var.cb_local_state_path}/bastion/host_network.json -timeout=30 up"
+    delete = "${vagrant_exec_cli} destroy -f"
   }
   lifecycle {
     precondition {
@@ -105,7 +105,7 @@ resource "local_file" "cloud-config-file" {
 resource "shell_script" "bastion-data" {
 
   lifecycle_commands {
-    create = "vboxmanage createmedium disk --filename ${local.data_disk_path} --size 20000 --format vdi"
-    delete = "vboxmanage closemedium disk ${local.data_disk_path} --delete"
+    create = "${local.vbox_env.vboxmanageCLI} createmedium disk --filename ${local.data_disk_path} --size 20000 --format vdi"
+    delete = "${local.vbox_env.vboxmanageCLI} closemedium disk ${local.data_disk_path} --delete"
   }
 }

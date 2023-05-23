@@ -16,11 +16,16 @@ terraform {
 
 data "shell_script" "system-env" {
   lifecycle_commands {
-    read = "${path.module}/system-env"
+    read = "${system_env_cli}"
   }
 } 
 
 locals {
+  # directories start with "C:..." on Windows; All other OSs use "/" for root.
+  is_windows_fs = substr(pathexpand("~"), 0, 1) == "/" ? false : true
+  system_env_cli = is_windows_fs ? "${abspath(path.module)}\\system-env.exe" : "${abspath(path.module)}/system-env"
+  vagrant_exec_cli = is_windows_fs ? "${abspath(path.module)}\\vagrant-exec.exe" : "${abspath(path.module)}/vagrant-exec"
+
   is_windows  = data.shell_script.system-env.output.os == "windows"
   network_env = jsondecode(data.shell_script.system-env.output.network)
   tools_env   = jsondecode(data.shell_script.system-env.output.tools)
