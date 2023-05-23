@@ -62,7 +62,7 @@ func main() {
 		_ = os.Remove(options.infofile)
 	}
 
-	if vagrant, _, err = CreateCLI("vagrant", &outputBuffer, &outputBuffer); err != nil {
+	if vagrant, _, err = run.CreateCLI("vagrant", &outputBuffer, &outputBuffer); err != nil {
 		log.Fatalf("Unable to create CLI for 'vagrant': %s", err.Error())
 
 	} else {

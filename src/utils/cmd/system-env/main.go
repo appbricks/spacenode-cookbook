@@ -131,7 +131,7 @@ func main() {
 		}
 	}
 
-	if _, _, err = CreateCLI("vagrant", &outputBuffer, &outputBuffer); err != nil {
+	if _, _, err = run.CreateCLI("vagrant", &outputBuffer, &outputBuffer); err != nil {
 		output.Msgs = append(output.Msgs,
 			fmt.Sprintf("Unable to create CLI for 'vagrant': %s", err.Error()),
 		)
@@ -140,7 +140,7 @@ func main() {
 		output.Tools.VagrantInstalled = "true"
 	}
 
-	if vboxmanage, output.VBoxInfo.VBoxManageCLI, err = CreateCLI("vboxmanage", &outputBuffer, &outputBuffer); err != nil {
+	if vboxmanage, output.VBoxInfo.VBoxManageCLI, err = run.CreateCLI("vboxmanage", &outputBuffer, &outputBuffer); err != nil {
 		output.Msgs = append(output.Msgs,
 			fmt.Sprintf("Unable to create CLI for 'vboxmanage': %s", err.Error()),
 		)
