@@ -23,8 +23,8 @@ cd ${download_dir}
 unzip ./mycs-cookbook-utils.zip
 cd -
 
-# remove any downloaded binaries from 
-# a previous build and refresh repo
+# remove any downloaded windows binaries from 
+# previous build if any and refresh repo
 rm -f *.exe
 git checkout .
 
