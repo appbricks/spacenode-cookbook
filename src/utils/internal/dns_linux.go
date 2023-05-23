@@ -29,7 +29,7 @@ func GetSystemNameservers(defItf string) ([]netip.Addr, error) {
 		matches [][]string
 	)
 
-	if resolvectl, err = CreateCLI("resolvectl", &outputBuffer, &outputBuffer); err != nil {
+	if resolvectl, _, err = CreateCLI("resolvectl", &outputBuffer, &outputBuffer); err != nil {
 		return nil, err
 	}
 	if err = resolvectl.Run([]string{}); err != nil {

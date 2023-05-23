@@ -28,7 +28,7 @@ var CliSearchPaths = func(cliName string) []string {
 	return []string{}
 }
 
-func CreateCLI(cliName string, outputBuffer *bytes.Buffer, errorBuffer *bytes.Buffer) (run.CLI, error) {
+func CreateCLI(cliName string, outputBuffer *bytes.Buffer, errorBuffer *bytes.Buffer) (run.CLI, string, error) {
 
 	var (
 		err error
@@ -45,12 +45,13 @@ func CreateCLI(cliName string, outputBuffer *bytes.Buffer, errorBuffer *bytes.Bu
 	}
 	if len(cliPath) == 0 {
 		if cliPath, err = LookupFilePathInSystem(cliBinaryName); err != nil {
-			return nil, err
+			return nil, cliPath, err
 		}
 	}
 
 	cwd, _ := os.Getwd()
-	return run.NewCLI(cliPath, cwd, outputBuffer, errorBuffer)
+	cli, err := run.NewCLI(cliPath, cwd, outputBuffer, errorBuffer)
+	return cli, cliPath, err
 }
 
 func LookupFilePathInSystem(fileName string) (string, error) {

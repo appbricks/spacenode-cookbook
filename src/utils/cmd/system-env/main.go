@@ -51,6 +51,7 @@ type network struct {
 
 type vbox struct {
 	DefaultBridge string `json:"defaultBridge"`
+	VBoxManageCLI string `json:"vboxmanageCLI"`
 }
 
 // returns the corresponding bridge
@@ -130,7 +131,7 @@ func main() {
 		}
 	}
 
-	if _, err = CreateCLI("vagrant", &outputBuffer, &outputBuffer); err != nil {
+	if _, _, err = CreateCLI("vagrant", &outputBuffer, &outputBuffer); err != nil {
 		output.Msgs = append(output.Msgs,
 			fmt.Sprintf("Unable to create CLI for 'vagrant': %s", err.Error()),
 		)
@@ -139,7 +140,7 @@ func main() {
 		output.Tools.VagrantInstalled = "true"
 	}
 
-	if vboxmanage, err = CreateCLI("vboxmanage", &outputBuffer, &outputBuffer); err != nil {
+	if vboxmanage, output.VBoxInfo.VBoxManageCLI, err = CreateCLI("vboxmanage", &outputBuffer, &outputBuffer); err != nil {
 		output.Msgs = append(output.Msgs,
 			fmt.Sprintf("Unable to create CLI for 'vboxmanage': %s", err.Error()),
 		)
