@@ -5,9 +5,6 @@ package main
 import (
 	"path/filepath"
 
-	"golang.org/x/sys/windows"
-	"golang.zx2c4.com/wireguard/windows/tunnel/winipcfg"
-
 	"github.com/mevansam/goutils/run"
 )
 
@@ -25,19 +22,5 @@ func init() {
 				filepath.Join(d, "VirtualBox"),
 			)
 		}
-	}
-
-	// map given interface name to corresponding bridge itf name vbox will recognize
-	vboxItfName = func(itfName string) string {
-		addrs, err := winipcfg.GetAdaptersAddresses(windows.AF_INET, winipcfg.GAAFlagIncludeAllInterfaces)
-		if err != nil {
-			panic(err)
-		}
-		for _, addr := range addrs {
-			if addr.FriendlyName() == itfName {
-				return addr.Description()
-			}
-		}
-		return itfName
 	}
 }
