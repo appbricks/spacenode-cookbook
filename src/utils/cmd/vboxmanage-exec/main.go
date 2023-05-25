@@ -50,18 +50,17 @@ func main() {
 
 	} else {
 		args := flag.Args()
-		if err = vboxmanage.RunWithEnv(args, os.Environ()); err != nil {
+		err = vboxmanage.RunWithEnv(args, os.Environ())
+		_ = os.WriteFile("vboxmanage.out", outputBuffer.Bytes(), 0644)
+		if err != nil {
 			log.Fatalf(
 				"Error running '%s': %s\n\n%s",
 				strings.Join(append([]string{"vboxmanage"}, args...), " "),
 				err.Error(),
 				outputBuffer.String(),
 			)
-
-		} else {
-			_ = os.WriteFile("vboxmanage.out", outputBuffer.Bytes(), 0644)
 		}
 	}
 
-	output.Msgs = strings.Split(strings.TrimSuffix(outputBuffer.String(), "\n"), "\n")
+	output.Msgs = strings.Split(strings.TrimSuffix(outputBuffer.String(), LineBreak), LineBreak)
 }

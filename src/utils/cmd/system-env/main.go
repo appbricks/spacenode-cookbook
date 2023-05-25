@@ -153,7 +153,7 @@ func main() {
 			if err = vboxmanage.Run([]string{"list", "bridgedifs"}); err != nil {
 				output.Error = fmt.Sprintf(
 					"Error retrieving Virtual Box bridge interfaces: %s",
-					strings.TrimSuffix(outputBuffer.String(), "\n"),
+					strings.TrimSuffix(outputBuffer.String(), LineBreak),
 				)
 				return
 			}

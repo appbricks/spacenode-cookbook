@@ -67,7 +67,9 @@ func main() {
 
 	} else {
 		args := flag.Args()
-		if err = vagrant.RunWithEnv(args, os.Environ()); err != nil {
+		err = vagrant.RunWithEnv(args, os.Environ())
+		_ = os.WriteFile("vagrant.out", outputBuffer.Bytes(), 0644)
+		if err != nil {
 			log.Fatalf(
 				"Error running '%s': %s\n\n%s",
 				strings.Join(append([]string{"vagrant"}, args...), " "),
@@ -75,8 +77,7 @@ func main() {
 				outputBuffer.String(),
 			)
 
-		} else {
-			_ = os.WriteFile("vagrant.out", outputBuffer.Bytes(), 0644)
+		} else {			
 			if len(options.infofile) > 0 {
 				if output.VMInfo, err = readVMInfo(); err != nil {
 					log.Fatalf("Error reading VM info file': %s", err.Error())
@@ -85,7 +86,7 @@ func main() {
 		}
 	}
 
-	output.Msgs = strings.Split(strings.TrimSuffix(outputBuffer.String(), "\n"), "\n")
+	output.Msgs = strings.Split(strings.TrimSuffix(outputBuffer.String(), LineBreak), LineBreak)
 }
 
 func readVMInfo() (string, error) {
