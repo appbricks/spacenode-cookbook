@@ -43,6 +43,8 @@ func main() {
 		jsonOutput []byte
 	)
 
+	logger.Initialize()
+
 	flag.StringVar(&options.infofile, "info", "", "File containing additional information regarding the deployed vagrant instance.")
 	flag.IntVar(&options.timeout, "timeout", 0, "Timeout in seconds to wait for the result file to be available.")
 	flag.Parse()

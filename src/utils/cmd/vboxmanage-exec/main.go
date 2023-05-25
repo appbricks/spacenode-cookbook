@@ -32,6 +32,8 @@ func main() {
 		jsonOutput []byte
 	)
 
+	logger.Initialize()
+
 	flag.Parse()
 
 	output := output{
