@@ -4,8 +4,14 @@
 
 locals {
   # vagrant file path
-  vagrant_file      = "${var.cb_local_state_path}/bastion/Vagrantfile"
-  cloud_config_file = "${var.cb_local_state_path}/bastion/cloud-config.dat"
+  vagrant_file = (local.is_windows
+    ? "${var.cb_local_state_path}\\bastion\\Vagrantfile"
+    : "${var.cb_local_state_path}/bastion/Vagrantfile"
+  )
+  cloud_config_file = (local.is_windows
+    ? "${var.cb_local_state_path}\\bastion\\cloud-config.dat"
+    : "${var.cb_local_state_path}/bastion/cloud-config.dat"
+  )
 
   # split image name into name and version and determine vagrant image src an version
   image_name_parts = split("_", var.bastion_image_name)
@@ -16,9 +22,15 @@ locals {
   )
 
   # data disk path
-  data_disk_path=(local.is_windows
-    ? "${replace(var.cb_local_state_path, "/", "\\")}\\bastion\\data.vdi"
+  data_disk_path = (local.is_windows
+    ? "${local.local_state_path}\\bastion\\data.vdi"
     : "${var.cb_local_state_path}/bastion/data.vdi"
+  )
+
+  # host network info file path
+  host_network_path = (local.is_windows_fs 
+    ? "${local.local_state_path}\\bastion\\host_network.json" 
+    : "${var.cb_local_state_path}/bastion/host_network.json"
   )
 
   # bastion vm info
@@ -27,7 +39,7 @@ locals {
 
 resource "shell_script" "vagrant-bastion" {
   lifecycle_commands {
-    create = "${local.vagrant_exec_cli} -info=${var.cb_local_state_path}/bastion/host_network.json -timeout=30 up"
+    create = "${local.vagrant_exec_cli} -info=${local.host_network_path} -timeout=30 up"
     delete = "${local.vagrant_exec_cli} destroy -f"
   }
   lifecycle {
@@ -105,7 +117,7 @@ resource "local_file" "cloud-config-file" {
 resource "shell_script" "bastion-data" {
 
   lifecycle_commands {
-    create = "${local.vbox_env.vboxmanageCLI} createmedium disk --filename ${local.data_disk_path} --size 20000 --format vdi"
-    delete = "${local.vbox_env.vboxmanageCLI} closemedium disk ${local.data_disk_path} --delete"
+    create = "${local.vboxmanage_exec_cli} createmedium disk --filename ${local.data_disk_path} --size 20000 --format vdi"
+    delete = "${local.vboxmanage_exec_cli} closemedium disk ${local.data_disk_path} --delete"
   }
 }
