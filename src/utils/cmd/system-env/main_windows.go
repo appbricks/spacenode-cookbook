@@ -3,6 +3,7 @@
 package main
 
 import (
+	"os"
 	"path/filepath"
 
 	"golang.org/x/sys/windows"
@@ -12,6 +13,9 @@ import (
 )
 
 func init() {
+
+	sysPaths.GlobalDataDir = filepath.Join(os.Getenv("ProgramData"), "mycs")
+	sysPaths.LocalDataDir = filepath.Join(os.Getenv("LOCALAPPDATA"), ".mycs")
 
 	// maps cli names to windows intallation specific names and paths
 	run.AddCliNameMapping("vagrant", "vagrant.exe")

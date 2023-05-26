@@ -27,12 +27,19 @@ type output struct {
 	OS   string `json:"os"`
 	Arch string `json:"arch"`
 
+	Paths paths `json:"paths"`
+
 	Network  network `json:"network"`
 	Tools    tools   `json:"tools"`
 	VBoxInfo vbox    `json:"vbox"`
 
 	Error string   `json:"error"`
 	Msgs  []string `json:"msgs"`
+}
+
+type paths struct {
+	GlobalDataDir string `json:"globalDataDir"`
+	LocalDataDir  string `json:"localDataDir"`
 }
 
 type tools struct {
@@ -53,6 +60,8 @@ type vbox struct {
 	DefaultBridge string `json:"defaultBridge"`
 	VBoxManageCLI string `json:"vboxmanageCLI"`
 }
+
+var sysPaths = paths{}
 
 // returns the corresponding bridge
 // itf name vbox will recognize
@@ -83,6 +92,7 @@ func main() {
 		BuildTimestamp: BuildTimestamp,
 		OS:             runtime.GOOS,
 		Arch:           runtime.GOARCH,
+		Paths:          sysPaths,
 		Msgs:           []string{},
 	}
 	defer func() {
