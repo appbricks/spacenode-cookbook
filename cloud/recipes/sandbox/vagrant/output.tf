@@ -116,7 +116,7 @@ output "cb_vpc_name" {
 }
 
 output "cb_deployment_networks" {
-  value = local.network_env.defaultNetwork
+  value = [local.network_env.defaultNetwork]
 }
 
 output "cb_deployment_security_group" {
