@@ -2,7 +2,7 @@
 # Vagrant specific resource names
 #
 # @resource_instance_list: shell_script.vagrant-bastion
-# @resource_instance_data_list: null_resource.bastion-data
+# @resource_instance_data_list: shell_script.bastion-data
 #
 
 #
