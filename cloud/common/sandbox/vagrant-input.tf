@@ -9,6 +9,18 @@
 # Vagrant specific inputs
 #
 
+# The provider's cloud type for this recipe. 
+# This is a non-input field used for Cloud
+# specific conditional input variables and
+# is a constant.
+#
+# @order: 0
+#
+variable "provider_type" {
+  default = "vagrant"
+  description = "The provider's cloud type."
+}
+
 # The bastion VM's instance memory
 #
 # @order: 101

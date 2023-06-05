@@ -22,6 +22,7 @@ variable "name" {
 # @order: 2
 # @accepted_values: +iaas_regions
 # @accepted_values_message: Error! not a valid region
+# @depends_on: provider_type=aws|google|azure
 #
 variable "region" {
   description = "The cloud region or location in which to deploy the VPN node."
@@ -34,6 +35,7 @@ variable "region" {
 # @tags: recipe
 # @accepted_values: false,true
 # @accepted_values_message: Please enter 'true' or 'false'.
+# @depends_on: provider_type=aws|google|azure
 #
 variable "attach_dns_zone" {
   description = "If you own a domain and wish the node to be looked up via that domain then set this value to 'true'."
@@ -49,6 +51,7 @@ variable "attach_dns_zone" {
 # @tags: recipe,target-undeployed
 # @accepted_values: false,true
 # @accepted_values_message: Please enter 'true' or 'false'.
+# @depends_on: provider_type=aws|google|azure
 #
 variable "configure_admin_network" {
   description = "If you want to configure an internal admin network where apps and services can be installed set this value to 'true'."
@@ -61,6 +64,7 @@ variable "configure_admin_network" {
 # @tags: recipe
 # @accepted_values: false,true
 # @accepted_values_message: Please enter 'true' or 'false'.
+# @depends_on: provider_type=aws|google|azure
 #
 variable "certify_bastion" {
   description = "Issue a valid certificate for your VPN domain from https://letsencrypt.org/. You will need to provide a domain which you own for this to be successful."

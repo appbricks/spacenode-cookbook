@@ -9,6 +9,18 @@
 # Google Cloud Platform specific inputs
 #
 
+# The provider's cloud type for this recipe. 
+# This is a non-input field used for Cloud
+# specific conditional input variables and
+# is a constant.
+#
+# @order: 0
+#
+variable "provider_type" {
+  default = "google"
+  description = "The provider's cloud type."
+}
+
 # The DNS Zone to use
 #
 # @order: 6
