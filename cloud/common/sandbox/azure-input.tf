@@ -14,7 +14,7 @@
 # specific conditional input variables and
 # is a constant.
 #
-# @order: 0
+# @order: 5
 #
 variable "provider_type" {
   default = "azure"
@@ -23,7 +23,7 @@ variable "provider_type" {
 
 # The DNS Zone to use
 #
-# @order: 6
+# @order: 9
 # @tags: recipe
 # @value_inclusion_filter: ^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$
 # @value_inclusion_filter_message: Entered value does not appear to be a valid DNS name.
@@ -36,7 +36,7 @@ variable "azure_dns_zone" {
 
 # The dns zone's resource group
 #
-# @order: 7
+# @order: 10
 # @tags: recipe
 # @value_inclusion_filter: ^[-_.()0-9a-zA-Z]*[-_()0-9a-zA-Z]$
 # @value_inclusion_filter_message: Entered value does not appear to be a valid Azure resource group name.

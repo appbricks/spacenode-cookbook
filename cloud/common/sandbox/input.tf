@@ -19,8 +19,8 @@ variable "name" {
 
 # Cloud region to deploy to
 #
-# @order: 2
-# @accepted_values: +iaas_regions
+# @order: 6
+# @accepted_values: $iaas_regions
 # @accepted_values_message: Error! not a valid region
 # @depends_on: provider_type=aws|google|azure
 #
@@ -29,25 +29,12 @@ variable "region" {
   type = string
 }
 
-# Whether a DNS zone should be attached
-#
-# @order: 5
-# @tags: recipe
-# @accepted_values: false,true
-# @accepted_values_message: Please enter 'true' or 'false'.
-# @depends_on: provider_type=aws|google|azure
-#
-variable "attach_dns_zone" {
-  description = "If you own a domain and wish the node to be looked up via that domain then set this value to 'true'."
-  default = false
-}
-
 # Whether to deploy an internal admin network
 # which can either bridge access to other or
 # cloud resources or be used for apps and
 # services.
 #
-# @order: 6
+# @order: 7
 # @tags: recipe,target-undeployed
 # @accepted_values: false,true
 # @accepted_values_message: Please enter 'true' or 'false'.
@@ -58,9 +45,22 @@ variable "configure_admin_network" {
   default = false
 }
 
+# Whether a DNS zone should be attached
+#
+# @order: 8
+# @tags: recipe
+# @accepted_values: false,true
+# @accepted_values_message: Please enter 'true' or 'false'.
+# @depends_on: provider_type=aws|google|azure
+#
+variable "attach_dns_zone" {
+  description = "If you own a domain and wish the node to be looked up via that domain then set this value to 'true'."
+  default = false
+}
+
 # Issue valid letsencrypt certificate to bastion
 #
-# @order: 10
+# @order: 15
 # @tags: recipe
 # @accepted_values: false,true
 # @accepted_values_message: Please enter 'true' or 'false'.
@@ -73,7 +73,7 @@ variable "certify_bastion" {
 
 # VPN Type - type of the VPN
 #
-# @order: 15
+# @order: 20
 # @tags: recipe
 # @accepted_values: wg,ovpn,ipsec
 # @accepted_values_message: VPN type must be one of wg (WireGuard), ovpn (OpenVPN) or ipsec (IPSec/IKEv2).
@@ -86,7 +86,7 @@ variable "vpn_type" {
 # Indicates action when no VPN clients have 
 # been connected to a node for some time
 #
-# @order: 16
+# @order: 21
 # @tags: recipe,target-undeployed
 # @accepted_values: shutdown,none
 # @accepted_values_message: Please provide one of 'shutdown' or 'none'.
@@ -99,7 +99,7 @@ variable "idle_action" {
 # Time interval in minutes before node is shut
 # as no VPN clients connected during that time.
 #
-# @order: 17
+# @order: 22
 # @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The time interval should be a value greater than 0.
@@ -112,7 +112,7 @@ variable "idle_shutdown_time" {
 
 # VPN Users - list of 'user|password' pairs
 #
-# @order: 18
+# @order: 23
 # @tags: recipe
 # @value_inclusion_filter: ^[a-zA-Z][-a-zA-Z0-9]*|[a-zA-Z0-9!@#%&:;<>_`~{}\^\$\*\+\-\.\?\"\'\[\]\(\)]*,?$
 # @value_inclusion_filter_message: User names cannot start with a numeric and must be only apha-numeric with the exception of a '-'. Passwords can contain special characters except for '|' and ','.

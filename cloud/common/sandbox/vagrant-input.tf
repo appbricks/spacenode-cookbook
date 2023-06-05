@@ -14,7 +14,7 @@
 # specific conditional input variables and
 # is a constant.
 #
-# @order: 0
+# @order: 5
 #
 variable "provider_type" {
   default = "vagrant"
