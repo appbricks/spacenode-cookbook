@@ -47,7 +47,7 @@ variable "google_dns_managed_zone_name" {
 
 # The bastion VM's instance type
 #
-# @order: 101
+# @order: 200
 # @accepted_values: n1-standard-1,n1-standard-2,n2-standard-2,n1-standard-4,n2-standard-4
 # @accepted_values_message: Not a valid AWS general purpose instance type
 # @tags: recipe,target-undeployed,target-deployed

@@ -23,7 +23,7 @@ variable "provider_type" {
 
 # The bastion VM's instance memory
 #
-# @order: 101
+# @order: 200
 # @tags: recipe,target-undeployed,target-deployed
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: Must be a numeric value

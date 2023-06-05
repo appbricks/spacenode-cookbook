@@ -36,7 +36,7 @@ variable "aws_dns_zone" {
 
 # The bastion VM's instance type
 #
-# @order: 101
+# @order: 200
 # @tags: recipe,target-undeployed,target-deployed
 # @accepted_values: t4g.nano,t4g.micro,t4g.small,t4g.medium,t4g.large,t4g.xlarge,t4g.2xlarge
 # @accepted_values_message: Not a valid AWS general purpose ARM t4g.* instance type

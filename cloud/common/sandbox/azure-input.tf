@@ -49,7 +49,7 @@ variable "azure_dns_zone_resource_group" {
 
 # The bastion VM's instance type
 #
-# @order: 101
+# @order: 200
 # @tags: recipe,target-undeployed,target-deployed
 # @accepted_values: Standard_B1s,Standard_B1ms,Standard_B2s,Standard_B2ms,Standard_B4ms
 # @accepted_values_message: Not a valid AWS general purpose instance type
