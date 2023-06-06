@@ -84,6 +84,7 @@ resource "local_file" "vagrant-file" {
       cloud_config_path = local.cloud_config_file
       bastion_vm_name = var.name
       bastion_memory_size = var.bastion_memory_size
+      bastion_admin_ssh_port = var.bastion_admin_ssh_port
     }
   )
 

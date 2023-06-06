@@ -10,7 +10,7 @@ locals {
   version = reverse(split("_", var.bastion_image_name))[0]
   
   endpoint = "${replace(local.network_env.publicIP, ".", "-")}.mycs.appbricks.org"
-  endpoint_port = local.bastion_admin_api_port == "443" ? "" : ":${local.bastion_admin_api_port}"
+  endpoint_port = var.bastion_admin_api_port == "443" ? "" : ":${var.bastion_admin_api_port}"
   users    = (length(local.vpn_users) > 0 ? [for u in split(",", local.vpn_users) : 
     "* URL: https://${local.endpoint}${local.endpoint_port}/static/~${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}" 
   ]: [])
@@ -29,10 +29,9 @@ If port forwarding has not been automatically setup via UPnP
 on your internet facing router then you need to configure the
 following port forwarding rules manually.
 
-  * SpaceAPI:  TCP ${local.bastion_admin_api_port} => ${local.bastion_info.ip}:${local.bastion_admin_api_port}
+  * SpaceAPI:  TCP ${var.bastion_admin_api_port} => ${local.bastion_info.ip}:${var.bastion_admin_api_port}
   * SpaceSTUN: UDP ${var.derp_stun_port} => ${local.bastion_info.ip}:${var.derp_stun_port}
   * SpaceVPN:  ${local.vpn_port_forwarding_config}
-
 PORT_FORWARDING_CONFIG
 
   bastion_description_non_wg = <<BASTION_DESCRIPTION
@@ -74,10 +73,10 @@ output "cb_managed_instances" {
       "fqdn": local.endpoint
       "public_ip": local.bastion_info.ip # use private IP as instance should be accessed only from within the LAN
       "private_ip": local.bastion_info.ip
-      "health_check_port": local.bastion_admin_api_port
+      "health_check_port": var.bastion_admin_api_port
       "health_check_type": "tcp"
-      "api_port": local.bastion_admin_api_port
-      "ssh_port": local.bastion_admin_ssh_port
+      "api_port": var.bastion_admin_api_port
+      "ssh_port": var.bastion_admin_ssh_port
       "ssh_user": local.bastion_admin_user 
       "ssh_key": module.config.bastion_admin_sshkey
       "root_user": "bastion-admin" 

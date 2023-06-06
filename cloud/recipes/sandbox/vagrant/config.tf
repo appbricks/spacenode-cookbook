@@ -33,23 +33,35 @@ module "config" {
   bastion_admin_itf_ip = ""
 
   bastion_nic_config = (
-    [ 
-      "x", // exclude the first interface which is the vagrant NAT interface
-      join("|", 
-        tolist([
-          "", // IP assigned via DHCP
-          local.network_env.defaultNetwork,
-          "0.0.0.0/0"
-        ]),
-      )
-    ]
+    length(var.bastion_static_ip) > 0 
+      ? [ 
+          "x", // exclude the first interface which is the vagrant NAT interface
+          join("|", 
+            tolist([
+              var.bastion_static_ip,
+              local.network_env.defaultNetwork,
+              "0.0.0.0/0",
+              local.network_env.gatewayIP
+            ]),
+          )
+        ]
+      : [ 
+          "x", // exclude the first interface which is the vagrant NAT interface
+          join("|", 
+            tolist([
+              "", // IP assigned via DHCP
+              local.network_env.defaultNetwork,
+              "0.0.0.0/0"
+            ]),
+          )
+        ]
   )
 
   data_volume_name = "sdc"
   shared_external_folder = "/vagrant"
 
-  bastion_admin_api_port = local.bastion_admin_api_port
-  bastion_admin_ssh_port = local.bastion_admin_ssh_port
+  bastion_admin_api_port = var.bastion_admin_api_port
+  bastion_admin_ssh_port = var.bastion_admin_ssh_port
   bastion_admin_user     = local.bastion_admin_user
   squidproxy_server_port = ""
 
@@ -90,9 +102,7 @@ module "config" {
 
 locals {
   # Bastion config
-  bastion_admin_api_port = "8443"
-  bastion_admin_ssh_port = "22"
-  bastion_admin_user     = "mycs-admin"
+  bastion_admin_user = "mycs-admin"
 
   # VPN network attribs
   vpn_network             = "192.168.111.0/24"

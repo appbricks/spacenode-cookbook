@@ -6,7 +6,7 @@ Vagrant.configure('2') do |config|
 
     bastion.vm.network 'public_network', bridge: '${def_bridge_name}'
     bastion.vm.disk :disk, name: 'data', file: '${data_disk_path}', size: '20GB', primary: false
-   
+    
     bastion.vm.cloud_init :user_data do |cloud_init|
       cloud_init.content_type = 'text/cloud-config'
       cloud_init.path = '${cloud_config_path}'
