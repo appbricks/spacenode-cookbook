@@ -130,7 +130,7 @@ variable "vpn_users" {
 # Wireguard port
 #
 # @order: 110
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
 # @depends_on: vpn_type=wg
@@ -138,6 +138,15 @@ variable "vpn_users" {
 variable "wireguard_service_port" {
   description = "The port on which the WireGuard service will listen for connections."
   default = "3399"
+
+  validation {
+    condition = (
+      can(tonumber(var.wireguard_service_port)) && 
+      tonumber(var.wireguard_service_port) >= 1024 && 
+      tonumber(var.wireguard_service_port) <= 65535
+    )
+    error_message = "Invalid port number."
+  }
 }
 
 # OpenVPN specific inputs
@@ -146,7 +155,7 @@ variable "wireguard_service_port" {
 # OpenVPN port
 #
 # @order: 111
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
 # @depends_on: vpn_type=ovpn
@@ -154,12 +163,21 @@ variable "wireguard_service_port" {
 variable "ovpn_service_port" {
   description = "The port on which the OpenVPN service will listen for connections."
   default = "4495"
+
+  validation {
+    condition = (
+      can(tonumber(var.ovpn_service_port)) && 
+      tonumber(var.ovpn_service_port) >= 1024 && 
+      tonumber(var.ovpn_service_port) <= 65535
+    )
+    error_message = "Invalid port number."
+  }
 }
 
 # OpenVPN protocol
 #
 # @order: 112
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @accepted_values: udp,tcp
 # @accepted_values_message: The protocol must be one of "udp" or "tcp".
 # @depends_on: vpn_type=ovpn
@@ -175,7 +193,7 @@ variable "ovpn_protocol" {
 # Mask VPN traffic
 #
 # @order: 113
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @accepted_values: yes,no
 # @accepted_values_message: Please enter 'yes' or 'no'.
 # @depends_on: vpn_type=wg|ovpn
@@ -188,7 +206,7 @@ variable "mask_vpn_traffic" {
 # VPN traffic obfuscation tunnel start port
 #
 # @order: 114
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
 # @depends_on: mask_vpn_traffic=yes
@@ -196,12 +214,21 @@ variable "mask_vpn_traffic" {
 variable "tunnel_vpn_port_start" {
   description = "The start port over which an obfuscated VPN traffic will be tunnelled."
   default = "4496"
+
+  validation {
+    condition = (
+      can(tonumber(var.tunnel_vpn_port_start)) && 
+      tonumber(var.tunnel_vpn_port_start) >= 1024 && 
+      tonumber(var.tunnel_vpn_port_start) <= 65535
+    )
+    error_message = "Invalid port number."
+  }
 }
 
 # VPN traffic obfuscation tunnel end port
 #
 # @order: 115
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
 # @depends_on: mask_vpn_traffic=yes
@@ -209,18 +236,36 @@ variable "tunnel_vpn_port_start" {
 variable "tunnel_vpn_port_end" {
   description = "The end port over which an obfuscated VPN traffic will be tunnelled."
   default = "5596"
+
+  validation {
+    condition = (
+      can(tonumber(var.tunnel_vpn_port_end)) && 
+      tonumber(var.tunnel_vpn_port_end) >= 1024 && 
+      tonumber(var.tunnel_vpn_port_end) <= 65535
+    )
+    error_message = "Invalid port number."
+  }
 }
 
 # MyCS DERP service STUN port
 #
 # @order: 116
-# @tags: recipe
+# @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
 #
 variable "derp_stun_port" {
   description = "The port on which MyCS Node will run the STUN service to discover endpoints of connected devices"
   default = "3478"
+
+  validation {
+    condition = (
+      can(tonumber(var.derp_stun_port)) && 
+      tonumber(var.derp_stun_port) >= 1024 && 
+      tonumber(var.derp_stun_port) <= 65535
+    )
+    error_message = "Invalid port number."
+  }
 }
 
 #

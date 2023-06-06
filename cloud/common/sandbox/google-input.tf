@@ -57,6 +57,50 @@ variable "bastion_instance_type" {
   default = "n1-standard-1"
 }
 
+# The MyCS api service port
+#
+# @order: 201
+# @tags: recipe,target-undeployed
+# @value_inclusion_filter: ^\d+$
+# @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
+#
+variable "bastion_admin_api_port" {
+  description = "The port on which the MyCS space service will listen on"
+  default = "443"
+
+  validation {
+    condition = (
+      can(tonumber(var.bastion_admin_api_port)) && 
+      ( tonumber(var.bastion_admin_api_port) == 443 ||
+        ( tonumber(var.bastion_admin_api_port) >= 1024 && 
+          tonumber(var.bastion_admin_api_port) <= 65535 ) )
+    )
+    error_message = "Invalid port number."
+  }
+}
+
+# The bastion's SSH port
+#
+# @order: 202
+# @tags: recipe,target-undeployed
+# @value_inclusion_filter: ^\d+$
+# @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
+#
+variable "bastion_admin_ssh_port" {
+  description = "The port on which the SSH service will be available on"
+  default = "22"
+
+  validation {
+    condition = (
+      can(tonumber(var.bastion_admin_ssh_port)) && 
+      ( tonumber(var.bastion_admin_ssh_port) == 22 ||
+        ( tonumber(var.bastion_admin_ssh_port) >= 1024 && 
+          tonumber(var.bastion_admin_ssh_port) <= 65535 ) )
+    )
+    error_message = "Invalid port number."
+  }
+}
+
 #
 # Google Cloud Platform common local variables
 #
