@@ -17,8 +17,8 @@
 # @order: 5
 #
 variable "provider_type" {
-  default = "aws"
   description = "The provider's cloud type."
+  default = "aws"
 }
 
 # The DNS Zone to use

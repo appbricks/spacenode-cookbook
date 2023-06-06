@@ -17,8 +17,8 @@
 # @order: 5
 #
 variable "provider_type" {
-  default = "azure"
   description = "The provider's cloud type."
+  default = "azure"
 }
 
 # The DNS Zone to use

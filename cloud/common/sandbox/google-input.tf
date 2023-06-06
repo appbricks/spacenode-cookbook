@@ -17,8 +17,8 @@
 # @order: 5
 #
 variable "provider_type" {
-  default = "google"
   description = "The provider's cloud type."
+  default = "google"
 }
 
 # The DNS Zone to use
