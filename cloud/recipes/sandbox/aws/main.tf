@@ -72,6 +72,9 @@ module "bootstrap" {
 
   bastion_host_name  = "vpn"
   bastion_admin_user = "mycs-admin"
+  
+  bastion_admin_api_port = var.bastion_admin_api_port
+  bastion_admin_ssh_port = var.bastion_admin_ssh_port
 
   bastion_instance_type = var.bastion_instance_type
 
