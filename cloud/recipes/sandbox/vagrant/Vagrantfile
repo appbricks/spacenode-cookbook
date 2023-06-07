@@ -5,7 +5,6 @@ Vagrant.configure('2') do |config|
     bastion.vm.box_version = '${bastion_box_version}'
 
     bastion.vm.network 'public_network', bridge: '${def_bridge_name}'
-    bastion.vm.disk :disk, name: 'data', file: '${data_disk_path}', size: '20GB', primary: false
     
     bastion.vm.cloud_init :user_data do |cloud_init|
       cloud_init.content_type = 'text/cloud-config'
@@ -18,12 +17,29 @@ Vagrant.configure('2') do |config|
       vb.memory = '${bastion_memory_size}'
       vb.customize [ 'guestproperty', 'set', :id, '/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', 1000 ]
       vb.customize [ 'modifyvm', :id, '--uartmode1', 'disconnected' ]
-    end
 
-    # remove default route on nat interface as 
-    # interfaces will be reconfigured
-    # config.vm.provision 'shell',
-    #   run: 'always',
-    #   inline: 'ip route del default via 10.0.2.2 || true'
+      vb.customize [
+        'storageattach', :id, 
+        '--storagectl', 'SCSI', 
+        '--port', 2, 
+        '--device', 0, 
+        '--type', 'hdd', 
+        '--medium', '${data_disk_path}'
+      ]
+    end
+  end
+
+  config.trigger.before :destroy do |trigger|
+    trigger.info = "Detaching data disk"
+    trigger.run = {
+      inline: 
+        "${vboxmanage_exec_cli} -shutdown=true " + 
+          "storageattach '${bastion_vm_name}' " +
+          "--storagectl 'SCSI' " +
+          "--port 2 " +
+          "--device 0 " +
+          "--type hdd " +
+          "--medium none" 
+    }
   end
 end
