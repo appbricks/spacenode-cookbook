@@ -85,6 +85,8 @@ resource "local_file" "vagrant-file" {
       bastion_vm_name = var.name
       bastion_memory_size = var.bastion_memory_size
       bastion_admin_ssh_port = var.bastion_admin_ssh_port
+
+      vboxmanage_exec_cli = local.vboxmanage_exec_cli
     }
   )
 
