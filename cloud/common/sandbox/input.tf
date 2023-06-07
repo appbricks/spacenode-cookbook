@@ -71,35 +71,23 @@ variable "certify_bastion" {
   default = false
 }
 
-# VPN Type - type of the VPN
-#
-# @order: 20
-# @tags: recipe
-# @accepted_values: wg,ovpn,ipsec
-# @accepted_values_message: VPN type must be one of wg (WireGuard), ovpn (OpenVPN) or ipsec (IPSec/IKEv2).
-#
-variable "vpn_type" {
-  description = "Type of VPN to deploy for the sandbox."
-  default = "wg"
-}
-
 # Indicates action when no VPN clients have 
 # been connected to a node for some time
 #
-# @order: 21
+# @order: 20
 # @tags: recipe,target-undeployed
 # @accepted_values: shutdown,none
 # @accepted_values_message: Please provide one of 'shutdown' or 'none'.
 #
 variable "idle_action" {
-  description = "Action to take when no VPN clients have been connected to the space for some time."
+  description = "Action to take when no clients have been connected to the space for some time."
   default = "shutdown"
 }
 
 # Time interval in minutes before node is shut
 # as no VPN clients connected during that time.
 #
-# @order: 22
+# @order: 21
 # @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^[0-9]+$
 # @value_inclusion_filter_message: The time interval should be a value greater than 0.
@@ -108,6 +96,18 @@ variable "idle_action" {
 variable "idle_shutdown_time" {
   description = "Time interval after last client disconnects from the space when the space node is shut down."
   default = 10
+}
+
+# VPN Type - type of the VPN
+#
+# @order: 22
+# @tags: recipe
+# @accepted_values: wg,ovpn,ipsec
+# @accepted_values_message: VPN type must be one of wg (WireGuard), ovpn (OpenVPN) or ipsec (IPSec/IKEv2).
+#
+variable "vpn_type" {
+  description = "Type of VPN to deploy for the sandbox."
+  default = "wg"
 }
 
 # VPN Users - list of 'user|password' pairs
