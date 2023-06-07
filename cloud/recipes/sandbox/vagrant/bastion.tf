@@ -39,7 +39,7 @@ locals {
 
 resource "shell_script" "vagrant-bastion" {
   lifecycle_commands {
-    create = "${local.vagrant_exec_cli} -info=${local.host_network_path} -timeout=30 up"
+    create = "${local.vagrant_exec_cli} -info=${local.host_network_path} -timeout=300 up"
     delete = "${local.vagrant_exec_cli} destroy -f"
   }
   lifecycle {
