@@ -33,13 +33,13 @@ Vagrant.configure('2') do |config|
     trigger.info = "Detaching data disk"
     trigger.run = {
       inline: 
-        "${vboxmanage_exec_cli} -shutdown=true " + 
-          "storageattach '${bastion_vm_name}' " +
-          "--storagectl 'SCSI' " +
-          "--port 2 " +
-          "--device 0 " +
-          "--type hdd " +
-          "--medium none" 
+        '${vboxmanage_exec_cli} -shutdown=true ' + 
+          'storageattach "${bastion_vm_name}" ' +
+          '--storagectl "SCSI" ' +
+          '--port 2 ' +
+          '--device 0 ' +
+          '--type hdd ' +
+          '--medium none' 
     }
   end
 end
