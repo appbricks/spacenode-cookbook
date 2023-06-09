@@ -4,7 +4,7 @@ Vagrant.configure('2') do |config|
     bastion.vm.box = '${bastion_box_name}'
     bastion.vm.box_version = '${bastion_box_version}'
 
-    bastion.vm.network 'public_network', bridge: '${def_bridge_name}'
+    bastion.vm.network 'public_network', bridge: '${def_bridge_name}', mac: '${bastion_mac_address}'
     
     bastion.vm.cloud_init :user_data do |cloud_init|
       cloud_init.content_type = 'text/cloud-config'

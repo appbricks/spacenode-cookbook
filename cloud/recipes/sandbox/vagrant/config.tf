@@ -23,7 +23,7 @@ module "config" {
 
   bastion_use_fqdn  = true
   bastion_fqdn      = "vagrant"
-  bastion_public_ip = "vagrant"
+  bastion_public_ip = local.network_env.publicIP
 
   certify_bastion = false
   
@@ -149,5 +149,6 @@ locals {
   cert_domain_names = [
     "*.mycloudspace.io",    // <spaceid>.mycloudspace.io
     "*.mycs.appbricks.org", // lookup ip by IP DNS - 1-1-1-1.mycs.appbricks.org        
+    local.space_internal_domain
   ]
 }

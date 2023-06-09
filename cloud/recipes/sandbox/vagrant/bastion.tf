@@ -84,6 +84,7 @@ resource "local_file" "vagrant-file" {
       cloud_config_path = local.cloud_config_file
       bastion_vm_name = var.name
       bastion_memory_size = var.bastion_memory_size
+      bastion_mac_address = macaddress.network-nic.address
       bastion_admin_ssh_port = var.bastion_admin_ssh_port
 
       vboxmanage_exec_cli = local.vboxmanage_exec_cli
@@ -110,6 +111,11 @@ resource "local_file" "vagrant-file" {
   depends_on = [
     shell_script.bastion-data
   ]
+}
+
+resource "macaddress" "network-nic" {
+  // 0A:
+  prefix = [10]
 }
 
 resource "local_file" "cloud-config-file" {
