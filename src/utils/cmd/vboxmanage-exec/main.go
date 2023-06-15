@@ -104,7 +104,8 @@ func shutdownVM(name string) {
 		return ""
 	}
 
-	if getVMStatus() != "powered off" {
+	vmStatus := getVMStatus()
+	if vmStatus != "powered off" && vmStatus != "aborted" {
 		// send shutdown signal to vm
 		if err = vboxmanage.Run([]string{ "controlvm", name, "acpipowerbutton" }); err != nil {
 			log.Fatalf("Unable to shutdown VM '%s':\n%s", name, outputBuffer.String())
