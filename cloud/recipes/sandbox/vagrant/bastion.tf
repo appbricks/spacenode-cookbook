@@ -84,7 +84,12 @@ resource "local_file" "vagrant-file" {
       cloud_config_path = local.cloud_config_file
       bastion_vm_name = var.name
       bastion_memory_size = var.bastion_memory_size
-      bastion_mac_address = replace(macaddress.network-nic.address, ":", "")
+      bastion_mac_address = replace(
+        length(var.bastion_mac_address) == 0 
+          ? macaddress.network-nic.address 
+          : var.bastion_mac_address, 
+        ":", ""
+      )
       bastion_admin_ssh_port = var.bastion_admin_ssh_port
 
       vboxmanage_exec_cli = local.vboxmanage_exec_cli

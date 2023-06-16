@@ -45,9 +45,21 @@ variable "bastion_static_ip" {
   default = ""
 }
 
-# The MyCS api service port
+# The bastion VM's mac address
 #
 # @order: 202
+# @tags: recipe,target-undeployed
+# @value_inclusion_filter: ^$|^[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}:[0-9a-fA-F]{2}$
+# @value_inclusion_filter_message: Must be a valid mac address format [i.e. 79:ee:6a:b7:49:1a] or blank
+#
+variable "bastion_mac_address" {
+  description = "Mac address to assign to the bastion instance. Leave blank to have it auto-assigned"
+  default = ""
+}
+
+# The MyCS api service port
+#
+# @order: 203
 # @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^\d+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
@@ -68,7 +80,7 @@ variable "bastion_admin_api_port" {
 
 # The bastion's SSH port
 #
-# @order: 203
+# @order: 204
 # @tags: recipe,target-undeployed
 # @value_inclusion_filter: ^\d+$
 # @value_inclusion_filter_message: The port value must be a number from 1024 to 65535.
