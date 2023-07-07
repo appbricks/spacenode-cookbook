@@ -23,7 +23,7 @@ variable "name" {
 # @order: 2
 # @tags: recipe,target-undeployed
 #
-variable "name" {
+variable "description" {
   description = "A description for the application router. This can be the applications that this router advertises to the space network."
   type        = string
   default     = "My MyCS space application router node"
