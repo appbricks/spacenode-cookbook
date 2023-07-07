@@ -33,8 +33,8 @@ for f in $(find $recipe_dir -maxdepth 1 -type l -ls | awk '/\/..\/.build\/bin\//
 
   if [[ $target_os == windows ]]; then
     fname="${fname}.exe"
-    rm -f $f
   fi
+  rm -f $f
   mv ${download_dir}/${fname} ${recipe_dir}/${fname}
 done
 

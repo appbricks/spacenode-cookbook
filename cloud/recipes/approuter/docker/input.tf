@@ -1,0 +1,1 @@
+../../../common/approuter/input.tf

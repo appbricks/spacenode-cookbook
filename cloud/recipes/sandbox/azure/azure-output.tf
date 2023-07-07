@@ -1,1 +1,0 @@
-../../../common/sandbox/azure-output.tf
