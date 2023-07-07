@@ -10,7 +10,7 @@ set -xeuo pipefail
 
 download_dir=`mktemp -d`
 
-if [[ $cookbook_version == dev ]]; then
+if [[ $cookbook_version == dev* ]]; then
   curl -f -s \
     -L https://mycsdev-deploy-artifacts.s3.amazonaws.com/releases/mycs-cookbook-utils_${target_os}_${target_arch}.zip \
     -o ${download_dir}/mycs-cookbook-utils.zip
