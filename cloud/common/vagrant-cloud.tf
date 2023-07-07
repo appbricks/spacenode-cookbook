@@ -1,6 +1,6 @@
 #
-# Shell Provider for shell commands 
-# to create configs and run vagrant 
+# Shell Provider for shell commands
+# to create configs and run vagrant
 #
 provider "shell" {}
 
@@ -22,7 +22,7 @@ data "shell_script" "system-env" {
   lifecycle_commands {
     read = "${local.system_env_cli}"
   }
-} 
+}
 
 locals {
   # directories start with "C:..." on Windows; All other OSs use "/" for root.

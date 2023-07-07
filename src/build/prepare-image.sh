@@ -81,7 +81,7 @@ mv client_linux_${arch} /usr/local/bin/kcptun-client
 cd -
 
 # Create lock files for all embedded recipes
-for rd in $(echo /usr/local/lib/vpn-server/cloud/recipes/*/*/ | tr ' ' '\n'); do
+for rd in $(echo /usr/local/lib/spacenode-cookbook/cloud/recipes/*/*/ | tr ' ' '\n'); do
   cd $rd
   terraform init -backend=false -input=false
   rm -fr .terraform
@@ -95,8 +95,8 @@ if [[ ${env} == dev ]]; then
 else
   curl -L https://mycsprod-deploy-artifacts.s3.amazonaws.com/releases/mycs-cookbook-utils-${version}_linux_${arch}.zip -o /tmp/mycs-cookbook-utils.zip
 fi
-mkdir -p /usr/local/lib/vpn-server/.build/bin
-cd /usr/local/lib/vpn-server/.build/bin
+mkdir -p /usr/local/lib/spacenode-cookbook/.build/bin
+cd /usr/local/lib/spacenode-cookbook/.build/bin
 unzip /tmp/mycs-cookbook-utils.zip
 cd -
 

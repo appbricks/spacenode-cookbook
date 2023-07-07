@@ -35,7 +35,7 @@ func GetSystemNameservers(defItf string) ([]netip.Addr, error) {
 	if err = scutil.Run([]string{"--dns"}); err != nil {
 		return nil, err
 	}
-	
+
 	nameservers := []netip.Addr{}
 	itf         := ""
 
@@ -55,7 +55,7 @@ func GetSystemNameservers(defItf string) ([]netip.Addr, error) {
 		if matches = resolverItfMatch.FindAllStringSubmatch(line, -1); len(matches) > 0 {
 			itf = matches[0][1]
 			continue
-		} 
+		}
 		if matches = nameserverMatch.FindAllStringSubmatch(line, -1 ); len(matches) > 0 {
 			nameservers = append(nameservers, netip.MustParseAddr(matches[0][1]))
 			continue

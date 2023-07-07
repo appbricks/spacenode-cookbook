@@ -95,7 +95,7 @@ if [[ -n $input_node ]]; then
   input_node_output_file=${workspace_root}/${input_node}/${input_node_cloud}/${region}/output.json
   if [[ -e $input_node_output_file ]]; then
     o=$(cat $input_node_output_file)
-    for name in $(echo "$o" | jq -r 'keys[]'); do 
+    for name in $(echo "$o" | jq -r 'keys[]'); do
       val=$(echo $o | jq -r .${name}.value)
       echo "export TF_VAR_$name='${val}'" >> ${run_dir}/input-vars.sh
       [[ $dev == yes ]] && \
@@ -103,7 +103,7 @@ if [[ -n $input_node ]]; then
     done
     [[ $dev == yes ]] && echo
   fi
-  
+
   # source all outputs from dependent node
   source ${run_dir}/input-vars.sh
 fi
@@ -121,10 +121,10 @@ if [[ $upgrade == yes ]]; then
   terraform::taint_bastion "$node_type" "$cloud" "$region" "$template_dir"
 fi
 
-# remove name input which is usually the 
-# name for the space node and may clash 
+# remove name input which is usually the
+# name for the space node and may clash
 # with an expected app name variable
-[[ -z $input_node ]] || unset TF_VAR_name 
+[[ -z $input_node ]] || unset TF_VAR_name
 
 if [[ $plan == yes ]]; then
   terraform::plan "$node_type" "$cloud" "$region" "$template_dir"

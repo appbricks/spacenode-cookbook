@@ -25,7 +25,7 @@ module "bootstrap" {
   #
   region = var.region
 
-  # Name of VPC will be used to identify 
+  # Name of VPC will be used to identify
   # VPC specific cloud resources
   vpc_name = local.space_domain
 
@@ -33,7 +33,7 @@ module "bootstrap" {
   vpc_dns_zone    = lower("${local.space_domain}.${var.google_dns_zone}")
   attach_dns_zone = local.configure_dns
 
-  # Name of parent zone 'gcp.appbricks.cloud' to which the 
+  # Name of parent zone 'gcp.appbricks.cloud' to which the
   # name server records of the 'vpc_dns_zone' will be added.
   dns_managed_zone_name = "${length(var.google_dns_managed_zone_name) == 0
     ? replace(var.google_dns_zone, ".", "-")
@@ -51,7 +51,7 @@ module "bootstrap" {
   vpn_users = split(",", var.vpn_users)
 
   vpn_type               = local.vpn_type
-  vpn_idle_action        = var.idle_action  
+  vpn_idle_action        = var.idle_action
   vpn_idle_shutdown_time = var.idle_shutdown_time
   vpn_tunnel_all_traffic = "yes"
 
@@ -60,7 +60,7 @@ module "bootstrap" {
 
   wireguard_service_port = var.wireguard_service_port
 
-  # Tunnel for VPN to handle situations where 
+  # Tunnel for VPN to handle situations where
   # OpenVPN is blocked or throttled by ISP.
   tunnel_vpn_port_start = local.tunnel_vpn_port_start
   tunnel_vpn_port_end   = local.tunnel_vpn_port_end
@@ -76,7 +76,7 @@ module "bootstrap" {
 
   bastion_host_name  = "vpn"
   bastion_admin_user = "mycs-admin"
-  
+
   bastion_admin_api_port = var.bastion_admin_api_port
   bastion_admin_ssh_port = var.bastion_admin_ssh_port
 

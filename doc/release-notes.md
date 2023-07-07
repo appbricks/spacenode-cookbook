@@ -5,5 +5,5 @@ Initial beta release includes incremental feature updates and bug fixes. Current
 * To install on MacOS or Linux run
 
 ```
-curl -L https://github.com/appbricks/vpn-server/releases/download/<VERSION>/install.sh | /bin/bash
+curl -L https://github.com/appbricks/spacenode-cookbook/releases/download/<VERSION>/install.sh | /bin/bash
 ```

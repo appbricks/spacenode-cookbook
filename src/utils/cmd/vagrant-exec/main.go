@@ -80,7 +80,7 @@ func main() {
 				outputBuffer.String(),
 			)
 
-		} else {			
+		} else {
 			if len(options.infofile) > 0 {
 				if output.VMInfo, err = readVMInfo(); err != nil {
 					log.Fatalf("Error reading VM info file': %s", err.Error())

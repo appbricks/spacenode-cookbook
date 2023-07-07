@@ -17,13 +17,13 @@ if [[ $1 == help ]]; then
 fi
 
 docker ps -a | awk '/^[0-9a-f]/{ print $1 }' | xargs docker rm -f
-docker rmi vpn-server 2>&1 >/dev/null
+docker rmi spacenode-cookbook 2>&1 >/dev/null
 
 set -e
-docker build . -t vpn-server
+docker build . -t spacenode-cookbook
 
 if [[ "$1" == "publish" ]]; then
-  
+
   if [[ -n $2 && -n $3 && -n $4 ]]; then
 
     TAG=${TRAVIS_TAG:-$(git tag -l --points-at HEAD)}
@@ -34,19 +34,19 @@ if [[ "$1" == "publish" ]]; then
 
     docker login -u $3 -p $4
 
-    docker tag vpn-server $2/vpn-server:latest
-    docker tag vpn-server $2/vpn-server:$TAG
-    docker push $2/vpn-server
+    docker tag spacenode-cookbook $2/spacenode-cookbook:latest
+    docker tag spacenode-cookbook $2/spacenode-cookbook:$TAG
+    docker push $2/spacenode-cookbook
 
     # clean up
-    docker rmi $2/vpn-server:latest
-    docker rmi $2/vpn-server:$TAG
-    docker rmi vpn-server
+    docker rmi $2/spacenode-cookbook:latest
+    docker rmi $2/spacenode-cookbook:$TAG
+    docker rmi spacenode-cookbook
 
     # Create installer scripts
-    sed "s|appbricks/vpn-server:latest|appbricks/vpn-server:${TAG}|" \
+    sed "s|appbricks/spacenode-cookbook:latest|appbricks/spacenode-cookbook:${TAG}|" \
       ${build_script_path}/../install/install.sh > install.sh
-    sed "s|appbricks/vpn-server:latest|appbricks/vpn-server:${TAG}|" \
+    sed "s|appbricks/spacenode-cookbook:latest|appbricks/spacenode-cookbook:${TAG}|" \
       ${build_script_path}/../install/install.ps1 > install.ps1
 
     if [[ -e ${build_script_path}/../../doc/release-notes-${TAG}.md ]]; then
@@ -59,5 +59,5 @@ if [[ "$1" == "publish" ]]; then
   else
     echo "To publish DOCKER_REPO, DOCKER_USER and DOCKER_PASSWORD arguments are required."
     exit 1
-  fi  
+  fi
 fi

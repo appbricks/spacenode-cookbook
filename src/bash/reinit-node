@@ -51,7 +51,7 @@ if [[ ! -e ${run_dir} ]]; then
   exit 1
 fi
 
-# This is usually set at deploy but required in 
+# This is usually set at deploy but required in
 # order to reinitialize without prompting for input.
 export TF_VAR_cb_local_state_path=${run_dir}/state
 export TF_VAR_vpn_idle_action=""

@@ -9,7 +9,7 @@ case $cloud in
     common::validate_cloud_credentials $cloud
     set -euo pipefail
 
-    echo -e "${GREEN}\nAvailable Amazon Web Services (AWS) Regions:${NC}\n" 
+    echo -e "${GREEN}\nAvailable Amazon Web Services (AWS) Regions:${NC}\n"
     cloud::set_aws_credentials
     aws ec2 describe-regions --query "Regions[].{Name:RegionName}" --output text | sort
     echo -e "${GREEN}\nMore detail can be found at the following link:"
@@ -19,7 +19,7 @@ case $cloud in
     common::validate_cloud_credentials $cloud
     set -euo pipefail
 
-    echo -e "${GREEN}\nAvailable Microsoft Azure Regions:${NC}\n" 
+    echo -e "${GREEN}\nAvailable Microsoft Azure Regions:${NC}\n"
     cloud::set_azure_credentials
     az account list-locations | jq -r '.[].name' | sort
     echo -e "${GREEN}\nMore detail can be found at the following link:"
@@ -29,7 +29,7 @@ case $cloud in
     common::validate_cloud_credentials $cloud
     set -euo pipefail
 
-    echo -e "${GREEN}\nAvailable Google Cloud Regions:${NC}\n" 
+    echo -e "${GREEN}\nAvailable Google Cloud Regions:${NC}\n"
     cloud::set_google_credentials >/dev/null
     gcloud compute regions list | awk '$1 != "NAME" { print $1 }' | sort
     echo -e "${GREEN}\nMore detail can be found at the following link:"

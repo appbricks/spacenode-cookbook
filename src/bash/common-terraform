@@ -131,7 +131,7 @@ function terraform::init() {
         -backend-config="storage_account_name=${storage_account}"
       )
       ;;
-      
+
     gcs)
       # Check/Create Terraform state bucket
       set +e
@@ -222,7 +222,7 @@ function terraform::taint_bastion() {
   local instances_to_taint=""
 
   echo -e "${GREEN}Flagging node type \"${node_type}\" in region \"${region}\" of \"$cloud\" cloud to be rebuilt...${NC}"
-  
+
   if [[ -e $input_tpl ]]; then
     instances_to_taint=$(cat $input_tpl | awk '/@resource_instance_list/{ print $3 }' | tr ',' ' ')
   fi

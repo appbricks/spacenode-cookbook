@@ -34,7 +34,7 @@ export TF_VAR_name=
 # DNS Zone for all deployments
 export TF_VAR_attach_dns_zone=false
 
-# Uncomment only if attaching to a DNS zone 
+# Uncomment only if attaching to a DNS zone
 # - AWS DNS configuration
 #export TF_VAR_aws_dns_zone=
 # - Azure DNS configuration
@@ -53,7 +53,7 @@ export TF_VAR_country="US"
 
 export TF_VAR_idle_shutdown_time=60
 
-# One of ipsec/openvpn. For wireguard configuration 
+# One of ipsec/openvpn. For wireguard configuration
 # use the Cloud-Builder client.
 export TF_VAR_vpn_type=ipsec
 

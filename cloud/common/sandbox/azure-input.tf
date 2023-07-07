@@ -9,7 +9,7 @@
 # Azure specific inputs
 #
 
-# The provider's cloud type for this recipe. 
+# The provider's cloud type for this recipe.
 # This is a non-input field used for Cloud
 # specific conditional input variables and
 # is a constant.
@@ -72,9 +72,9 @@ variable "bastion_admin_api_port" {
 
   validation {
     condition = (
-      can(tonumber(var.bastion_admin_api_port)) && 
+      can(tonumber(var.bastion_admin_api_port)) &&
       ( tonumber(var.bastion_admin_api_port) == 443 ||
-        ( tonumber(var.bastion_admin_api_port) >= 1024 && 
+        ( tonumber(var.bastion_admin_api_port) >= 1024 &&
           tonumber(var.bastion_admin_api_port) <= 65535 ) )
     )
     error_message = "Invalid port number."
@@ -94,9 +94,9 @@ variable "bastion_admin_ssh_port" {
 
   validation {
     condition = (
-      can(tonumber(var.bastion_admin_ssh_port)) && 
+      can(tonumber(var.bastion_admin_ssh_port)) &&
       ( tonumber(var.bastion_admin_ssh_port) == 22 ||
-        ( tonumber(var.bastion_admin_ssh_port) >= 1024 && 
+        ( tonumber(var.bastion_admin_ssh_port) >= 1024 &&
           tonumber(var.bastion_admin_ssh_port) <= 65535 ) )
     )
     error_message = "Invalid port number."
@@ -110,13 +110,13 @@ variable "bastion_admin_ssh_port" {
 locals {
   public_cloud_provider = "Microsoft Azure"
 
-  configure_dns = (var.attach_dns_zone 
-    ? length(var.azure_dns_zone) > 0 
+  configure_dns = (var.attach_dns_zone
+    ? length(var.azure_dns_zone) > 0
     : false
   )
 
-  source_resource_group = (length(var.azure_dns_zone_resource_group) == 0 
-    ? "default" 
+  source_resource_group = (length(var.azure_dns_zone_resource_group) == 0
+    ? "default"
     : var.azure_dns_zone_resource_group
   )
 }

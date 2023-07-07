@@ -8,24 +8,24 @@
 
 locals {
   version = reverse(split("_", var.bastion_image_name))[0]
-  
+
   endpoint = "${replace(local.network_env.publicIP, ".", "-")}.mycs.appbricks.org"
   endpoint_port = var.bastion_admin_api_port == "443" ? "" : ":${var.bastion_admin_api_port}"
-  users    = (length(local.vpn_users) > 0 ? [for u in split(",", local.vpn_users) : 
-    "* URL: https://${local.endpoint}${local.endpoint_port}/static/~${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}" 
+  users    = (length(local.vpn_users) > 0 ? [for u in split(",", local.vpn_users) :
+    "* URL: https://${local.endpoint}${local.endpoint_port}/static/~${split("|", u)[0]}\n  User: ${split("|", u)[0]}\n  Password: ${split("|", u)[1]}"
   ]: [])
 
   vpn_port_forwarding_config = (
-    var.vpn_type == "wg" 
+    var.vpn_type == "wg"
       ? "UDP ${var.wireguard_service_port} => ${local.bastion_info.ip}:${var.wireguard_service_port}"
-      : var.vpn_type == "ovpn" 
+      : var.vpn_type == "ovpn"
         ? var.ovpn_protocol == "udp"
           ? "UDP ${var.ovpn_service_port} => ${local.bastion_info.ip}:${var.ovpn_service_port}"
           : "TCP ${var.ovpn_service_port} => ${local.bastion_info.ip}:${var.ovpn_service_port}"
         : "UDP 500 => ${local.bastion_info.ip}:500\n               UDP 4500 => ${local.bastion_info.ip}:4500"
   )
   port_forwarding_config = <<PORT_FORWARDING_CONFIG
-If port forwarding has not been automatically setup via UPnP 
+If port forwarding has not been automatically setup via UPnP
 on your internet facing router then you need to configure the
 following port forwarding rules manually.
 
@@ -39,7 +39,7 @@ The Bastion instance runs the VPN service that can be used to
 securely and anonymously access your cloud space resources and the
 internet. You can download the VPN configuration along with the VPN
 client software using the CloudBuilder CLI or the password protected
-links below. The same user and password used to access the link 
+links below. The same user and password used to access the link
 should be used to login to the VPN if required.
 
 ${join("\n\n", local.users)}
@@ -47,7 +47,7 @@ ${join("\n\n", local.users)}
 ${local.port_forwarding_config}
 BASTION_DESCRIPTION
   bastion_description_wg = <<BASTION_DESCRIPTION
-The Bastion space node runs the cloud space network mesh control 
+The Bastion space node runs the cloud space network mesh control
 services. It also provides a VPN service that can be used to
 securely and anonymously connect to your cloud space to manage
 cloud resources and applications. You will need to use the Cloud
@@ -77,9 +77,9 @@ output "cb_managed_instances" {
       "health_check_type": "tcp"
       "api_port": var.bastion_admin_api_port
       "ssh_port": var.bastion_admin_ssh_port
-      "ssh_user": local.bastion_admin_user 
+      "ssh_user": local.bastion_admin_user
       "ssh_key": module.config.bastion_admin_sshkey
-      "root_user": "bastion-admin" 
+      "root_user": "bastion-admin"
       "root_passwd": module.config.bastion_admin_password
       "non_root_user": "mycs-user"
       "non_root_passwd": random_string.non-root-passwd.result
@@ -90,7 +90,7 @@ output "cb_managed_instances" {
 output "cb_node_description" {
   value = <<NODE_DESCRIPTION
 This My Cloud Space sandbox has been deployed to the following public
-cloud environment. 
+cloud environment.
 
 Provider: ${local.public_cloud_provider}
 VPN Type: ${local.vpn_type_name}

@@ -47,7 +47,9 @@ function common::set_working_dir() {
     mkdir -p $working_dir/.workspace
   fi
 
-  workspace_root=$working_dir/.workspace/run  
+  workspace_root=$working_dir/.workspace/run
+  mkdir -p $workspace_root
+
   template_dir=$working_dir/.workspace/templates
   if [[ ! -e $template_dir ]]; then
     mkdir -p $template_dir
@@ -122,18 +124,18 @@ function common::validate_environment() {
   fi
   set -e
 
-  if [[ ! -e $working_dir/cloud-creds.sh ]]; then
+  if [[ ! -e $(pwd)/cloud-creds.sh ]]; then
     echo -e "${RED}\nERROR! Unable to find the Cloud Credentials file at \"./cloud-creds.sh\".${NC}"
     exit 1
   fi
-  if [[ ! -e $working_dir/build-vars.sh ]]; then
+  if [[ ! -e $(pwd)/build-vars.sh ]]; then
     echo -e "${RED}\nERROR! Unable to find the Deployment variables file at \"./build-vars.sh\".${NC}"
     exit 1
   fi
 
   # Read the deployment context
-  source $working_dir/cloud-creds.sh
-  source $working_dir/build-vars.sh
+  source $(pwd)/cloud-creds.sh
+  source $(pwd)/build-vars.sh
 }
 
 function common::validate_cloud_credentials() {
@@ -250,7 +252,7 @@ function common::validate_workspace() {
     template_dir=${template_dir}/${node_type}/${cloud}
   fi
 
-  common::validate_cloud_credentials $cloud  
+  common::validate_cloud_credentials $cloud
   workspace_dir=${workspace_root}/${node_type}/${cloud}
   mkdir -p $workspace_dir
 

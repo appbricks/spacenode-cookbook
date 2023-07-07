@@ -25,7 +25,7 @@ module "bootstrap" {
   #
   region = var.region
 
-  # Name of VPC will be used to identify 
+  # Name of VPC will be used to identify
   # VPC specific cloud resources
   vpc_name = local.space_domain
 
@@ -54,7 +54,7 @@ module "bootstrap" {
 
   wireguard_service_port = var.wireguard_service_port
 
-  # Tunnel for VPN to handle situations where 
+  # Tunnel for VPN to handle situations where
   # OpenVPN is blocked or throttled by ISP.
   tunnel_vpn_port_start = local.tunnel_vpn_port_start
   tunnel_vpn_port_end   = local.tunnel_vpn_port_end
@@ -66,13 +66,13 @@ module "bootstrap" {
   bastion_allow_public_ssh = true
 
   # AWS instances with external IP will have
-  # an auto-assigned DNS entry if one is not 
+  # an auto-assigned DNS entry if one is not
   # explicitly configured
   bastion_use_fqdn = true
 
   bastion_host_name  = "vpn"
   bastion_admin_user = "mycs-admin"
-  
+
   bastion_admin_api_port = var.bastion_admin_api_port
   bastion_admin_ssh_port = var.bastion_admin_ssh_port
 

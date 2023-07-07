@@ -98,7 +98,7 @@ func shutdownVM(name string) {
 			})
 			if s := results["status"]; len(s) > 0 && len(s[0]) == 2 {
 				return s[0][1]
-			}			
+			}
 		}
 		log.Fatalf("Failed to retrieve VM Status '%s':\n%s", name, outputBuffer.String())
 		return ""

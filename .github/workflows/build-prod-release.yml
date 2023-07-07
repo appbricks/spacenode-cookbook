@@ -1,4 +1,4 @@
-name: MyCS Cookbook and SDK (appbricks/vpn-server:latest) CLI
+name: MyCS Cookbook and SDK (appbricks/spacenode-cookbook:latest) CLI
 concurrency: prod
 
 on:
@@ -160,7 +160,7 @@ jobs:
           ab_cloud_image=${{ steps.get_cloud_image.outputs.name }}
         push: true
         platforms: linux/amd64,linux/arm64
-        tags: appbricks/vpn-server:latest,appbricks/vpn-server:${{ needs.create-release-tag.outputs.version }}
+        tags: appbricks/spacenode-cookbook:latest,appbricks/spacenode-cookbook:${{ needs.create-release-tag.outputs.version }}
 
   publish-release-tag:
     needs: 
@@ -231,7 +231,7 @@ jobs:
           LICENSE
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GITHUB_REPOSITORY: appbricks/vpn-server
+        GITHUB_REPOSITORY: appbricks/spacenode-cookbook
 
     - name: Trigger Cloud-Builder CLI build
       uses: benc-uk/workflow-dispatch@v1

@@ -30,7 +30,7 @@ function cloud::set_azure_credentials() {
 }
 
 function cloud::set_google_credentials() {
-  
+
   if [[ $google_cli_credentials_validated == no ]]; then
 
     # Set GCP CLI credentials
@@ -59,10 +59,10 @@ function cloud::get_node_state() {
         ec2 describe-instances \
           --instance-ids "$managed_instance_id" \
           --region "$region")
-      
+
       if [[ $? -eq 0 ]]; then
         state=$(echo "$instance_detail" \
-          | jq -r '.Reservations[0].Instances[0].State.Name')          
+          | jq -r '.Reservations[0].Instances[0].State.Name')
       fi
       ;;
     azure)
@@ -73,7 +73,7 @@ function cloud::get_node_state() {
       if [[ $? -eq 0 ]]; then
         azure_vm_state=$(echo "$instance_detail" \
           | jq -r .powerState)
-        
+
         case $azure_vm_state in
           'VM running')
             state=running
@@ -147,7 +147,7 @@ function cloud::nodes() {
     [[ "$vpn_type" != "null" ]] || vpn_type=""
     local instance_ip=$(cat $o | jq -r '.cb_managed_instances.value[0] | .public_ip')
     [[ -n $instance_ip ]] || instance_ip="$(cat $o | jq -r '.cb_managed_instances.value[0] | .private_ip')"
-    
+
     local region_path=$(dirname $o)
     local region=$(basename $region_path)
     local cloud_path=""
@@ -163,7 +163,7 @@ function cloud::nodes() {
 
     >&2 echo -e -n "${BROWN_ORANGE}Retrieving details of instance \"${managed_instance_name}\"...                                                  ${NC}\r"
     local state=$(cloud::get_node_state "$cloud" "$region" "$managed_instance_id")
-    
+
     echo "${node_type}|${cloud}|${region}|${instance_address}|${state}|${version}|${root_user}|${root_passwd}|${managed_instance_id}|${vpn_type}|${instance_ip}"
   done
 

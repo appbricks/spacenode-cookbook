@@ -44,7 +44,7 @@ function build() {
   pushd $out_dir
 
   versionFlags="-X \"appbricks.io/mycs-cookbook-utils/internal.Version=$build_version\" -X \"appbricks.io/mycs-cookbook-utils/internal.BuildTimestamp=$build_timestamp\""
-  
+
   if [[ $action == *:dev:* ]]; then
     GOOS=$os GOARCH=$arch go build -ldflags "$versionFlags" -o $outfile $srcpath
   else
@@ -70,7 +70,7 @@ if [[ $action == *:dev:* ]]; then
 
   os=$build_os
   arch=$build_arch
-  for srcpath in $(find ${root_dir}/src/utils/cmd/* -type d -print); do 
+  for srcpath in $(find ${root_dir}/src/utils/cmd/* -type d -print); do
     build "$os" "$arch" \
       "${srcpath}" \
       $(basename $srcpath) \
@@ -85,7 +85,7 @@ else
 
   # build release binaries for all supported architectures
   if [[ -n $os && -n $arch ]]; then
-    for srcpath in $(find ${root_dir}/src/utils/cmd/* -type d -print); do 
+    for srcpath in $(find ${root_dir}/src/utils/cmd/* -type d -print); do
       build "$os" "$arch" \
         "${srcpath}" \
         $(basename $srcpath) \

@@ -71,7 +71,7 @@ variable "certify_bastion" {
   default = false
 }
 
-# Indicates action when no VPN clients have 
+# Indicates action when no VPN clients have
 # been connected to a node for some time
 #
 # @order: 20
@@ -141,8 +141,8 @@ variable "wireguard_service_port" {
 
   validation {
     condition = (
-      can(tonumber(var.wireguard_service_port)) && 
-      tonumber(var.wireguard_service_port) >= 1024 && 
+      can(tonumber(var.wireguard_service_port)) &&
+      tonumber(var.wireguard_service_port) >= 1024 &&
       tonumber(var.wireguard_service_port) <= 65535
     )
     error_message = "Invalid port number."
@@ -166,8 +166,8 @@ variable "ovpn_service_port" {
 
   validation {
     condition = (
-      can(tonumber(var.ovpn_service_port)) && 
-      tonumber(var.ovpn_service_port) >= 1024 && 
+      can(tonumber(var.ovpn_service_port)) &&
+      tonumber(var.ovpn_service_port) >= 1024 &&
       tonumber(var.ovpn_service_port) <= 65535
     )
     error_message = "Invalid port number."
@@ -217,8 +217,8 @@ variable "tunnel_vpn_port_start" {
 
   validation {
     condition = (
-      can(tonumber(var.tunnel_vpn_port_start)) && 
-      tonumber(var.tunnel_vpn_port_start) >= 1024 && 
+      can(tonumber(var.tunnel_vpn_port_start)) &&
+      tonumber(var.tunnel_vpn_port_start) >= 1024 &&
       tonumber(var.tunnel_vpn_port_start) <= 65535
     )
     error_message = "Invalid port number."
@@ -239,8 +239,8 @@ variable "tunnel_vpn_port_end" {
 
   validation {
     condition = (
-      can(tonumber(var.tunnel_vpn_port_end)) && 
-      tonumber(var.tunnel_vpn_port_end) >= 1024 && 
+      can(tonumber(var.tunnel_vpn_port_end)) &&
+      tonumber(var.tunnel_vpn_port_end) >= 1024 &&
       tonumber(var.tunnel_vpn_port_end) <= 65535
     )
     error_message = "Invalid port number."
@@ -260,8 +260,8 @@ variable "derp_stun_port" {
 
   validation {
     condition = (
-      can(tonumber(var.derp_stun_port)) && 
-      tonumber(var.derp_stun_port) >= 1024 && 
+      can(tonumber(var.derp_stun_port)) &&
+      tonumber(var.derp_stun_port) >= 1024 &&
       tonumber(var.derp_stun_port) <= 65535
     )
     error_message = "Invalid port number."
@@ -298,7 +298,7 @@ variable "mycs_node_private_key" {
 variable "mycs_node_id_key" {
   default = ""
 }
-# The unique id of this node 
+# The unique id of this node
 variable "mycs_node_id" {
   default = ""
 }
@@ -325,30 +325,30 @@ locals {
   space_internal_domain = "${local.space_domain}.mycs"
 
   vpn_type = (
-    var.vpn_type == "wg" 
-      ? "wireguard" 
-      : var.vpn_type == "ovpn" 
-        ? "openvpn" 
+    var.vpn_type == "wg"
+      ? "wireguard"
+      : var.vpn_type == "ovpn"
+        ? "openvpn"
         : "ipsec"
   )
   vpn_type_name = (
-    var.vpn_type == "wg" 
-      ? "WireGuard" 
-      : var.vpn_type == "ovpn" 
-        ? "OpenVPN" 
+    var.vpn_type == "wg"
+      ? "WireGuard"
+      : var.vpn_type == "ovpn"
+        ? "OpenVPN"
         : "IPSec/IKEv2"
   )
   tunnel_vpn_port_start = (
-    var.mask_vpn_traffic == "yes" 
+    var.mask_vpn_traffic == "yes"
       ? var.tunnel_vpn_port_start : ""
   )
   tunnel_vpn_port_end = (
-    var.mask_vpn_traffic == "yes" 
+    var.mask_vpn_traffic == "yes"
       ? var.tunnel_vpn_port_end : ""
   )
 
   # Add a non-admin VPN user for VPN types other than wireguard
-  vpn_users = (length(var.vpn_users) > 0 
+  vpn_users = (length(var.vpn_users) > 0
     ? join(",", ["mycs-user|${random_string.non-root-passwd.result}", var.vpn_users])
     : var.vpn_type != "wg" ? "mycs-user|${random_string.non-root-passwd.result}" : ""
   )

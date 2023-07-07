@@ -1,5 +1,5 @@
 #
-# Launch bastion vm on virtualbox using vagrant 
+# Launch bastion vm on virtualbox using vagrant
 #
 
 locals {
@@ -16,7 +16,7 @@ locals {
   # split image name into name and version and determine vagrant image src an version
   image_name_parts = split("_", var.bastion_image_name)
   bastion_box_name = "appbricks/${element(local.image_name_parts, 0)}"
-  bastion_box_version = (startswith(element(local.image_name_parts, 1), "D.") 
+  bastion_box_version = (startswith(element(local.image_name_parts, 1), "D.")
     ? "0.0.${element(split(".", element(local.image_name_parts, 1)), 1)}"
     : element(local.image_name_parts, 1)
   )
@@ -28,8 +28,8 @@ locals {
   )
 
   # host network info file path
-  host_network_path = (local.is_windows_fs 
-    ? "${local.local_state_path}\\bastion\\host_network.json" 
+  host_network_path = (local.is_windows_fs
+    ? "${local.local_state_path}\\bastion\\host_network.json"
     : "${var.cb_local_state_path}/bastion/host_network.json"
   )
 
@@ -54,7 +54,7 @@ resource "shell_script" "vagrant-bastion" {
     precondition {
       condition     = local.tools_env.vagrantInstalled == "true"
       error_message = "Vagrant (https://developer.hashicorp.com/vagrant/docs/installation) need needs to be installed:\n  ${join("\n  *", local.system_msgs)}"
-    }    
+    }
   }
 
   working_directory = dirname(local_file.vagrant-file.filename)
@@ -85,9 +85,9 @@ resource "local_file" "vagrant-file" {
       bastion_vm_name = var.name
       bastion_memory_size = var.bastion_memory_size
       bastion_mac_address = replace(
-        length(var.bastion_mac_address) == 0 
-          ? macaddress.network-nic.address 
-          : var.bastion_mac_address, 
+        length(var.bastion_mac_address) == 0
+          ? macaddress.network-nic.address
+          : var.bastion_mac_address,
         ":", ""
       )
       bastion_admin_ssh_port = var.bastion_admin_ssh_port

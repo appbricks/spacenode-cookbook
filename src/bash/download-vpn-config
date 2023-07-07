@@ -26,7 +26,7 @@ function download_vpn_config() {
   curl -s -f $skip_ssl_validation \
     -u "${user}:${password}" $config_file_url \
     -o $config_file_out
-  
+
   while [[ $? -ne 0 ]]; do
     echo "Waiting for VPN node to become available..."
     sleep 5
@@ -173,23 +173,23 @@ elif [[ $os_type == Linux ]]; then
       rm -fr ${working_dir}/*.tblk
       unzip -q -o ${working_dir}/${file} -d $working_dir
       rm ${working_dir}/${file}
-      
+
       file=${TF_VAR_name}.ovpn
       download_vpn_config $user $password \
         https://${vpn_server_host}/static/~${user}/${file} \
-        ${working_dir}/${file}       
+        ${working_dir}/${file}
       ;;
 
-    ipsec)      
+    ipsec)
       file=${TF_VAR_name}.mobileconfig
       download_vpn_config $user $password \
         https://${vpn_server_host}/static/~${user}/${file} \
-        ${working_dir}/${file}    
+        ${working_dir}/${file}
 
       file=${user}.p12
       download_vpn_config $user $password \
         https://${vpn_server_host}/static/~${user}/${file} \
-        ${working_dir}/${file} 
+        ${working_dir}/${file}
       ;;
 
     *)
@@ -204,7 +204,7 @@ elif [[ $os_type == Linux ]]; then
       echo "- \"$(basename $d)\""
     else
       first=n
-    fi      
+    fi
   done
 
   case $vpn_type in

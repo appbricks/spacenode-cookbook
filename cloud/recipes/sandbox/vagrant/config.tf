@@ -26,17 +26,17 @@ module "config" {
   bastion_public_ip = local.network_env.publicIP
 
   certify_bastion = false
-  
+
   bastion_dns = join(",", local.network_env.nameservers)
 
   bastion_dmz_itf_ip   = local.network_env.gatewayIP
   bastion_admin_itf_ip = ""
 
   bastion_nic_config = (
-    length(var.bastion_static_ip) > 0 
-      ? [ 
+    length(var.bastion_static_ip) > 0
+      ? [
           "x", // exclude the first interface which is the vagrant NAT interface
-          join("|", 
+          join("|",
             tolist([
               var.bastion_static_ip,
               local.network_env.defaultNetwork,
@@ -45,9 +45,9 @@ module "config" {
             ]),
           )
         ]
-      : [ 
+      : [
           "x", // exclude the first interface which is the vagrant NAT interface
-          join("|", 
+          join("|",
             tolist([
               "", // IP assigned via DHCP
               local.network_env.defaultNetwork,
@@ -109,14 +109,14 @@ locals {
   vpn_protected_sub_range = 2
   wireguard_mesh_network  = "192.168.112.0/24"
   wireguard_mesh_node     = 1
-  # Partitioning the vpn range into a range of ips that 
-  # are protected by the DNS sink hole vs ips that are 
+  # Partitioning the vpn range into a range of ips that
+  # are protected by the DNS sink hole vs ips that are
   # in open can only be done for the wireguard vpn type.
   vpn_restricted_network = (
-    local.vpn_type == "wireguard" 
+    local.vpn_type == "wireguard"
       ? cidrsubnet(
-          local.vpn_network, 
-          local.vpn_protected_sub_range, 
+          local.vpn_network,
+          local.vpn_protected_sub_range,
           pow(2, local.vpn_protected_sub_range)-1
         )
       : local.vpn_network
@@ -127,28 +127,28 @@ locals {
   # For such cases wireguard must have network range that
   # is separate from the vpn range.
   #
-  # TBD - this does not allow a wireguard client VPN to be 
+  # TBD - this does not allow a wireguard client VPN to be
   # setup alongside the mesh. To allow a mesh configuration
   # the mesh setup needs to be separate from the vpn config
   #
   # https://github.com/appbricks/cloud-inceptor/issues/1
   #
-  # This featue may be discontinued as space nodes should 
+  # This featue may be discontinued as space nodes should
   # be linked via the tailscale net.
   #
   #
   wireguard_subnet_ip = (
-    local.vpn_type == "wireguard" 
+    local.vpn_type == "wireguard"
       ? "${cidrhost(local.vpn_network, 1)}/${split("/", local.vpn_network)[1]}"
       : "${cidrhost(local.wireguard_mesh_network, local.wireguard_mesh_node)}/${split("/", local.wireguard_mesh_network)[1]}"
   )
-  # If the bastion has been allocated an elastic IP then 
+  # If the bastion has been allocated an elastic IP then
   # return that. Otherwise pass an indicator in the field
   # so the bastion startup script can attempt to introspect
   # its externally facing Ip.
   cert_domain_names = [
     "*.mycloudspace.io",    // <spaceid>.mycloudspace.io
-    "*.mycs.appbricks.org", // lookup ip by IP DNS - 1-1-1-1.mycs.appbricks.org        
+    "*.mycs.appbricks.org", // lookup ip by IP DNS - 1-1-1-1.mycs.appbricks.org
     local.space_internal_domain
   ]
 }

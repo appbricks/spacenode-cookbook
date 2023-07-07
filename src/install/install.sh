@@ -25,20 +25,20 @@ DIM='\033[2m'
 # Check if docker exists
 which docker >/dev/null 2>&1
 if [[ $? -ne 0 ]]; then
-  echo -e "${RED}\nERROR! Unable to find Docker in the system path.\n" 
+  echo -e "${RED}\nERROR! Unable to find Docker in the system path.\n"
   echo -e "${GREEN}Please follow the instructions at: "
-  echo -e "- ${BLUE}https://www.docker.com/products/docker-desktop\n" 
+  echo -e "- ${BLUE}https://www.docker.com/products/docker-desktop\n"
   echo -e "${GREEN}to download and install the Docker the desktop app.${NC}"
   exit 1
 fi
 
-# Remove existing vpn-server container images
+# Remove existing spacenode-cookbook container images
 echo -e "${GREEN}\nRemoving downloaded VS CLI container images...${NC}"
 docker images \
-  | awk '/appbricks\/vpn-server/{ print "appbricks/vpn-server:"$2 }' \
+  | awk '/appbricks\/spacenode-cookbook/{ print "appbricks/spacenode-cookbook:"$2 }' \
   | xargs docker rmi 2>&1 >/dev/null
 
-docker_alias="alias vs='docker run --privileged --rm -p 4495:4495 -p 4495:4495/udp -v \$(pwd)/:/vpn -it appbricks/vpn-server:latest'"
+docker_alias="alias vs='docker run --privileged --rm -p 4495:4495 -p 4495:4495/udp -v \$(pwd)/:/vpn -it appbricks/spacenode-cookbook:latest'"
 
 case $SHELL in
   /bin/sh)
@@ -67,9 +67,9 @@ else
 fi
 
 curl -s \
-  -L https://raw.githubusercontent.com/appbricks/vpn-server/<VERSION>/bin/vsd \
+  -L https://raw.githubusercontent.com/appbricks/spacenode-cookbook/<VERSION>/bin/vsd \
   -o /usr/local/bin/vs
-sed -i ${sed_option} "s|appbricks/vpn-server:latest|appbricks/vpn-server:<VERSION>|" /usr/local/bin/vs
+sed -i ${sed_option} "s|appbricks/spacenode-cookbook:latest|appbricks/spacenode-cookbook:<VERSION>|" /usr/local/bin/vs
 chmod +x /usr/local/bin/vs
 
 echo -e "${GREEN}\nVS CLI has been added to you system path \"/usr/local/bin/vs\".${NC}"

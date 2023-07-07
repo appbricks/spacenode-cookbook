@@ -53,7 +53,7 @@ fi
 
 export TF_VAR_cb_local_state_path=${run_dir}/state
 
-# This is usually set at deploy but required in 
+# This is usually set at deploy but required in
 # order to reinitialize without prompting for input.
 [[ ! -e ${run_dir}/input-vars.sh ]] || source ${run_dir}/input-vars.sh
 

@@ -1,4 +1,4 @@
-name: MyCS Cookbook and SDK (appbricks/vpn-server:dev) CLI
+name: MyCS Cookbook and SDK (appbricks/spacenode-cookbook:dev) CLI
 concurrency: dev
 
 on:
@@ -105,4 +105,4 @@ jobs:
           ab_cloud_image=${{ steps.get_cloud_image.outputs.name }}
         push: true
         platforms: linux/amd64,linux/arm64
-        tags: appbricks/vpn-server:dev
+        tags: appbricks/spacenode-cookbook:dev
