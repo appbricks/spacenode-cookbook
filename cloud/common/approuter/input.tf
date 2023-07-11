@@ -29,9 +29,35 @@ variable "description" {
   default     = "My MyCS space application router node"
 }
 
+# External networks to advertise
+#
+# @order: 3
+# @tags: recipe,target-undeployed
+# @value_inclusion_filter: ^(([0-9]{1,3}\.){3}[0-9]{1,3}\/[0-9]{1,3},?)*$
+# @value_inclusion_filter_message: Must be a comma separated list of IPv4 CIDR. For single IP append /32 to it.
+#
+variable "advertised_external_networks" {
+  description = "List of comma separated external networks that to be routed via this app node."
+  type        = string
+  default     = ""
+}
+
+# External domain names to advertise
+#
+# @order: 4
+# @tags: recipe,target-undeployed
+# @value_inclusion_filter: ^(([-a-zA-Z]+\.)+[-a-zA-Z]+,?)*$
+# @value_inclusion_filter_message: Must be a comma separated list of domain names.
+#
+variable "advertised_external_domain_names" {
+  description = "List of comma separated external domain names to be routed via this app node."
+  type        = string
+  default     = ""
+}
+
 #
 # MyCS container image version
 #
-variable "mycsnode_version" {
+variable "mycs_node_version" {
   type = string
 }

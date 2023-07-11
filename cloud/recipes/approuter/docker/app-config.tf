@@ -2,13 +2,6 @@
 # MyCS Application configuration
 #
 
-locals {
-  mycs_app_config_dir = (local.is_windows
-    ? "${local.paths_env.globalDataDir}\\minecraft\\name"
-    : "${local.paths_env.globalDataDir}/minecraft/name"
-  )
-}
-
 module "app-config" {
   source = "github.com/appbricks/cloud-inceptor.git/modules/app-config"
 
@@ -19,26 +12,19 @@ module "app-config" {
   mycs_app_version = var.mycs_app_version
   mycs_space_ca_root = var.cb_root_ca_cert
 
-  # app_work_directory = local.minecraft_root
-  # app_exec_cmd = "${local.minecraft_root}/run_server.sh"
-  # app_cmd_arguments = (var.minecraft_type == "bedrock" 
-  #   ? [
-  #     var.minecraft_server_description,
-  #   ] 
-  #   : [ 
-  #     var.minecraft_server_description,
-  #     var.minecraft_port,
-  #     var.java_mx_mem,
-  #     var.java_ms_mem
-  #   ]
-  # )
+  mycs_app_data_dir = local.mycs_app_data_dir
+
+  advertised_external_networks = (
+    length(var.advertised_external_networks) == 0 
+    ? [] 
+    : split(",", var.advertised_external_networks)
+  )
+  advertised_external_domain_names = (
+    length(var.advertised_external_domain_names) == 0 
+    ? [] 
+    : split(",", var.advertised_external_domain_names)
+  )
 
   app_description = "${var.description}"
   app_domain_name = "${var.name}.${var.cb_internal_domain}"
-  # app_service_ports = jsonencode([
-  #   {
-  #     "name": "server"
-  #     "port": var.minecraft_type == "bedrock" ? 19132 : var.minecraft_port
-  #   }
-  # ])
 }
