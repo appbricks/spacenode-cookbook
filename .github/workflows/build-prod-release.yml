@@ -1,4 +1,4 @@
-name: MyCS Cookbook and SDK (appbricks/spacenode-cookbook:latest) CLI
+name: MyCS SpaceNode Cookbook and SDK (appbricks/spacenode-cookbook:latest) CLI
 concurrency: prod
 
 on:

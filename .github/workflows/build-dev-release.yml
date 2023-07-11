@@ -1,4 +1,4 @@
-name: MyCS Cookbook and SDK (appbricks/spacenode-cookbook:dev) CLI
+name: MyCS SpaceNode Cookbook and SDK (appbricks/spacenode-cookbook:dev) CLI
 concurrency: dev
 
 on:
