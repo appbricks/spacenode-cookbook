@@ -15,4 +15,4 @@ RUN chmod +x /tmp/prepare-image.sh \
   && /tmp/prepare-image.sh
 
 WORKDIR /vpn
-ENTRYPOINT [ "/usr/local/lib/spacenode-cookbook/bin/vs" ]
+ENTRYPOINT [ "/usr/local/lib/spacenode-cookbook/bin/snb" ]
