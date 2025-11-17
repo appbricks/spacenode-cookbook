@@ -102,7 +102,7 @@ jobs:
         for f in $(ls releases/); do
           aws s3 cp \
             releases/$f \
-            "s3://mycs${ENV}-deploy-artifacts/releases/${f%%_*}-${VERSION}_${f#*_}.zip" \
+            "s3://mycs${ENV}-useast1-deploy-artifacts/releases/${f%%_*}-${VERSION}_${f#*_}.zip" \
             --acl public-read
         done
 
