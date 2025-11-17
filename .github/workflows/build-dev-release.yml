@@ -51,7 +51,7 @@ jobs:
       run: |
         mkdir releases
         cp -r .build/releases/*.zip releases/
-        aws s3 sync releases s3://mycs${ENV}-useast1-deploy-artifacts/releases --acl public-read
+        aws s3 sync releases s3://mycs${ENV}-useast1-deploy-artifacts/releases
 
     - name: Trigger Cloud-Builder CLI build
       uses: benc-uk/workflow-dispatch@v1
