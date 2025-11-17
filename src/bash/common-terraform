@@ -161,7 +161,7 @@ function terraform::init() {
   # Initialize Terraform
   if [[ ${#backend_config[@]} > 0 ]]; then
     echo -e "${GREEN}Initializing terraform context...${NC}"
-    TF_DATA_DIR=$tf_data_dir terraform -chdir=$template_dir init ${backend_config[@]}
+    TF_DATA_DIR=$tf_data_dir terraform -chdir=$template_dir init -reconfigure ${backend_config[@]}
     echo
   else
     echo -e "${GREEN}Initializing terraform context...${NC}"
