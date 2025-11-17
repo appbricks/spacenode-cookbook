@@ -91,9 +91,9 @@ done
 # Download cookbook utils
 
 if [[ ${env} == dev ]]; then
-  curl -L https://mycsdev-deploy-artifacts.s3.amazonaws.com/releases/mycs-cookbook-utils_linux_${arch}.zip -o /tmp/mycs-cookbook-utils.zip
+  curl -L https://mycsdev-useast1-deploy-artifacts.s3.amazonaws.com/releases/mycs-cookbook-utils_linux_${arch}.zip -o /tmp/mycs-cookbook-utils.zip
 else
-  curl -L https://mycsprod-deploy-artifacts.s3.amazonaws.com/releases/mycs-cookbook-utils-${version}_linux_${arch}.zip -o /tmp/mycs-cookbook-utils.zip
+  curl -L https://mycsprod-useast1-deploy-artifacts.s3.amazonaws.com/releases/mycs-cookbook-utils-${version}_linux_${arch}.zip -o /tmp/mycs-cookbook-utils.zip
 fi
 mkdir -p /usr/local/lib/spacenode-cookbook/.build/bin
 cd /usr/local/lib/spacenode-cookbook/.build/bin
