@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function usage::main() {
-  echo -e "${NC}\nUSAGE: vs ${BOLD}<COMMAND>${NORMAL} [options]\n"
+  echo -e "${NC}\nUSAGE: snb ${BOLD}<COMMAND>${NORMAL} [options]\n"
   echo -e "  This CLI manages personal cloud VPN nodes in multiple cloud regions.\n"
   echo -e "${LIGHT_BLUE}  ${BOLD}<COMMAND>${NORMAL} should be one of the following:\n${GREEN}"
   echo -e "    ${BOLD}init${NORMAL}                                     Initializes the current folder with the"
@@ -20,7 +20,7 @@ function usage::main() {
 }
 
 function usage::show_regions() {
-  echo -e "${NC}\nUSAGE: vs show-regions ${BOLD}<CLOUD>${NORMAL}\n"
+  echo -e "${NC}\nUSAGE: snb show-regions ${BOLD}<CLOUD>${NORMAL}\n"
   echo -e "${LIGHT_BLUE}  This CLI command shows the regions that can be targeted for each of the supported"
   echo -e "  clouds. The available public clouds for deployment are \"aws\", \"azure\" and \"google\".\n${NC}"
 }
@@ -29,7 +29,7 @@ function usage::deploy_node() {
   local n=${node_type:-<NODE_TYPE>}
   local c=${cloud:-<CLOUD>}
 
-  echo -e "\nUSAGE: vs deploy-node $n $c [-r|--region <REGION>] [-c|--clean] [-i|--init] [-u|--upgrade] [-a|--no-idle-shutdown] [-s|--show] [-d|--debug]\n${LIGHT_BLUE}"
+  echo -e "\nUSAGE: snb deploy-node $n $c [-r|--region <REGION>] [-c|--clean] [-i|--init] [-u|--upgrade] [-a|--no-idle-shutdown] [-s|--show] [-d|--debug]\n${LIGHT_BLUE}"
   echo -e "${LIGHT_BLUE}  This CLI command creates a node in the given region.\n${LIGHT_GREEN}"
   echo -e "  ${DIM}-r|--region${NORMAL} <REGION>   The region to create the server in"
   echo -e "  ${DIM}-c|--clean${NORMAL}             Clean the terraform workspace context before deploying"
@@ -41,7 +41,7 @@ function usage::deploy_node() {
 }
 
 function usage::reinit_node() {
-  echo -e "${NC}\nUSAGE: vs reinit-node $node_type $cloud [-r|--region <REGION>] [-d|--debug]\n${LIGHT_BLUE}"
+  echo -e "${NC}\nUSAGE: snb reinit-node $node_type $cloud [-r|--region <REGION>] [-d|--debug]\n${LIGHT_BLUE}"
   echo -e "  This CLI command reinitializes the remote state of a node in the given"
   echo -e "  region.\n${LIGHT_GREEN}"
   echo -e "  ${DIM}-r|--region${NORMAL} <REGION>  The region where the node is deployed"
@@ -49,14 +49,14 @@ function usage::reinit_node() {
 }
 
 function usage::destroy_node() {
-  echo -e "${NC}\nUSAGE: vs destroy-node $node_type $cloud [-r|--region <REGION>] [-d|--debug]\n${LIGHT_BLUE}"
+  echo -e "${NC}\nUSAGE: snb destroy-node $node_type $cloud [-r|--region <REGION>] [-d|--debug]\n${LIGHT_BLUE}"
   echo -e "${LIGHT_BLUE}  This CLI command destroys a node that has been deployed to the given region.\n${LIGHT_GREEN}"
   echo -e "  ${DIM}-r|--region${NORMAL} <REGION>  The region where the node to be destroyed is deployed"
   echo -e "  ${DIM}-d|--debug${NORMAL}            Enable trace output${NC}"
 }
 
 function usage::download_vpn_config() {
-  echo -e "\nUSAGE: vs download-vpn-config $node_type $cloud [-r|--region <REGION>] [-u|--user <USERNAME>] [-p|--password <PASSWORD>] [-d|--debug]\n"
+  echo -e "\nUSAGE: snb download-vpn-config $node_type $cloud [-r|--region <REGION>] [-u|--user <USERNAME>] [-p|--password <PASSWORD>] [-d|--debug]\n"
   echo -e "${LIGHT_BLUE}  This CLI command downloads the VPN client configuration from the bastion server deployed to a given region.\n${LIGHT_GREEN}"
   echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>      The region of the server from which the configuration should be downloaded"
   echo -e "  ${BOLD}-u|--user${NORMAL} <USERNAME>      The name of the VPN user whose client configuration should be downloaded"
@@ -65,7 +65,7 @@ function usage::download_vpn_config() {
 }
 
 function usage::start_tunnel() {
-  echo -e "${NC}\nUSAGE: vs start-tunnel $cloud [-r|--region <REGION>] [-t|--type <TUNNEL_TYPE>] [-d|--debug]\n${LIGHT_BLUE}"
+  echo -e "${NC}\nUSAGE: snb start-tunnel $cloud [-r|--region <REGION>] [-t|--type <TUNNEL_TYPE>] [-d|--debug]\n${LIGHT_BLUE}"
   echo -e "${LIGHT_BLUE}  This CLI command starts tunnel services which obfuscates VPN traffic to a bastion node.\n${LIGHT_GREEN}"
   echo -e "  ${BOLD}-r|--region${NORMAL} <REGION>       The region where the node is deployed"
   echo -e "  ${BOLD}-t|--type${NORMAL} <TUNNEL_TYPE>    The type of tunnel. This should be one of:\n"
