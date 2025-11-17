@@ -56,7 +56,7 @@ instance_ip=$(echo "$node_detail" | awk -F '|' '{ print $11 }')
 echo -e "\n${GREEN}${BOLD}What do you want to do:${NORMAL}"
 echo -e "1) Update Node"
 if [[ $node_status == running ]]; then
-  if [[ $vpn_type =~ ovpn|ipsec ]]; then
+  if [[ $vpn_type =~ openvpn|ipsec ]]; then
     echo -e "2) Download VPN Config"
   else
     echo -e "${DIM}${DARK_GRAY}2) Download VPN Config${GREEN}${NORMAL}"
