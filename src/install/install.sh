@@ -67,9 +67,9 @@ else
 fi
 
 curl -s \
-  -L https://raw.githubusercontent.com/appbricks/spacenode-cookbook/<VERSION>/bin/vsd \
-  -o /usr/local/bin/vs
-sed -i ${sed_option} "s|appbricks/spacenode-cookbook:latest|appbricks/spacenode-cookbook:<VERSION>|" /usr/local/bin/vs
-chmod +x /usr/local/bin/vs
+  -L https://raw.githubusercontent.com/appbricks/spacenode-cookbook/<VERSION>/bin/snbd \
+  -o /usr/local/bin/snb
+sed -i ${sed_option} "s|appbricks/spacenode-cookbook:latest|appbricks/spacenode-cookbook:<VERSION>|" /usr/local/bin/snb
+chmod +x /usr/local/bin/snb
 
-echo -e "${GREEN}\nVS CLI has been added to you system path \"/usr/local/bin/vs\".${NC}"
+echo -e "${GREEN}\nSNB CLI has been added to you system path \"/usr/local/bin/snb\".${NC}"
