@@ -19,16 +19,18 @@ apk update && apk upgrade
 apk --no-cache add \
   build-base autoconf automake openssl-dev libffi-dev libtool \
   bison flex iptables bash curl zip git libqrencode openssh sshpass \
-  python3 python3-dev py3-pip
+  python3 python3-dev py3-pip jq
 
 rm -f /usr/bin/python && \
   ln -s /usr/bin/python3 /usr/bin/python
 
 # Install AWS CLI
-pip install awscli
-
-# Install Azure CLI
-pip install azure-cli
+mkdir -p /tmp/aws
+cd /tmp/aws
+curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscli.zip"
+unzip awscli.zip
+./aws/install
+cd -
 
 # Install Google CLI
 export CLOUDSDK_CORE_DISABLE_PROMPTS=1
@@ -38,22 +40,14 @@ echo "export PATH=$PATH:${CLOUDSDK_INSTALL_DIR}/google-cloud-sdk/bin" > /etc/pro
 ln -s ${CLOUDSDK_INSTALL_DIR}/google-cloud-sdk/bin/gcloud /usr/local/bin/gcloud
 ln -s ${CLOUDSDK_INSTALL_DIR}/google-cloud-sdk/bin/gsutil /usr/local/bin/gsutil
 
+# Install Azure CLI
+pip install azure-cli --break-system-packages
+
 # Install latest version of Terraform
-terraform_version=1.3.4
+terraform_version=1.5.7
 curl -OL https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_${arch}.zip
 unzip terraform_${terraform_version}_linux_${arch}.zip
 mv terraform /usr/local/bin
-
-# Build latest version of JQ
-git clone --branch jq-1.6 https://github.com/stedolan/jq /tmp/jq
-cd /tmp/jq
-git submodule update --init
-autoreconf -fi
-./configure --with-oniguruma=builtin
-make -j8
-make check
-mv ./jq /usr/local/bin
-cd -
 
 # Compile UDP Tunnel binaries (EXPERIMENTAL)
 git clone https://github.com/wangyu-/UDPspeeder.git /tmp/udp-speeder
@@ -102,4 +96,6 @@ cd -
 
 mkdir /vpn
 rm -fr /tmp/*
+
+apk del build-base autoconf automake openssl-dev libffi-dev libtool
 rm -rf /var/cache/apk/*
