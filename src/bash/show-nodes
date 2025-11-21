@@ -88,7 +88,7 @@ case $option in
       "$node_type" "$cloud" -r "$region" -u
     ;;
   2)
-    if [[ $node_status == running && $vpn_type =~ ovpn|ipsec ]]; then
+    if [[ $node_status == running && $vpn_type =~ openvpn|ipsec ]]; then
       echo -e -n "\n${GREEN}Please enter the VPN username: ${NC}" && read username
       echo -e -n "${GREEN}Please enter the VPN password: ${NC}" && read -s password
 
