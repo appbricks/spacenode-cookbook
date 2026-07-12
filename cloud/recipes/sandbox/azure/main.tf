@@ -3,7 +3,7 @@
 #
 
 module "bootstrap" {
-  source = "github.com/appbricks/cloud-inceptor.git/modules/bootstrap/azure"
+  source = "github.com/novassist-ai/mycs-node.git//cloud/modules/bootstrap/azure?ref=dev"
 
   #
   # Company information used in certificate creation
