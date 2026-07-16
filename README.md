@@ -1,3 +1,5 @@
+> The code in this repository has been moved to https://github.com/novassist-ai/mycs-node and the CLI has been migrated to [vpn-node-builder](https://github.com/novassist-ai/mycs-node/tree/dev/apps/clients/vpn-node-builder).
+
 # Private VPN Node Builder
 
 [![Build Status](https://github.com/appbricks/vpn-server/actions/workflows/build-dev-release.yml/badge.svg)](https://github.com/appbricks/vpn-server/actions/workflows/build-dev-release.yml)
